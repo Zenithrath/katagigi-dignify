@@ -10,13 +10,13 @@
 
             <div class="flex gap-2">
                 @can('read category')
-                    <a href="{{ route('categories.index') }}" class="clickable-primary py-2 px-4 rounded-md">
+                    <a href="{{ route('categories.index') }}" class="clickable-primary py-2 px-4 rounded-xl">
                         {{ __('general.category.index._nav') }}
                     </a>
                 @endcan
 
                 @can('create service')
-                    <a href="{{ route('services.create') }}" class="clickable-primary py-2 px-4 rounded-md">
+                    <a href="{{ route('services.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
                         {{ __('general.service.index.action.add') }}
                     </a>
                 @endcan
@@ -62,7 +62,7 @@
                                 <td class="action-column">
                                     <div class="flex gap-2">
                                         {{-- @can('update service') --}}
-                                        <a href="{{ route('services.edit', ['service' => $service->id]) }}" class="h-full">
+                                        <a href="{{ route('services.edit', ['service' => $service->id]) }}" class="h-full rounded-xl">
                                             {{ __('general.service.index.action.edit') }}
                                             <span class="sr-only">{{ $service->name }}</span>
                                         </a>
@@ -73,7 +73,7 @@
                                                 method="post">
                                                 @csrf
                                                 @method('delete')
-                                                <button class="text-danger-600 hover:text-danger-500 active:text-danger-700"
+                                                <button class="text-danger-600 hover:text-danger-500 active:text-danger-700 rounded-xl"
                                                     type="submit">{{ __('general.service.index.action.delete') }}<span
                                                         class="sr-only">{{ $service->name }}</span></button>
                                             </form>
@@ -97,70 +97,50 @@
         </section>
 
         <section class="mt-4">
-            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
-                <div class="-mt-px flex w-0 flex-1">
+            <nav class="flex items-center justify-between border-t border-slate-200 px-1 py-3">
+                <div class="flex w-0 flex-1">
                     @if ($pagination->page > 1)
                         <a href="{{ route('services.index', ['page' => $pagination->page - 1]) }}"
-                            class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            <svg class="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a.75.75 0 01-.75.75H4.66l2.1 1.95a.75.75 0 11-1.02 1.1l-3.5-3.25a.75.75 0 010-1.1l3.5-3.25a.75.75 0 111.02 1.1l-2.1 1.95h12.59A.75.75 0 0118 10z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
                             <span class="hidden md:block">{{ __('Previous') }}</span>
-                            </button>
+                        </a>
                     @endif
                 </div>
 
-                <div class="md:-mt-px flex">
+                <div class="hidden md:flex items-center gap-1">
                     @if ($pagination->page - 3 >= 0)
-                        <a href="{{ route('services.index', ['page' => 1]) }}" @class([
-                            'inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium text-gray-500 hover:text-gray-700',
-                        ])
-                            aria-current="page">{{ 1 }}</a>
+                        <a href="{{ route('services.index', ['page' => 1]) }}"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">{{ 1 }}</a>
                     @endif
 
                     @if ($pagination->page - 3 > 0)
-                        <span class="inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium text-gray-500"
-                            aria-current="page">...</span>
+                        <span class="px-1 text-slate-400">...</span>
                     @endif
 
                     @foreach (range(1, $pagination->last) as $page)
                         @if ($page > $pagination->page - 2 && $page < $pagination->page + 2)
-                            <a href="{{ route('services.index', ['page' => $page]) }}" @class([
-                                'inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium',
-                                'text-indigo-600 border-indigo-500' => $page === $pagination->page,
-                                'text-gray-500 hover:text-gray-700' => $page !== $pagination->page,
-                            ])
-                                aria-current="page">{{ $page }}</a>
+                            <a href="{{ route('services.index', ['page' => $page]) }}"
+                                class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ $page === $pagination->page ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' }}">{{ $page }}</a>
                         @endif
                     @endforeach
 
                     @if ($pagination->page + 2 < $pagination->last)
-                        <span class="inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium text-gray-500"
-                            aria-current="page">...</span>
+                        <span class="px-1 text-slate-400">...</span>
                     @endif
 
                     @if ($pagination->page + 2 <= $pagination->last)
-                        <a href="{{ route('services.index', ['page' => $pagination->last]) }}" @class([
-                            'inline-flex items-center border-t-2 px-4 pt-4 text-sm font-medium text-gray-500 hover:text-gray-700',
-                        ])
-                            aria-current="page">{{ $pagination->last }}</a>
+                        <a href="{{ route('services.index', ['page' => $pagination->last]) }}"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">{{ $pagination->last }}</a>
                     @endif
                 </div>
 
-                <div class="-mt-px flex w-0 flex-1 justify-end">
+                <div class="flex w-0 flex-1 justify-end">
                     @if ($pagination->page < $pagination->last)
                         <a href="{{ route('services.index', ['page' => $pagination->page + 1]) }}"
-                            class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
                             <span class="hidden md:block">{{ __('Next') }}</span>
-                            <svg class="ml-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M2 10a.75.75 0 01.75-.75h12.59l-2.1-1.95a.75.75 0 111.02-1.1l3.5 3.25a.75.75 0 010 1.1l-3.5 3.25a.75.75 0 11-1.02-1.1l2.1-1.95H2.75A.75.75 0 012 10z"
-                                    clip-rule="evenodd" />s
-                            </svg>
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
                         </a>
                     @endif
                 </div>

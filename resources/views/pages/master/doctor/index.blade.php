@@ -9,7 +9,7 @@
             </div>
 
             @can('create doctor')
-                <a href="{{ route('doctors.create') }}" class="clickable-primary py-2 px-4 rounded-md">
+                <a href="{{ route('doctors.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('master.doctor.index.buttons.add') }}
                 </a>
             @endcan
@@ -35,24 +35,26 @@
                         @foreach ($doctorList as $doctor)
                             <tr>
                                 <td class="column">{{ $loop->iteration }}</td>
-                                <td class="index-column flex gap-4 items-center w-80 overflow-hidden truncate">
-                                    @if ($doctor->profile_picture)
-                                        <img src="{{ asset('storage/' . $doctor->profile_picture) }}"
-                                            alt="{{ $doctor->name . "'s Profile Picture" }}"
-                                            class="w-12 h-12 object-cover object-center rounded-full" />
-                                    @else
-                                        <div class="w-12 h-12 fill-none stroke-1 stroke-slate-900
-                                            <x-lucide-user-circle class="w-full h-full" />
+                                <td>
+                                    <div class="flex items-center gap-3.5">
+                                        @if ($doctor->profile_picture)
+                                            <img src="{{ asset('storage/' . $doctor->profile_picture) }}" alt="{{ $doctor->name }}" class="w-11 h-11 rounded-full object-cover border-2 border-slate-100 shrink-0" />
+                                        @else
+                                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center font-bold text-emerald-700 text-sm border-2 border-slate-100 shrink-0">{{ strtoupper(substr($doctor->name, 0, 1)) }}</div>
+                                        @endif
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-bold text-slate-900 text-sm truncate">{{ $doctor->name }}</span>
+                                            <span class="text-xs text-slate-400 truncate">{{ $doctor->email }}</span>
                                         </div>
-                                    @endif
-                                    <div class="flex flex-col w-64">
-                                        <span class="font-semibold w-full truncate">{{ $doctor->name }}</span>
-                                        <span class="text-gray-500 w-full truncate">{{ $doctor->email }}</span>
                                     </div>
                                 </td>
                                 <td class="column">{{ $doctor->nipp ?? '-' }}</td>
                                 <td class="column">
-                                    {{ $doctor->is_active ? __('master.doctor.index.table.active') : __('master.doctor.index.table.inactive') }}
+                                    @if ($doctor->is_active)
+                                        <span class="badge badge-success"><span class="dot"></span> {{ __('master.doctor.index.table.active') }}</span>
+                                    @else
+                                        <span class="badge badge-warning"><span class="dot"></span> {{ __('master.doctor.index.table.inactive') }}</span>
+                                    @endif
                                 </td>
                                 <td class="action-column">
                                     <div class="flex gap-2">

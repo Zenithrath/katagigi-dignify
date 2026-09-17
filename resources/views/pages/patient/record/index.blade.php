@@ -9,7 +9,7 @@
             </div>
 
             @can('create medical record')
-                <a href="{{ route('medical-records.create') }}" class="clickable-primary py-2 px-4 rounded-md">
+                <a href="{{ route('medical-records.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('patient.record.index.actions.add') }}
                 </a>
             @endcan
@@ -17,24 +17,21 @@
 
         <x-flash-alerts />
 
-        <section class="bg-slate-50 p-8 rounded-md">
-            <form action="{{ route('medical-records.index') }}" method="GET">
-                <div class="input-group">
-                    <label for="keyword">{{ __('patient.record.index.table.patient_keyword') }}</label>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input type="text" name="keyword" id="keyword" class="flex-1" value="{{ request('keyword') }}"
-                            placeholder="{{ __('patient.record.index.placeholders.patient_id') }}" />
-                        <button class="clickable-primary py-2 px-4 rounded-md" type="submit">
-                            {{ __('patient.record.index.actions.find') }}
-                        </button>
-                    </div>
+        <div class="content-card">
+            <form action="{{ route('medical-records.index') }}" method="GET" class="flex items-end gap-3">
+                <div class="flex-1">
+                    <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('patient.record.index.table.patient_keyword') }}</label>
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="{{ __('patient.record.index.placeholders.patient_id') }}" class="custom-input" />
                 </div>
+                <button class="clickable-primary py-2.5 px-5 rounded-xl text-sm font-bold" type="submit">
+                    {{ __('patient.record.index.actions.find') }}
+                </button>
             </form>
-        </section>
+        </div>
 
-        <section class="py-2 px-4 mt-4">
-            <span>Found: {{ $medicalRecordList->total() }} entries.</span>
-        </section>
+        <div class="flex items-center gap-2 mt-1 mb-2">
+            <span class="text-sm text-slate-500">Menampilkan <span class="font-bold text-slate-700">{{ $medicalRecordList->total() }}</span> data rekam medis</span>
+        </div>
 
         <section class="table-content">
             <table>

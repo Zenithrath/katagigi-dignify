@@ -3,10 +3,10 @@
 
     <main class="main-table-container">
         <section class="flex gap-4 items-center">
-            <a href="{{ route('transactions.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
+            <a href="{{ route('transactions.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
                 <x-lucide-chevron-left class="w-full h-full" />
             </a>
-            <h1> {{ $type == 'update' ? __('form.title.update.transaction') : __('form.title.create.transaction') }}
+            <h1 class="text-xl font-bold text-slate-900"> {{ $type == 'update' ? __('form.title.update.transaction') : __('form.title.create.transaction') }}
             </h1>
         </section>
 
@@ -295,7 +295,7 @@
 
                     <template x-if="isDataShown">
                         <input type="submit" value="{{ __('form.actions.save_and_print') }}"
-                            class="clickable-primary py-2 px-4 mt-4 rounded-md w-full" />
+                            class="btn-submit" />
                     </template>
                 </div>
             </form>

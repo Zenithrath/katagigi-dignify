@@ -17,44 +17,32 @@
             {{-- @endcan --}}
         </section>
 
-        <section class="content-card">
-            <form action="{{ route('transactions.index') }}" method="GET">
-                <div class="flex flex-col gap-2 items-start">
-                    <div class="flex flex-col sm:flex-row gap-2 w-full">
-                        <div class="input-group w-full flex-1">
-                            <label for="date_start">{{ __('report.transaction.index.labels.date_start') }}</label>
-                            <input type="date" name="since" id="date_start" class="flex-1 h-12"
-                                value="{{ request('since') }}"
-                                placeholder="{{ __('report.transaction.index.placeholders.type_here') }}" />
-                        </div>
-
-                        <div class="input-group w-full flex-1">
-                            <label for="date_end">{{ __('report.transaction.index.labels.date_end') }}</label>
-                            <input type="date" name="until" id="date_end" class="flex-1 h-12"
-                                value="{{ request('until') }}"
-                                placeholder="{{ __('report.transaction.index.placeholders.type_here') }}" />
-                        </div>
+        <div class="content-card">
+            <form action="{{ route('transactions.index') }}" method="GET" class="flex flex-col gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('report.transaction.index.labels.date_start') }}</label>
+                        <input type="date" name="since" value="{{ request('since') }}" class="custom-input" />
                     </div>
-
-                    <div class="input-group w-full flex-1">
-                        <label for="patient_keyword">{{ __('report.transaction.index.labels.patient_keyword') }}</label>
-                        <input type="text" name="keyword" id="patient_keyword" class="flex-1 h-12"
-                            value="{{ request('keyword') }}"
-                            placeholder="{{ __('report.transaction.index.placeholders.type_here') }}" />
-                        <small class="helper">
-                            {{ __('report.transaction.index.helpers.patient_keyword') }}
-                        </small>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('report.transaction.index.labels.date_end') }}</label>
+                        <input type="date" name="until" value="{{ request('until') }}" class="custom-input" />
                     </div>
-                    <button class="clickable-primary py-2 px-4 rounded-md" type="submit">
-                        {{ __('report.transaction.index.actions.find') }}
-                    </button>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('report.transaction.index.labels.patient_keyword') }}</label>
+                        <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="{{ __('report.transaction.index.placeholders.type_here') }}" class="custom-input" />
+                        <small class="text-xs text-slate-400 mt-1 block">{{ __('report.transaction.index.helpers.patient_keyword') }}</small>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button class="clickable-primary py-2.5 px-6 rounded-xl text-sm font-bold" type="submit">{{ __('report.transaction.index.actions.find') }}</button>
                 </div>
             </form>
-        </section>
+        </div>
 
-        <section class="py-2 px-4 mt-4">
-            <span>Found: {{ $transactionList->total() }} entries.</span>
-        </section>
+        <div class="flex items-center gap-2 mt-1 mb-2">
+            <span class="text-sm text-slate-500">Menampilkan <span class="font-bold text-slate-700">{{ $transactionList->total() }}</span> transaksi</span>
+        </div>
 
         <section class="table-content">
             <table>
@@ -111,15 +99,9 @@
                                 <td class="column">{{ $transaction->payment_method }}</td>
                                 <td class="column">
                                     @if (!$transaction->canceled_at)
-                                        <div
-                                            class="w-fit px-2 py-0.5 bg-brand-500/30 border border-brand-500 text-brand-500 rounded-md text-xs">
-                                            {{ __('Completed') }}
-                                        </div>
-                                    @elseif ($transaction->canceled_at)
-                                        <div
-                                            class="w-fit px-2 py-0.5 bg-orange-500/30 border border-orange-500 text-orange-500 rounded-md text-xs">
-                                            {{ __('Canceled') }}
-                                        </div>
+                                        <span class="badge badge-success"><span class="dot"></span> {{ __('Completed') }}</span>
+                                    @else
+                                        <span class="badge badge-warning"><span class="dot"></span> {{ __('Canceled') }}</span>
                                     @endif
                                 </td>
                                 {{-- <td class="action-column">

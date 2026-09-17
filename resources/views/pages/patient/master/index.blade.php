@@ -9,7 +9,7 @@
             </div>
 
             @can('create patient')
-                <a href="{{ route('patients.create') }}" class="clickable-primary py-2 px-4 rounded-md">
+                <a href="{{ route('patients.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('patient.master.index.buttons.add') }}
                 </a>
             @endcan
@@ -17,24 +17,21 @@
 
         <x-flash-alerts />
 
-        <section class="bg-slate-50 p-8 rounded-md">
-            <form action="{{ route('patients.index') }}" method="GET">
-                <div class="input-group">
-                    <label for="keyword">{{ __('form.labels.patient_keyword') }}</label>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input type="text" name="keyword" id="keyword" class="flex-1" value="{{ request('keyword') }}"
-                            placeholder="{{ __('form.placeholders.keyword') }}" />
-                        <button class="clickable-primary py-2 px-4 rounded-md" type="submit">
-                            {{ __('patient.record.index.actions.find') }}
-                        </button>
-                    </div>
+        <div class="content-card">
+            <form action="{{ route('patients.index') }}" method="GET" class="flex items-end gap-3">
+                <div class="flex-1">
+                    <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('form.labels.patient_keyword') }}</label>
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" placeholder="{{ __('form.placeholders.keyword') }}" class="custom-input" />
                 </div>
+                <button class="clickable-primary py-2.5 px-5 rounded-xl text-sm font-bold" type="submit">
+                    {{ __('patient.record.index.actions.find') }}
+                </button>
             </form>
-        </section>
+        </div>
 
-        <section class="py-2 px-4 mt-4">
-            <span>Found: {{ $patientList->total() }} entries.</span>
-        </section>
+        <div class="flex items-center gap-2 mt-1 mb-2">
+            <span class="text-sm text-slate-500">Menampilkan <span class="font-bold text-slate-700">{{ $patientList->total() }}</span> data pasien</span>
+        </div>
 
         <section class="table-content">
             <table>
@@ -56,26 +53,16 @@
                                 <td class="column">
                                     {{ ($patientList->currentPage()-1) * $patientList->perPage() + ++$index }}
                                 </td>
-                                <td class="index-column flex gap-4 items-center w-80 overflow-hidden truncate">
-                                    <div class="flex gap-4 items-center">
+<td>
+                                    <div class="flex items-center gap-3.5">
                                         @if ($patient->picture)
-                                            <img src="{{ asset('storage/' . $patient->picture) }}"
-                                                alt="{{ $patient->name }}'s Picture"
-                                                class="w-12 h-12 object-cover object-center rounded-full" />
+                                            <img src="{{ asset('storage/' . $patient->picture) }}" alt="{{ $patient->name }}" class="w-11 h-11 rounded-full object-cover border-2 border-slate-100 shrink-0" />
                                         @else
-                                            <div
-                                                class="w-12 h-12 fill-none stroke-1 stroke-slate-900
-                                                <x-lucide-user-circle class="w-full h-full" />
-                                            </div>
+                                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center font-bold text-emerald-700 text-sm border-2 border-slate-100 shrink-0">{{ strtoupper(substr($patient->name, 0, 1)) }}</div>
                                         @endif
-                                        <div class="flex flex-col">
-                                            <span class="font-semibold">
-                                                <a href="{{ route('patients.show', ['patient' => $patient->id]) }}"
-                                                    class="h-full">
-                                                    <span>{{ $patient->name }}</span>
-                                                </a>
-                                            </span>
-                                            <span class="text-gray-500">{{ $patient->email }}</span>
+                                        <div class="flex flex-col min-w-0">
+                                            <a href="{{ route('patients.show', ['patient' => $patient->id]) }}" class="font-bold text-slate-900 text-sm truncate hover:text-brand-600">{{ $patient->name }}</a>
+                                            <span class="text-xs text-slate-400 truncate">{{ $patient->email }}</span>
                                         </div>
                                     </div>
                                 </td>

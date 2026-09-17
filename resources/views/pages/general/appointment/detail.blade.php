@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot:title>{{ __('general.appointment.detail._title') }}</x-slot:title>
 
-    <main class="mb-auto px-8 pt-8 pb-12">
+    <main class="main-table-container">
         <div class="flex gap-4 items-center">
-            <a href="{{ route('patients.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
+            <a href="{{ route('patients.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
                 <x-lucide-chevron-left class="w-full h-full" />
             </a>
-            <h1> {{ __('general.appointment.detail._title') }} </h1>
+            <h1 class="text-xl font-bold text-slate-900">{{ __('general.appointment.detail._title') }}</h1>
         </div>
 
         <div class="content-card pt-8 px-8">
@@ -112,7 +112,7 @@
                 <div class="flex gap-4 items-center">
                     @can('update appointment')
                         <a href="{{ route('appointments.edit', ['appointment' => $data->id]) }}"
-                            class="clickable-primary py-2 px-4 rounded-md">
+                            class="clickable-primary py-2.5 px-5 rounded-xl">
                             {{ __('general.appointment.detail.action.edit') }}
                             <span class="sr-only">{{ $data->patient_name }}</span>
                         </a>

@@ -10,56 +10,48 @@
         </section>
 
         <section class="content-card">
-            <div class="flex flex-col items-end gap-4">
-                <form action="" method="get" class="w-full">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 flex-wrap gap-2 w-full">
-                        <div class="input-group flex flex-col gap-2 flex-1">
-                            <label for="since">{{ __('report.income.index.lookup.since') }}</label>
-                            <input type="date" name="since" id="since" x-model="dateSince" />
-                        </div>
-                        <div class="input-group flex flex-col gap-2 flex-1">
-                            <label for="until">{{ __('report.income.index.lookup.until') }}</label>
-                            <input type="date" name="until" id="until" x-model="dateUntil" />
-                        </div>
-                        <div class="input-group flex flex-col gap-2 flex-1">
-                            <label for="doctor">{{ __('report.income.index.lookup.doctor.title') }}</label>
-                            <select name="doctor" id="doctor" x-model="doctorID">
-                                @if (auth()->user()->hasRole('admin'))
-                                    <option value="">{{ __('report.income.index.lookup.doctor.helper') }}</option>
-                                @endif
-                                @foreach ($doctors as $item)
-                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+            <form action="" method="get" class="flex flex-col gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('report.income.index.lookup.since') }}</label>
+                        <input type="date" name="since" id="since" x-model="dateSince" class="custom-input" />
                     </div>
-                </form>
-
-                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 w-full">
-                    <small class="helper">
-                        {{ __('report.income.index.lookup._helper') }}
-                    </small>
-                    <div class="flex gap-2">
-                        <button class="clickable-ghost py-2 px-4 rounded-md md:w-fit text-sm" @click="handleExportClick()">
-                            {{ __('Export XLSX') }}
-                        </button>
-                        <button class="clickable-primary py-2 px-4 rounded-md flex-1 md:w-fit"
-                            @click="handleLookupClick()">{{ __('Filter') }}</button>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('report.income.index.lookup.until') }}</label>
+                        <input type="date" name="until" id="until" x-model="dateUntil" class="custom-input" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 mb-1.5 block">{{ __('report.income.index.lookup.doctor.title') }}</label>
+                        <select name="doctor" id="doctor" x-model="doctorID" class="custom-select">
+                            @if (auth()->user()->hasRole('admin'))
+                                <option value="">{{ __('report.income.index.lookup.doctor.helper') }}</option>
+                            @endif
+                            @foreach ($doctors as $item)
+                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
-            </div>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <small class="text-xs text-slate-400">{{ __('report.income.index.lookup._helper') }}</small>
+                    <div class="flex gap-2">
+                        <button class="clickable-ghost py-2.5 px-5 rounded-xl text-sm font-bold" type="button" @click="handleExportClick()">{{ __('Export XLSX') }}</button>
+                        <button class="clickable-primary py-2.5 px-5 rounded-xl text-sm font-bold" type="button" @click="handleLookupClick()">{{ __('Filter') }}</button>
+                    </div>
+                </div>
+            </form>
         </section>
 
         <template x-if="isEmpty || isLoading">
             <section class="content-card">
                 <template x-if="isLoading && !isEmpty">
-                    <div class="w-full h-32 flex items-center justify-center">
+                    <div class="w-full h-32 flex items-center justify-center text-sm text-slate-400">
                         {{ __('Loading...') }}
                     </div>
                 </template>
 
                 <template x-if="isEmpty && !isLoading">
-                    <div class="w-full h-32 flex items-center justify-center">
+                    <div class="w-full h-32 flex items-center justify-center text-sm text-slate-400">
                         {{ __('report.income.index.helper.empty') }}
                     </div>
                 </template>

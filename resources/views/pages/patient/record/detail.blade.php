@@ -4,11 +4,11 @@
     <main class="main-table-container">
         <section class="heading">
             <div class="flex items-start gap-4">
-                <a href="{{ route('medical-records.index') }}" class="clickable-ghost p-2 rounded-md w-12 h-12">
+                <a href="{{ route('medical-records.index') }}" class="clickable-ghost w-9 h-9 rounded-xl p-2">
                     <x-lucide-chevron-left class="w-full h-full" />
                 </a>
                 <div>
-                    <h1>{{ __('Medical Record') }} #{{ strtoupper(substr($data->id, 0, 7)) }}</h1>
+                    <h1 class="text-xl font-bold text-slate-900">{{ __('Medical Record') }} #{{ strtoupper(substr($data->id, 0, 7)) }}</h1>
                     <p>{{ Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
                     </p>
                 </div>

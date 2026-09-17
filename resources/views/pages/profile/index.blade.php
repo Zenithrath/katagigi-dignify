@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot:title>{{ __('general.profile.index._title') }}</x-slot:title>
 
-    <main class="mb-auto px-8 pt-8 pb-12" x-data>
+    <main class="main-table-container" x-data>
         <div class="flex gap-4 items-center">
-            <a href="{{ route('admins.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
+            <a href="{{ route('admins.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
                 <x-lucide-chevron-left class="w-full h-full" />
             </a>
-            <h1> {{ __('general.profile.index.menu') }} </h1>
+            <h1 class="text-xl font-bold text-slate-900">{{ __('general.profile.index.menu') }}</h1>
         </div>
 
         <x-flash-alerts />
@@ -141,7 +141,7 @@
 
                     <input type="submit"
                         value="{{ __('general.profile.form.buttons.update') }}"
-                        class="clickable-primary py-2 rounded-md mt-4" />
+                        class="clickable-primary py-2.5 px-5 rounded-xl mt-4" />
                 </div>
             </form>
         </div>

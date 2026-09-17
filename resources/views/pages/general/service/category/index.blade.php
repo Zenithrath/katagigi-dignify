@@ -10,13 +10,13 @@
 
             <div class="flex gap-2">
                 {{-- @can('read service') --}}
-                <a href="{{ route('services.index') }}" class="clickable-primary py-2 px-4 rounded-md">
+                <a href="{{ route('services.index') }}" class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('general.service.index._nav') }}
                 </a>
                 {{-- @endcan --}}
 
                 {{-- @can('create category') --}}
-                <a href="{{ route('categories.create') }}" class="clickable-primary py-2 px-4 rounded-md">
+                <a href="{{ route('categories.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('general.category.index.action.add') }}
                 </a>
                 {{-- @endcan --}}

@@ -4,17 +4,17 @@
     <main class="main-table-container" x-data="reschedule">
         <div class="flex gap-4">
             <div class="flex">
-                <a href="{{ route('transactions.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
+                <a href="{{ route('transactions.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
                     <x-lucide-chevron-left class="w-full h-full" />
                 </a>
             </div>
             <section class="heading w-full">
                 <div class="flex-1">
-                    <h1>{{ __('report.transaction.index._title') }} {{ 'No. ' . $data->sequence }}</h1>
+                    <h1 class="text-xl font-bold text-slate-900">{{ __('report.transaction.index._title') }} {{ 'No. ' . $data->sequence }}</h1>
                     <p>{{ Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
                     </p>
                 </div>
-                <button class="clickable-primary py-2 px-4 rounded-md" @click="window.print()">
+                <button class="clickable-primary py-2.5 px-5 rounded-xl" @click="window.print()">
                     {{ __('report.transaction.index.actions.print') }}
                 </button>
             </section>
@@ -74,14 +74,14 @@
                                         null"
                                     @change="handleChange(event)" />
                                 <button type="button" @click="handleSubmit()"
-                                    class="clickable-primary px-4 py-2 rounded-md">{{ __('Set') }}</button>
+                                    class="clickable-primary px-5 py-2.5 rounded-xl">{{ __('Set') }}</button>
                             </div>
                         </template>
                         <template x-if="!isInputShown">
                             <div class="flex gap-4">
                                 <span x-text="dateText"></span>
                                 <button type="button" @click="handleRescheduleClick()"
-                                    class="clickable-primary px-2 py-0.5 rounded-md">{{ __('report.transaction.detail.data.schedule.reschedule') }}</button>
+                                    class="clickable-primary px-2.5 py-1 rounded-xl">{{ __('report.transaction.detail.data.schedule.reschedule') }}</button>
                             </div>
                         </template>
                     </dd>
@@ -157,12 +157,12 @@
                                 <form action="{{ route('cancellations.approve', ['id' => $pendingProposal->id]) }}" method="post" class="flex flex-wrap items-center gap-2">
                                     @csrf
                                     <input type="text" name="decision_note" class="w-56" placeholder="Catatan (opsional)" />
-                                    <button type="submit" class="clickable-primary py-2 px-4 rounded-md">Setujui</button>
+                                    <button type="submit" class="clickable-primary py-2.5 px-5 rounded-xl">Setujui</button>
                                 </form>
                                 <form action="{{ route('cancellations.reject', ['id' => $pendingProposal->id]) }}" method="post" class="flex flex-wrap items-center gap-2">
                                     @csrf
                                     <input type="text" name="decision_note" class="w-56" placeholder="Alasan penolakan" />
-                                    <button type="submit" class="clickable-ghost py-2 px-4 rounded-md">Tolak</button>
+                                    <button type="submit" class="clickable-ghost py-2.5 px-5 rounded-xl">Tolak</button>
                                 </form>
                             </div>
                         @endrole
@@ -176,7 +176,7 @@
                                         {{ __('report.transaction.detail.helper.cancel') }}
                                     </span>
                                     <button type="button" @click="handleAskCancelation()"
-                                        class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2 px-4 rounded-md">
+                                        class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2.5 px-5 rounded-xl">
                                         {{ __('report.transaction.detail.button.cancel') }}
                                     </button>
                                 </div>
@@ -190,7 +190,7 @@
                                         <input type="text" name="cancel_reason" id="cancel_reason" class="w-full md:w-72"
                                             placeholder="Type for a cancelation reason..." />
                                         <button type="submit"
-                                            class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2 px-4 rounded-md">
+                                            class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2.5 px-5 rounded-xl">
                                             {{ __('report.transaction.detail.button.submit_cancel') }}
                                         </button>
                                     </div>
@@ -204,7 +204,7 @@
                                 <div class="flex flex-col md:flex-row items-end md:items-center gap-4">
                                     <span>Butuh pembatalan? Usulkan ke manajemen.</span>
                                     <button type="button" @click="handleAskCancelation()"
-                                        class="clickable-ghost py-2 px-4 rounded-md">
+                                        class="clickable-ghost py-2.5 px-5 rounded-xl">
                                         Usulkan Pembatalan
                                     </button>
                                 </div>
@@ -217,7 +217,7 @@
                                     <div class="flex flex-col md:flex-row items-end md:items-center md:justify-end gap-4 w-full">
                                         <input type="text" name="cancel_reason" id="cancel_reason" class="w-full md:w-72"
                                             placeholder="Alasan usulan pembatalan..." required />
-                                        <button type="submit" class="clickable-primary py-2 px-4 rounded-md">
+                                        <button type="submit"                     class="clickable-primary py-2.5 px-5 rounded-xl">
                                             Kirim Usulan
                                         </button>
                                     </div>

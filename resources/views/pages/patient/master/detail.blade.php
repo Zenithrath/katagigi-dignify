@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot:title>{{ __('patient.master.detail.title') }}</x-slot:title>
 
-    <main class="mb-auto px-8 pt-8 pb-12">
+    <main class="main-table-container">
         <div class="flex gap-4 items-center">
-            <a href="{{ route('patients.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
+            <a href="{{ route('patients.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
                 <x-lucide-chevron-left class="w-full h-full" />
             </a>
-            <h1> {{ __('patient.master.detail.title') }} </h1>
+            <h1 class="text-xl font-bold text-slate-900">{{ __('patient.master.detail.title') }}</h1>
         </div>
 
         <div class="content-card relative mt-4 px-8">
