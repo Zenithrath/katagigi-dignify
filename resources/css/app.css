@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tema Donezo: light, hijau emerald, font Plus Jakarta Sans */
+body {
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+    background-color: #047857;
+    color: #fff;
+}
