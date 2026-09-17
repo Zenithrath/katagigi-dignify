@@ -36,9 +36,20 @@ class DatabaseSeeder extends Seeder
         DB::transaction(function () {
             $patients = Patient::factory()->count(15)->create();
 
-            $patients->each(function ($patient) {
-                PatientAddress::factory()->create(['patient_id' => $patient->id]);
-            });
+            foreach ($patients as $patient) {
+                DB::table('patient_addresses')->insert([
+                    'patient_id' => $patient->id,
+                    'zip_code' => fake()->numerify('#####'),
+                    'tonarigumi' => fake()->numerify('#####'),
+                    'street' => fake()->streetAddress(),
+                    'village' => fake()->citySuffix(),
+                    'district' => fake()->city(),
+                    'regency' => fake()->city(),
+                    'province' => fake()->randomElement(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur']),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             Schedule::factory()->count(15)->create();
             Appointment::factory()->count(15)->create();
