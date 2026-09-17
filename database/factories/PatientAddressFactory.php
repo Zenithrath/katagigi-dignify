@@ -16,7 +16,7 @@ class PatientAddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'patient_id' => Patient::inRandomOrder()->first()?->id ?? Patient::factory(),
+            'patient_id' => Patient::inRandomOrder()->first()?->id ?? throw new \RuntimeException('No patients found. Create patients first.'),
             'zip_code' => fake()->numerify('#####'),
             'tonarigumi' => fake()->numerify('#####'),
             'street' => fake()->streetAddress(),

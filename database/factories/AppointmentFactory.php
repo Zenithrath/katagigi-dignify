@@ -30,7 +30,7 @@ class AppointmentFactory extends Factory
             'patient_name' => $patient->name,
             'doctor_id' => $doctor->user_id,
             'doctor_name' => $doctor->user->name ?? fake()->name('male'),
-            'schedule_id' => Schedule::inRandomOrder()->first()?->id ?? Schedule::factory(),
+            'schedule_id' => Schedule::inRandomOrder()->first()?->id ?? Schedule::factory()->create()->id,
             'date' => fake()->dateTimeBetween('-1 month', '+3 months'),
             'time_start' => sprintf('%02d:00:00', $startHour),
             'time_end' => sprintf('%02d:00:00', min($endHour, 20)),

@@ -21,7 +21,7 @@ class ScheduleFactory extends Factory
 
         return [
             'id' => Str::uuid(),
-            'doctor_id' => Doctor::inRandomOrder()->first()?->user_id ?? Doctor::factory(),
+            'doctor_id' => Doctor::inRandomOrder()->first()?->user_id ?? Doctor::factory()->create()->user_id,
             'day' => fake()->randomElement(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']),
             'time_start' => sprintf('%02d:00:00', $startHour),
             'time_end' => sprintf('%02d:00:00', min($endHour, 20)),
