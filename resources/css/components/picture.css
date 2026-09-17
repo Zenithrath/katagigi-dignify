@@ -1,13 +1,13 @@
 @layer components {
     /* Picture Upload Container */
     .picture-container {
-        @apply relative overflow-hidden;
+        @apply relative;
         min-height: 200px;
     }
 
     /* Cover Picture */
     .cover-picture {
-        @apply w-full h-40 md:h-48 bg-slate-100;
+        @apply w-full h-40 md:h-48 bg-slate-100 overflow-hidden relative;
     }
 
     .cover-picture img {
@@ -19,7 +19,9 @@
         @apply absolute left-6 md:left-8 w-24 h-24 md:w-32 md:h-32
             rounded-full border-4 border-white
             bg-slate-200 overflow-hidden
-            shadow-lg z-10 -translate-y-1/2;
+            shadow-lg z-10;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .profile-picture img {
@@ -28,7 +30,7 @@
 
     /* Picture Action Container (cover overlay) */
     .picture-action-container {
-        @apply bottom-3 right-3 flex gap-2;
+        @apply absolute bottom-3 right-3 flex gap-2 z-20;
     }
 
     /* Picture Action Button */
@@ -44,7 +46,9 @@
         @apply hover:bg-emerald-50;
     }
 
-    .picture-action input[type="file"] {
-        @apply hidden;
+    /* Hide ALL file inputs inside picture-container */
+    .picture-container input[type="file"] {
+        @apply !absolute !-left-[9999px] !opacity-0 !w-0 !h-0 !p-0 !m-0;
+        pointer-events: none;
     }
 }
