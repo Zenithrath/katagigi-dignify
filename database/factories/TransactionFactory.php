@@ -28,6 +28,7 @@ class TransactionFactory extends Factory
         return [
             'id' => Str::uuid(),
             'sequence' => fake()->unique()->randomNumber(6),
+            'down_payment_transaction_id' => null,
             'has_down_payment' => fake()->boolean(30),
             'is_endorsed' => fake()->boolean(20),
             'has_installment' => fake()->boolean(20),
@@ -39,9 +40,12 @@ class TransactionFactory extends Factory
             'doctor_id' => $doctor->user_id,
             'doctor_nipp' => $doctor->nipp,
             'doctor_name' => $doctor->user->name ?? fake()->name('male'),
+            'nurse_id' => null,
+            'nurse_nipp' => null,
+            'nurse_name' => null,
             'appointment_id' => $appointment->id,
-            'appointment_datetime' => fake()->dateTimeBetween('-1 month', '+1 month'),
-            'next_schedule' => fake()->dateTimeBetween('+1 week', '+2 months'),
+            'appointment_datetime' => fake()->dateTimeBetween('-1 month', '+1 month')->format('Y-m-d H:i:s'),
+            'next_schedule' => fake()->dateTimeBetween('+1 week', '+2 months')->format('Y-m-d'),
             'services' => json_encode([
                 ['name' => fake()->randomElement(['Scaling', 'Tambal Gigi', 'Cabut Gigi', 'Pembersihan Karang Gigi', 'Orthodonti']), 'price' => $price],
             ]),
@@ -52,6 +56,7 @@ class TransactionFactory extends Factory
             'canceled_at' => null,
             'cancel_reason' => null,
             'voucher_code' => null,
+            'referenced_installment_id' => null,
             'is_locked' => false,
         ];
     }
