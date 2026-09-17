@@ -17,6 +17,13 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             DiagnosisCodeSeeder::class,
+            CategoriesSeeder::class,
+            ServiceUmumSeeder::class,
+            ServiceBedahMulutSeeder::class,
+            ServiceKonservasiSeeder::class,
+            ServiceOrtodonsiaSeeder::class,
+            ServicePedodonsiaSeeder::class,
+            ServiceProstodonsiaSeeder::class,
         ]);
     }
 }

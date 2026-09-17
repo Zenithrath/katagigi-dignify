@@ -1,0 +1,9 @@
+@layer components {
+    footer {
+        @apply h-16 flex items-center justify-center gap-2;
+    }
+
+    footer img {
+        @apply h-6;
+    }
+}

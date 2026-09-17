@@ -1,0 +1,59 @@
+@layer components {
+    .auth-base {
+        @apply absolute top-0 z-20 flex flex-col w-full h-full;
+        @apply bg-gradient-to-bl from-transparent to-brand-100;
+        @apply dark:to-brand-800/20;
+        @apply text-base 2xl:text-lg;
+    }
+
+    .auth-base-isolation {
+        @apply relative isolate w-screen min-h-screen;
+    }
+
+    .auth-accent-container {
+        @apply left-0 top-0 z-10 origin-top-left transform-gpu
+            opacity-20 blur-2xl sm:left-1/2 sm:-ml-96 md:blur-3xl
+            sm:-mt-10 sm:translate-y-0 sm:transform-gpu sm:opacity-50
+            h-full;
+    }
+
+    .auth-accent {
+        @apply h-full w-full bg-gradient-to-bl from-brand-500
+            to-blue-500;
+        @apply md:dark:from-brand-900 md:dark:to-blue-900;
+    }
+
+    .auth-container {
+        @apply mb-auto h-full md:mt-20 md:h-fit flex flex-col
+            gap-8 justify-center items-center;
+    }
+
+    .auth-title-container {
+        @apply flex flex-col gap-4 items-center;
+    }
+
+    .auth-institution-logo {
+        @apply w-fit h-20;
+    }
+
+    .auth-form-container {
+        @apply  w-5/6 sm:w-[400px] p-8 rounded-md;
+        @apply bg-slate-50 dark:bg-slate-800;
+    }
+
+    .auth-password-revealer {
+        @apply absolute px-2 right-0 top-0 h-full flex
+            items-center text-sm font-semibold;
+        @apply text-brand-500;
+    }
+
+    .auth-checkbox {
+        @apply rounded shadow-sm focus:ring focus:ring-opacity-50;
+        @apply border-gray-300 text-indigo-600
+            focus:border-indigo-300 focus:ring-indigo-200;
+    }
+
+    .auth-checkbox-caption {
+        @apply text-sm text-gray-600 dark:text-gray-200;
+    }
+}

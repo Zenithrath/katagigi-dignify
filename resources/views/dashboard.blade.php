@@ -7,44 +7,44 @@
                 <p class="mt-0.5 text-sm text-slate-400">Rencanakan, prioritaskan, dan layani pasien dengan mudah.</p>
             </div>
             <div class="flex gap-2">
-                <span class="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white/90" title="Aktif setelah modul appointment">＋ Reservasi</span>
-                <span class="inline-flex cursor-not-allowed items-center rounded-full border border-emerald-800 px-4 py-2 text-sm font-semibold text-emerald-900" title="Aktif setelah modul transaksi">Tarik Data</span>
+                <a href="{{ route('appointments.create') }}" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">＋ Reservasi</a>
+                <a href="{{ route('export-transactions') }}" class="inline-flex items-center rounded-full border border-emerald-800 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50">Tarik Data</a>
             </div>
         </div>
 
-        {{-- 4 kartu statistik --}}
+        {{-- 4 kartu statistik (data live dari DashboardController) --}}
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
             <div class="rounded-3xl bg-emerald-800 p-5 text-white shadow-sm">
                 <div class="flex items-start justify-between">
-                    <p class="text-sm font-medium text-emerald-100">Antrian Hari Ini</p>
+                    <p class="text-sm font-medium text-emerald-100">Antrian Minggu Ini</p>
                     <span class="grid h-7 w-7 place-items-center rounded-full bg-white text-emerald-800 text-sm">↗</span>
                 </div>
-                <p class="mt-2 text-4xl font-extrabold">0</p>
-                <p class="mt-1 text-xs text-emerald-200">Modul appointment menyusul</p>
+                <p class="mt-2 text-4xl font-extrabold">{{ isset($data->appointments) ? count($data->appointments) : 0 }}</p>
+                <p class="mt-1 text-xs text-emerald-200">Belum dilayani & belum batal</p>
             </div>
             <div class="rounded-3xl bg-white p-5 shadow-sm border border-white">
                 <div class="flex items-start justify-between">
                     <p class="text-sm font-medium text-slate-500">Pasien Terdaftar</p>
                     <span class="grid h-7 w-7 place-items-center rounded-full border border-slate-200 text-sm">↗</span>
                 </div>
-                <p class="mt-2 text-4xl font-extrabold">0</p>
-                <p class="mt-1 text-xs text-slate-400">Modul pasien menyusul</p>
+                <p class="mt-2 text-4xl font-extrabold">{{ $data->patients ?? ($data->medical_records ?? 0) }}</p>
+                <p class="mt-1 text-xs text-slate-400">{{ isset($data->patients) ? 'Total pasien klinik' : 'Rekam medis bulan ini' }}</p>
             </div>
             <div class="rounded-3xl bg-white p-5 shadow-sm border border-white">
                 <div class="flex items-start justify-between">
                     <p class="text-sm font-medium text-slate-500">Transaksi Bulan Ini</p>
                     <span class="grid h-7 w-7 place-items-center rounded-full border border-slate-200 text-sm">↗</span>
                 </div>
-                <p class="mt-2 text-4xl font-extrabold">0</p>
-                <p class="mt-1 text-xs text-slate-400">Modul kasir menyusul</p>
+                <p class="mt-2 text-4xl font-extrabold">{{ $data->transactions ?? 0 }}</p>
+                <p class="mt-1 text-xs text-slate-400">Nota terbit bulan berjalan</p>
             </div>
             <div class="rounded-3xl bg-white p-5 shadow-sm border border-white">
                 <div class="flex items-start justify-between">
                     <p class="text-sm font-medium text-slate-500">Omzet Bulan Ini</p>
                     <span class="grid h-7 w-7 place-items-center rounded-full border border-slate-200 text-sm">↗</span>
                 </div>
-                <p class="mt-2 text-4xl font-extrabold">Rp 0</p>
-                <p class="mt-1 text-xs text-slate-400">Modul laporan menyusul</p>
+                <p class="mt-2 text-2xl font-extrabold">{{ $data->revenue ?? 'Rp 0' }}</p>
+                <p class="mt-1 text-xs text-slate-400">Pendapatan bulan berjalan</p>
             </div>
         </div>
 

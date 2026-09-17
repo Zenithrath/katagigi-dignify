@@ -1,0 +1,51 @@
+@layer components {
+    .sidenav {
+        @apply w-64 px-4 pt-4 pb-12 h-screen fixed top-0
+            z-40 print:!hidden;
+        @apply lg:w-64 lg:sticky;
+        @apply 2xl:w-72 2xl:sticky;
+        @apply bg-slate-50;
+        @apply dark:bg-slate-900;
+    }
+
+    .sidenav-collapsed {
+        @apply sidenav;
+        @apply hidden md:block md:w-20 sticky;
+    }
+
+    .sidenav > .item-container {
+        @apply flex flex-col gap-4 overflow-y-auto;
+    }
+
+    .sidenav > .item-container a {
+        @apply w-full px-4 py-2 flex gap-2 items-center
+            rounded-md text-xs;
+        @apply stroke-1 stroke-slate-950 text-slate-950
+            fill-none bg-transparent hover:bg-brand-200
+            active:bg-brand-500 active:text-slate-50
+            active:stroke-slate-50;
+        @apply dark:stroke-slate-50 dark:text-slate-50
+            dark:hover:bg-brand-900
+            dark:active:bg-brand-950;
+    }
+
+    .sidenav > .item-container a.active {
+        @apply bg-brand-200;
+        @apply dark:bg-brand-800 dark:text-slate-50
+            dark:stroke-slate-50;
+    }
+
+    .sidenav section {
+        @apply flex flex-col gap-1;
+    }
+
+    .sidenav section > span.collapsed {
+        @apply hidden;
+    }
+
+    .sidenav section > span {
+        @apply text-sm font-semibold;
+        @apply text-slate-950;
+        @apply dark:text-slate-50;
+    }
+}

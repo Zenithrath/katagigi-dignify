@@ -35,25 +35,25 @@
                         <span>⊞</span> Dashboard
                     </a>
                     @can('read schedule')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">◷ Jadwal <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('schedules.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('schedules.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">◷ Jadwal</a>
                     @endcan
                     @can('read appointment')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">✚ Appointment <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('appointments.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('appointments.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">✚ Appointment</a>
                     @endcan
                     @can('read patient')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">♿ Pasien <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('patients.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('patients.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">♿ Pasien</a>
                     @endcan
                     @can('read medical record')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">☰ Rekam Medis <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('medical-records.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('medical-records.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">☰ Rekam Medis</a>
                     @endcan
                     @can('read transaction')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">⇄ Transaksi <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('transactions.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('transactions.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">⇄ Transaksi</a>
                     @endcan
                     @can('read turnover')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">▤ Omzet <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('incomes.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('incomes.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">▤ Omzet</a>
                     @endcan
                     @role('manajemen')
-                        <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-400">✓ Persetujuan <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">Segera</em></span>
+                        <a href="{{ route('transactions.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-500 hover:bg-slate-50">✓ Persetujuan <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">via nota</em></a>
                     @endrole
                 </nav>
 

@@ -1,0 +1,44 @@
+@layer components {
+    .main-container {
+        @apply mb-auto px-8 pt-8 pb-12;
+    }
+
+    .main-table-container {
+        @apply main-container;
+        @apply w-screen md:w-full;
+    }
+
+    .main-table-container section.heading {
+        @apply flex flex-col gap-4 mb-8 items-start
+            justify-between;
+        @apply md:flex-row md:items-center;
+    }
+
+    .main-table-container section.table-content {
+        @apply w-full overflow-y-hidden mt-4;
+    }
+
+    dl.detail-list {
+        @apply divide-y divide-gray-200;
+        @apply dark:divide-gray-700;
+    }
+
+    dl.detail-list .data-container {
+        @apply px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0;
+    }
+
+    dl.detail-list .preview-container {
+        @apply px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0;
+    }
+
+    .data-container dt, .preview-container dt {
+        @apply text-sm font-medium leading-6 text-gray-900;
+        @apply dark:text-gray-100;
+    }
+
+    .data-container dd, .preview-container dd {
+        @apply mt-1 text-sm leading-6 text-gray-700
+            sm:col-span-2 sm:mt-0;
+        @apply dark:text-gray-300;
+    }
+}

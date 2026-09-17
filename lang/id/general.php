@@ -1,0 +1,472 @@
+<?php
+
+return [
+    'table.number_no' => 'No.',
+    'phrases' => [
+        'down_payment' => 'DP',
+        'installment' => 'Angsuran',
+        'balloon' => 'Balon',
+        'full_payment' => 'Pembayaran Penuh',
+        'find' => 'Cari',
+        'paid' => 'Lunas',
+        'pending' => 'Belum Lunas',
+        'PAID' => 'Lunas',
+        'PENDING' => 'Belum Lunas',
+        'no_data' => 'Tidak ada data yang ditemukan.',
+    ],
+    'dashboard' => [
+        'statistic' => [
+            '_title' => 'Ikhtisar Bulan Ini',
+            'revenue' => 'Pendapatan',
+            'patient' => 'Pasien Terdaftar',
+            'patient_value' => ':value Terdaftar',
+            'appointment' => 'Jadwal',
+            'appointment_value' => ':value Permintaan',
+            'service' => 'Layanan Selesai',
+            'service_value' => ':value Selesai',
+        ],
+    ],
+    'schedule' => [
+        'index' => [
+            'title' => 'Jadwal',
+            'subtitle' => 'Daftar semua jadwal dokter di klinik Anda. Menampilkan tanggal, waktu mulai, dan waktu selesai.',
+            'buttons' => [
+                'add' => 'Tambah Jadwal',
+                'edit' => 'Edit',
+                'delete' => 'Hapus',
+                'available' => 'Tersedia',
+                'unavailable' => 'Tidak Tersedia',
+            ],
+            'table' => [
+                'doctor' => 'Nama Dokter',
+                'day' => 'Hari',
+                'working_time' => 'Jam Kerja',
+                'empty' => 'Tidak ada jadwal terdaftar.',
+            ],
+        ],
+        'form' => [
+            'title' => [
+                '_title' => 'Tambah Jadwal untuk Dokter yang Bekerja',
+                'add' => 'Tambah Jadwal',
+                'edit' => 'Edit Jadwal',
+            ],
+            'labels' => [
+                'doctor' => [
+                    'default' => 'Pilih salah satu dokter berikut...',
+                    '_title' => 'Dokter',
+                    'empty' => 'Tidak ada dokter terdaftar.',
+                ],
+                'day' => [
+                    '_title' => 'Hari',
+                    'default' => 'Pilih salah satu hari berikut...',
+                    'monday' => 'Senin',
+                    'tuesday' => 'Selasa',
+                    'wednesday' => 'Rabu',
+                    'thursday' => 'Kamis',
+                    'friday' => 'Jumat',
+                    'saturday' => 'Sabtu',
+                    'sunday' => 'Minggu',
+                ],
+                'start_time' => 'Waktu Mulai',
+                'end_time' => 'Waktu Selesai',
+            ],
+            'placeholders' => [
+                'day' => 'Tulis hari jadwal di sini...',
+                'start_time' => 'Tulis waktu mulai jadwal di sini...',
+                'end_time' => 'Tulis waktu selesai jadwal di sini...',
+            ],
+            'buttons' => [
+                'update' => 'Simpan Perubahan',
+                'add' => 'Tambah Jadwal',
+            ],
+        ],
+    ],
+    'service' => [
+        'index' => [
+            '_title' => 'Layanan dan Biaya',
+            '_subtitle' => 'Daftar semua layanan di klinik Anda. Menampilkan nama layanan, harga, dan kategori.',
+            '_nav' => 'Daftar Layanan',
+            'table' => [
+                'code' => 'Kode',
+                'name' => 'Nama',
+                'category' => 'Kategori',
+                'range_price' => 'Rentang Harga',
+                'uncategorized' => 'Tidak Terkategori',
+                'empty' => 'Belum ada layanan yang ditambahkan.',
+            ],
+            'action' => [
+                'add' => 'Tambah Layanan',
+                'edit' => 'Edit',
+                'delete' => 'Hapus',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Tambah Layanan',
+                'edit' => 'Edit Layanan',
+            ],
+            'labels' => [
+                'name' => 'Nama Layanan',
+                'description' => 'Deskripsi Layanan',
+                'lower_price' => 'Harga Terendah',
+                'upper_price' => 'Harga Tertinggi',
+                'commision' => 'Komisi Dokter, dalam persen',
+                'category' => 'Kategori Layanan',
+            ],
+            'helpers' => [
+                'alphanumeric' => 'Tulis dengan karakter alfanumerik atau ,-@.',
+                'integer' => 'Tulis angka saja atau desimal dengan menggunakan titik (.) sebagai pemisah desimal.',
+                'describe' => 'Jelaskan layanan secara jelas dan singkat. Apa yang dilakukan dan harapan hasil dari tindakan tersebut',
+                'category' => 'Pilih kategori yang diinginkan. Tidak sesuai dengan kategori di atas?',
+            ],
+            'placeholders' => [
+                'name' => 'Tulis nama layanan di sini...',
+                'description' => 'Apa yang akan kita lakukan untuk melayani pasien dengan layanan ini? Apa hasil yang diharapkan dengan layanan ini?',
+                'lower_price' => 'Tulis harga terendah di sini...',
+                'upper_price' => 'Tulis harga tertinggi di sini...',
+                'commision' => 'Tulis komisi di sini...',
+                'category' => 'Pilih kategori...',
+            ],
+            'action' => [
+                'create_category' => 'Coba buat kategori baru.',
+                'save' => 'Simpan Layanan',
+                'update' => 'Perbarui Layanan',
+            ],
+            'messages' => [
+                'success_create' => 'Layanan berhasil ditambahkan.',
+                'success_update' => 'Layanan berhasil diperbarui.',
+                'success_delete' => 'Layanan berhasil dihapus.',
+                'error_create' => 'Layanan gagal ditambahkan.',
+                'error_update' => 'Layanan gagal diperbarui.',
+                'error_delete' => 'Layanan gagal dihapus.',
+            ],
+        ],
+        'detail' => [
+            '_title' => 'Detail Layanan',
+            'labels' => [
+                'name' => 'Nama Layanan',
+                'category' => 'Kategori Layanan',
+                'lower_price' => 'Harga Terendah',
+                'upper_price' => 'Harga Tertinggi',
+                'commision' => 'Komisi Layanan',
+                'description' => 'Deskripsi Layanan',
+            ],
+        ],
+    ],
+    'category' => [
+        'index' => [
+            '_title' => 'Kategori Layanan',
+            '_subtitle' => 'Daftar semua kategori layanan di klinik Anda.',
+            '_nav' => 'Daftar Kategori',
+            'table' => [
+                'code' => 'Kode',
+                'name' => 'Nama',
+                'services' => 'Layanan',
+                'empty' => 'Belum ada kategori yang ditambahkan.',
+            ],
+            'action' => [
+                'add' => 'Tambah Kategori',
+                'edit' => 'Edit',
+                'delete' => 'Hapus',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Tambah Kategori',
+                'edit' => 'Edit Kategori',
+            ],
+            'labels' => [
+                'name' => 'Nama Kategori',
+                'code' => 'Kode Kategori',
+            ],
+            'helpers' => [
+                'alphanumeric' => 'Tulis dengan karakter alfanumerik atau,-@.',
+            ],
+            'action' => [
+                'save' => 'Simpan Kategori',
+                'update' => 'Perbarui Kategori',
+            ],
+            'placeholders' => [
+                'name' => 'Tulis nama kategori di sini...',
+                'code' => 'Tulis kode kategori di sini...',
+            ],
+            'messages' => [
+                'success_create' => 'Kategori berhasil ditambahkan.',
+                'success_update' => 'Kategori berhasil diperbarui.',
+                'success_delete' => 'Kategori berhasil dihapus.',
+                'error_create' => 'Kategori gagal ditambahkan.',
+                'error_update' => 'Kategori gagal diperbarui.',
+                'error_delete' => 'Kategori gagal dihapus.',
+            ],
+        ],
+    ],
+    'appointment' => [
+        'index' => [
+            '_title' => 'Jadwal Dokter',
+            '_subtitle' => 'Daftar semua jadwal dokter dengan pasien. Menampilkan data pasien, dokter yang membuat janji, dan tanggal dan waktu janji.',
+            'table' => [
+                'patient' => 'Pasien',
+                'doctor' => 'Dokter',
+                'service' => 'Layanan',
+                'schedule' => 'Jadwal',
+                'status' => 'Status',
+                'empty' => 'Tidak ada janji, nikmati harimu!',
+                'pending' => 'Menunggu Konfirmasi',
+                'confirmed' => 'Terkonfirmasi',
+                'served and paid' => 'Dilayani dan Dibayar',
+                'completed' => 'Selesai',
+                'canceled' => 'Dibatalkan',
+                'nipp' => 'NIPP',
+                'services' => 'Layanan',
+            ],
+            'action' => [
+                'add' => 'Buat Janji',
+                'edit' => 'Edit',
+                'delete' => 'Batalkan',
+                'confirm' => 'Konfirmasi',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Tambah Janji',
+                'edit' => 'Edit Janji',
+            ],
+            'table' => [
+                'patient' => [
+                    'data' => 'Data Pasien',
+                    'phone' => 'Telepon Pasien',
+                ],
+            ],
+            'labels' => [
+                'patient_code' => 'ID Pasien, Nama, atau Telepon',
+                'preview' => [
+                    'patient_name' => 'Nama Pasien',
+                    'patient_code' => 'ID Pasien',
+                ],
+                'doctor' => 'Dokter',
+                'service' => 'Layanan',
+                'date' => 'Tanggal Janji',
+                'start_time' => 'Waktu Mulai',
+                'end_time' => 'Waktu Selesai',
+            ],
+            'button' => [
+                'add_service' => 'Tambah Layanan',
+            ],
+            'placeholders' => [
+                'patient_code' => 'Ketik kata kunci pasien di sini...',
+                'doctor' => 'Pilih dokter...',
+                'service' => 'Pilih layanan...',
+            ],
+            'action' => [
+                'patient_check' => 'Periksa',
+                'update' => 'Perbarui Janji',
+                'save' => 'Buat Janji',
+            ],
+            'helpers' => [
+                'alphanumeric' => 'Tulis dengan karakter alfanumerik atau ,-@.',
+            ],
+            'messages' => [
+                'success_create' => 'Janji berhasil dibuat.',
+                'success_update' => 'Janji berhasil diperbarui.',
+                'success_cancel' => 'Janji berhasil dibatalkan.',
+                'success_confirm' => 'Janji berhasil dikonfirmasi.',
+                'error_create' => 'Janji gagal dibuat.',
+                'error_update' => 'Janji gagal diperbarui.',
+                'error_cancel' => 'Janji gagal dibatalkan.',
+                'error_confirm' => 'Janji gagal dikonfirmasi.',
+            ],
+        ],
+        'detail' => [
+            '_title' => 'Detail Janji',
+            '_subtitle' => 'Daftar semua janji dengan pasien. Menampilkan data pasien, dokter yang membuat janji, dan tanggal dan waktu janji.',
+            'data' => [
+                'patient' => 'Data Pasien',
+                'doctor' => 'Data Dokter',
+                'service' => 'Data Layanan',
+                'schedule' => 'Data Jadwal',
+            ],
+            'labels' => [
+                'patient' => [
+                    'name' => 'Nama',
+                    'mr_number' => 'ID',
+                    'phone' => 'Telepon',
+                    'address' => 'Alamat',
+                    'address_details' => ":street :tonarigumi\n:desa\n:kecamatan\n:kabupaten\n:provinsi\nKode Pos: :kodepos",
+                ],
+                'doctor' => [
+                    'name' => 'Nama',
+                    'nipp' => 'NIPP',
+                ],
+                'schedule' => [
+                    'service_name' => 'Layanan',
+                    'service_category' => 'Kategori Layanan',
+                    'date' => 'Tanggal',
+                    'time' => 'Waktu',
+                    'status' => 'Status',
+                ],
+            ],
+            'action' => [
+                'edit' => 'Perbarui',
+                'delete' => 'Buat Pembatalan',
+            ],
+        ],
+    ],
+    'password' => [
+        'index' => [
+            '_title' => 'Ubah Kata Sandi',
+            '_subtitle' => 'Ubah kata sandi Anda di sini.',
+            'menu' => 'Pengaturan Kata Sandi',
+        ],
+        'form' => [
+            'labels' => [
+                'password' => 'Kata Sandi',
+                'old_password' => 'Kata Sandi Lama',
+                'new_password' => 'Kata Sandi Baru',
+                'confirm_password' => 'Konfirmasi Kata Sandi',
+            ],
+            'placeholders' => [
+                'password' => 'Tulis kata sandi Anda di sini...',
+                'old_password' => 'Tulis kata sandi lama Anda di sini...',
+                'new_password' => 'Tulis kata sandi baru Anda di sini...',
+                'confirm_password' => 'Tulis konfirmasi kata sandi baru Anda di sini...',
+            ],
+            'action' => [
+                'save' => 'Simpan Kata Sandi',
+                'update' => 'Perbarui Kata Sandi',
+            ],
+        ],
+    ],
+    'profile' => [
+        'index' => [
+            '_title' => 'Profil',
+            '_subtitle' => 'Ubah profil Anda di sini.',
+            'menu' => 'Pengaturan Profil',
+            'type' => [
+                'doctor' => 'Dokter',
+                'admin' => 'Admin',
+                'nurse' => 'Perawat',
+            ],
+        ],
+        'form' => [
+            'title' => [
+                'add' => 'Tambah Dokter',
+                'edit' => 'Edit Dokter',
+            ],
+            'labels' => [
+                'name' => 'Nama',
+                'email' => 'Email',
+                'password' => 'Kata Sandi',
+                'password_confirmation' => 'Konfirmasi Kata Sandi',
+                'nipp' => 'NIPP',
+                'niptk' => 'NIPTK',
+                'address' => [
+                    'village' => 'Desa',
+                    'street' => 'Alamat Jalan',
+                    'tonarigumi' => 'RT/RW',
+                    'district' => 'Kecamatan',
+                    'city' => 'Kota',
+                    'state' => 'Provinsi',
+                    'zipcode' => 'Kode Pos',
+                ],
+            ],
+            'placeholders' => [
+                'name' => 'Tulis nama dokter di sini...',
+                'email' => 'Tulis email dokter di sini...',
+                'password' => 'Tulis kata sandi dokter di sini...',
+                'password_confirmation' => 'Tulis konfirmasi kata sandi dokter di sini...',
+                'nipp' => 'Tulis nomor NIPP dokter di sini...',
+                'niptk' => 'Tulis nomor NIPTK dokter di sini...',
+                'address' => [
+                    'village' => 'Tulis nama desa dokter di sini...',
+                    'street' => 'Tulis alamat jalan dokter di sini...',
+                    'tonarigumi' => 'Tulis RT/RW dokter di sini...',
+                    'district' => 'Tulis nama kecamatan dokter di sini...',
+                    'city' => 'Tulis nama kota dokter di sini...',
+                    'state' => 'Tulis nama provinsi dokter di sini...',
+                    'zipcode' => 'Tulis kode pos dokter di sini...',
+                ],
+            ],
+            'buttons' => [
+                'update' => 'Simpan Profil',
+            ],
+        ],
+    ],
+    'installment' => [
+        'index' => [
+            '_title' => 'Angsuran',
+            '_subtitle' => 'Daftar semua transaksi angsuran di klinik Anda. Menampilkan kode transaksi, data pasien, jumlah, status, dan tanggal jatuh tempo.',
+            'table' => [
+                'transaction_code' => 'Kode Transaksi',
+                'patient_data' => 'Data Pasien',
+                'amount' => 'Jumlah',
+                'status' => 'Status',
+                'due_date' => 'Jatuh Tempo',
+                'empty' => 'Belum ada transaksi angsuran yang ditambahkan.',
+                'pending' => 'Belum Lunas',
+                'paid' => 'Lunas',
+                'overdue' => 'Terlambat',
+                'total' => 'Total',
+                'rest' => 'Sisa',
+                'steps' => 'Langkah Angsuran',
+            ],
+            'action' => [
+                'add' => 'Tambah Angsuran',
+                'edit' => 'Edit',
+                'delete' => 'Delete',
+                'pay' => 'Bayar',
+                'detail' => 'Detail',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Tambah Angsuran',
+                'edit' => 'Edit Angsuran',
+            ],
+            'labels' => [
+                'transaction_code' => 'Kode Transaksi',
+                'patient_name' => 'Nama Pasien',
+                'amount' => 'Jumlah',
+                'status' => 'Status',
+                'due_date' => 'Jatuh Tempo',
+                'steps' => 'Langkah Angsuran',
+            ],
+            'placeholders' => [
+                'transaction_code' => 'Ketik kode transaksi...',
+                'patient_name' => 'Ketik nama pasien...',
+                'amount' => 'Tulis jumlah...',
+                'status' => 'Pilih status...',
+                'due_date' => 'Pilih tanggal jatuh tempo...',
+            ],
+            'buttons' => [
+                'add_step' => 'Tambah Langkah',
+                'update' => 'Simpan Perubahan',
+                'add' => 'Tambah Angsuran',
+            ],
+            'messages' => [
+                'success_create' => 'Angsuran berhasil ditambahkan.',
+                'success_update' => 'Angsuran berhasil diperbarui.',
+                'success_delete' => 'Angsuran berhasil dihapus.',
+                'error_create' => 'Angsuran gagal ditambahkan.',
+                'error_update' => 'Angsuran gagal diperbarui.',
+                'error_delete' => 'Angsuran gagal dihapus.',
+            ],
+        ],
+        'detail' => [
+            '_title' => 'Detil Angsuran',
+            '_subtitle' => 'Daftar semua transaksi angsuran di klinik Anda.
+            Menampilkan kode transaksi, nama pasien, jumlah, status, dan tanggal jatuh tempo.',
+            'labels' => [
+                'transaction_code' => 'Kode Transaksi',
+                'patient_code' => 'ID Pasien',
+                'patient_name' => 'Nama Pasien',
+                'amount' => 'Jumlah',
+                'status' => 'Status',
+                'total' => 'Total',
+                'paid' => 'Lunas',
+                'rest' => 'Rest',
+                'due_date' => 'Jatuh Tempo',
+                'steps' => 'Langkah Angsuran',
+            ],
+        ],
+    ],
+];

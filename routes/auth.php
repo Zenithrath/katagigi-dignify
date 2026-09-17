@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -29,4 +30,9 @@ Route::middleware('auth')->group(function () {
 
     Volt::route('confirm-password', 'pages.auth.confirm-password')
         ->name('password.confirm');
+
+    // Kompatibilitas header lawas (link GET) + form modern (POST).
+    Route::get('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->name('logout');
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy']);
 });

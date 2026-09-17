@@ -1,0 +1,56 @@
+@layer components {
+    .header-container {
+        @apply basic-transition;
+        @apply sticky top-0 z-20 shadow-md;
+        @apply border-slate-200 bg-slate-50;
+        @apply dark:bg-slate-900 dark:border-slate-700;
+    }
+
+    .header-glassmorphism {
+        @apply backdrop-blur-sm;
+        @apply !bg-slate-50/30;
+        @apply dark:!bg-slate-800/30;
+    }
+
+    .header {
+        @apply w-full h-16 px-8 py-4 flex justify-between
+            items-center;
+    }
+
+    .profile-bar-container {
+        @apply relative inline-flex text-left;
+    }
+
+    .profile-bar-container button {
+        @apply w-8 h-8 rounded-full overflow-hidden;
+    }
+
+    .profile-bar-container img {
+        @apply w-full h-full object-cover object-center;
+    }
+
+    .profile-bar-container .default-profile {
+        @apply w-full h-full p-1 stroke-1 fill-none;
+        @apply stroke-slate-950;
+        @apply dark:stroke-slate-200;
+    }
+
+    .profile-bar-container .dropdown-menu {
+        @apply absolute right-0 z-10 mt-10 w-56 origin-top-right
+            rounded-md shadow-lg ring-1 ring-opacity-5
+            focus:outline-none text-xs;
+        @apply bg-slate-50 ring-slate-400;
+        @apply dark:ring-slate-800 dark:bg-slate-900;
+    }
+
+    .profile-bar-container .dropdown-menu .item-container {
+        @apply py-1 px-1 flex flex-col gap-1;
+    }
+
+    .dropdown-menu .item-container a {
+        @apply block px-4 py-2;
+        @apply text-slate-700 hover:text-brand-500
+            active:text-brand-600;
+        @apply dark:text-slate-200;
+    }
+}

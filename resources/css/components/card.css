@@ -1,0 +1,50 @@
+@layer components {
+    .content-card {
+        @apply w-full my-4 p-8 rounded-lg;
+        @apply bg-slate-50;
+        @apply dark:bg-slate-900;
+    }
+
+    section.statistic {
+        @apply flex flex-col gap-2;
+    }
+
+    section .title {
+        @apply text-lg font-semibold mb-2 pl-2;
+    }
+
+    section.statistic .content {
+        @apply grid grid-cols-2 md:grid-cols-4 gap-2;
+    }
+
+    .statistic-card {
+        @apply rounded-md p-4 flex flex-col gap-1 shadow-md;
+        @apply bg-slate-50;
+        @apply dark:bg-slate-800;
+    }
+
+    .statistic-card .title-container {
+        @apply flex items-center gap-2;
+    }
+
+    .statistic-card .title-container .title {
+        @apply text-xs flex-1 mb-0 pl-0 overflow-clip;
+        @apply lg:text-sm;
+        @apply text-slate-800;
+        @apply dark:text-slate-200;
+    }
+
+    .statistic-card .title-container .icon {
+        @apply fill-none stroke-1 w-4 h-4 hidden;
+        @apply lg:block;
+        @apply stroke-slate-800;
+        @apply dark:stroke-slate-200;
+    }
+
+    .statistic-card .value {
+        @apply text-sm font-semibold;
+        @apply lg:text-lg;
+        @apply text-brand-800;
+        @apply dark:text-brand-300;
+    }
+}

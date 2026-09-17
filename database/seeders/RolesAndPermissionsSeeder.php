@@ -50,7 +50,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $admin->syncPermissions([
             'create schedule', 'read schedule', 'update schedule',
             'create appointment', 'read appointment', 'update appointment',
-            'read patient',
+            'create patient', 'read patient', 'update patient',
             'read medical record',
             'read transaction',
             'read turnover',

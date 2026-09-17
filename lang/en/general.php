@@ -1,0 +1,472 @@
+<?php
+
+return [
+    'table.number_no' => 'No.',
+    'phrases' => [
+        'down_payment' => 'DP',
+        'installment' => 'Installment',
+        'balloon' => 'Balloon',
+        'full_payment' => 'Full Payment',
+        'find' => 'Find',
+        'paid' => 'Paid',
+        'pending' => 'Pending',
+        'PAID' => 'Paid',
+        'PENDING' => 'Pending',
+        'no_data' => 'No Data',
+    ],
+    'dashboard' => [
+        'statistic' => [
+            '_title' => 'This Month Overview',
+            'revenue' => 'Revenue',
+            'patient' => 'Registered Patients',
+            'patient_value' => ':value Registered',
+            'appointment' => 'Appointments',
+            'appointment_value' => ':value Requests',
+            'service' => 'Done Services',
+            'service_value' => ':value Done',
+        ],
+    ],
+    'schedule' => [
+        'index' => [
+            'title' => 'Schedule',
+            'subtitle' => 'List of all schedule doctor in your clinic. Shows date, start time, and end time.',
+            'buttons' => [
+                'add' => 'Add Schedule',
+                'edit' => 'Edit',
+                'delete' => 'Delete',
+                'available' => 'Available',
+                'unavailable' => 'Unavailable',
+            ],
+            'table' => [
+                'doctor' => 'Doctor Name',
+                'day' => 'Day',
+                'working_time' => 'Working Time',
+                'empty' => 'There is no schedule registered.',
+            ],
+        ],
+        'form' => [
+            'title' => [
+                '_title' => 'Add Schedule for Working Doctors',
+                'add' => 'Add Schedule',
+                'edit' => 'Edit Schedule',
+            ],
+            'labels' => [
+                'doctor' => [
+                    'default' => 'Choose one of the following doctor...',
+                    '_title' => 'Doctor',
+                    'empty' => 'There is no doctor registered.',
+                ],
+                'day' => [
+                    '_title' => 'Day',
+                    'default' => 'Choose one of the following day...',
+                    'monday' => 'Monday',
+                    'tuesday' => 'Tuesday',
+                    'wednesday' => 'Wednesday',
+                    'thursday' => 'Thursday',
+                    'friday' => 'Friday',
+                    'saturday' => 'Saturday',
+                    'sunday' => 'Sunday',
+                ],
+                'start_time' => 'Start Time',
+                'end_time' => 'End Time',
+            ],
+            'placeholders' => [
+                'day' => 'Write schedule day here...',
+                'start_time' => 'Write schedule start time here...',
+                'end_time' => 'Write schedule end time here...',
+            ],
+            'buttons' => [
+                'update' => 'Save Updates',
+                'add' => 'Add Schedule',
+            ],
+        ],
+    ],
+    'service' => [
+        'index' => [
+            '_title' => 'Services and Fees',
+            '_subtitle' => "List of all services in your clinic. Shows service name, prices and it's category.",
+            '_nav' => 'Services List',
+            'table' => [
+                'code' => 'Code',
+                'name' => 'Name',
+                'category' => 'Category',
+                'range_price' => 'Price Range',
+                'uncategorized' => 'Uncategorized',
+                'empty' => 'There is no service added yet.',
+            ],
+            'action' => [
+                'add' => 'Add Service',
+                'edit' => 'Edit',
+                'delete' => 'Delete',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Add Service',
+                'edit' => 'Edit Service',
+            ],
+            'labels' => [
+                'name' => 'Service Name',
+                'description' => 'Service Description',
+                'lower_price' => 'Lower Price',
+                'upper_price' => 'Upper Price',
+                'commision' => 'Doctor Commision, in percent',
+                'category' => 'Service Category',
+            ],
+            'helpers' => [
+                'alphanumeric' => 'Write in alphanumeric or ,-@ characters.',
+                'integer' => 'Write number only or decimal using . character.',
+                'describe' => "Describe the service clearly and concisely. What to do and what the action's result expectations",
+                'category' => 'Select prefered category. Not suitable for to the categories above?',
+            ],
+            'placeholders' => [
+                'name' => 'Write service name here...',
+                'description' => 'What will we do to serve patient with this service? What is expected result with this service?',
+                'lower_price' => 'Write lower price here...',
+                'upper_price' => 'Write upper price here...',
+                'commision' => 'Write commision here...',
+                'category' => 'Choose a category...',
+            ],
+            'action' => [
+                'create_category' => 'Try create category instead.',
+                'save' => 'Save Service',
+                'update' => 'Update Service',
+            ],
+            'messages' => [
+                'success_create' => 'Service successfully created.',
+                'success_update' => 'Service successfully updated.',
+                'success_delete' => 'Service successfully deleted.',
+                'error_create' => 'Service failed to be created.',
+                'error_update' => 'Service failed to be updated.',
+                'error_delete' => 'Service failed to be deleted.',
+            ],
+        ],
+        'detail' => [
+            '_title' => 'Service Details',
+            'labels' => [
+                'name' => 'Service Name',
+                'category' => 'Service Category',
+                'lower_price' => 'Lower Price',
+                'upper_price' => 'Upper Price',
+                'commision' => 'Service Commision',
+                'description' => 'Service Description',
+            ],
+        ],
+    ],
+    'category' => [
+        'index' => [
+            '_title' => 'Service Categories',
+            '_subtitle' => 'List all service categories in your clinic.',
+            '_nav' => 'Categories List',
+            'table' => [
+                'code' => 'Code',
+                'name' => 'Name',
+                'services' => 'Services',
+                'empty' => 'There is no category added yet.',
+            ],
+            'action' => [
+                'add' => 'Add Category',
+                'edit' => 'Edit',
+                'delete' => 'Delete',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Add Category',
+                'edit' => 'Edit Category',
+            ],
+            'labels' => [
+                'name' => 'Category Name',
+                'code' => 'Category Code',
+            ],
+            'helpers' => [
+                'alphanumeric' => 'Write in alphanumeric or,-@ characters.',
+            ],
+            'action' => [
+                'save' => 'Save Category',
+                'update' => 'Update Category',
+            ],
+            'placeholders' => [
+                'name' => 'Write category name here...',
+                'code' => 'Write category code here...',
+            ],
+            'messages' => [
+                'success_create' => 'Category successfully created.',
+                'success_update' => 'Category successfully updated.',
+                'success_delete' => 'Category successfully deleted.',
+                'error_create' => 'Category failed to be created.',
+                'error_update' => 'Category failed to be updated.',
+                'error_delete' => 'Category failed to be deleted.',
+            ],
+        ],
+    ],
+    'appointment' => [
+        'index' => [
+            '_title' => 'Appointment',
+            '_subtitle' => 'List all created appointment with the patient. Shows patient data, the doctor who appoint with and date and time of appointment.',
+            'table' => [
+                'patient' => 'Patient',
+                'doctor' => 'Doctor',
+                'service' => 'Service',
+                'schedule' => 'Schedule',
+                'status' => 'Status',
+                'empty' => 'There are no appointment, enjoy your day!',
+                'pending' => 'Pending',
+                'confirmed' => 'Confirmed',
+                'served and paid' => 'Served and Paid',
+                'completed' => 'Completed',
+                'canceled' => 'Canceled',
+                'nipp' => 'NIPP',
+                'services' => 'Services',
+            ],
+            'action' => [
+                'add' => 'Create Appointment',
+                'edit' => 'Edit',
+                'delete' => 'Cancel',
+                'confirm' => 'Confirm',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Add Appointment',
+                'edit' => 'Edit Appointment',
+            ],
+            'table' => [
+                'patient' => [
+                    'data' => 'Patient Data',
+                    'phone' => 'Patient Phone',
+                ],
+            ],
+            'labels' => [
+                'patient_code' => 'Patient ID, Name or Phone',
+                'preview' => [
+                    'patient_name' => 'Patient Name',
+                    'patient_code' => 'Patient ID',
+                ],
+                'doctor' => 'Doctor',
+                'service' => 'Service',
+                'date' => 'Appointment Date',
+                'start_time' => 'Start Time',
+                'end_time' => 'End Time',
+            ],
+            'button' => [
+                'add_service' => 'Add Services',
+            ],
+            'placeholders' => [
+                'patient_code' => 'Type patient keyword here...',
+                'doctor' => 'Choose doctor...',
+                'service' => 'Choose service...',
+            ],
+            'action' => [
+                'patient_check' => 'Check',
+                'update' => 'Update Appointment',
+                'save' => 'Create Appointment',
+            ],
+            'helpers' => [
+                'alphanumeric' => 'Write in alphanumeric or ,-@ characters.',
+            ],
+            'messages' => [
+                'success_create' => 'Appointment successfully created.',
+                'success_update' => 'Appointment successfully updated.',
+                'success_cancel' => 'Appointment successfully canceled.',
+                'success_confirm' => 'Appointment successfully confirmed.',
+                'error_create' => 'Appointment failed to be created.',
+                'error_update' => 'Appointment failed to be updated.',
+                'error_cancel' => 'Appointment failed to be canceled.',
+                'error_confirm' => 'Appointment failed to be confirmed.',
+            ],
+        ],
+        'detail' => [
+            '_title' => 'Detail Appointment',
+            '_subtitle' => 'List all created appointment with the patient. Shows patient data, the doctor who appoint with and date and time of appointment.',
+            'data' => [
+                'patient' => 'Patient Data',
+                'doctor' => 'Doctor Data',
+                'service' => 'Service Data',
+                'schedule' => 'Schedule Data',
+            ],
+            'labels' => [
+                'patient' => [
+                    'name' => 'Name',
+                    'mr_number' => 'ID',
+                    'phone' => 'Phone',
+                    'address' => 'Address',
+                    'address_details' => ":street :tonarigumi\n:village\n:district\n:regency\n:province\nPostcode: :zipcode",
+                ],
+                'doctor' => [
+                    'name' => 'Name',
+                    'nipp' => 'NIPP',
+                ],
+                'schedule' => [
+                    'service_name' => 'Service',
+                    'service_category' => 'Service Category',
+                    'date' => 'Date',
+                    'time' => 'Time',
+                    'status' => 'Status',
+                ],
+            ],
+            'action' => [
+                'edit' => 'Update',
+                'delete' => 'Issue Cancelation',
+            ],
+        ],
+    ],
+    'password' => [
+        'index' => [
+            '_title' => 'Change Password',
+            '_subtitle' => 'Change your password here.',
+            'menu' => 'Settings Password',
+        ],
+        'form' => [
+            'labels' => [
+                'password' => 'Password',
+                'old_password' => 'Old Password',
+                'new_password' => 'New Password',
+                'confirm_password' => 'Password Confirmation',
+            ],
+            'placeholders' => [
+                'password' => 'Write your password here...',
+                'old_password' => 'Write your old password here...',
+                'new_password' => 'Write your new password here...',
+                'confirm_password' => 'Write your new password confirmation here...',
+            ],
+            'action' => [
+                'save' => 'Save Password',
+                'update' => 'Update Password',
+            ],
+        ],
+    ],
+    'profile' => [
+        'index' => [
+            '_title' => 'Profile',
+            '_subtitle' => 'Change your profile here.',
+            'menu' => 'Profile Settings ',
+            'type' => [
+                'doctor' => 'Doctor',
+                'admin' => 'Admin',
+                'nurse' => 'Nurse',
+            ],
+        ],
+        'form' => [
+            'title' => [
+                'add' => 'Add Doctor',
+                'edit' => 'Edit Doctor',
+            ],
+            'labels' => [
+                'name' => 'Name',
+                'email' => 'Email',
+                'password' => 'Password',
+                'password_confirmation' => 'Password Confirmation',
+                'nipp' => 'NIPP',
+                'niptk' => 'NIPTK',
+                'address' => [
+                    'village' => 'Village',
+                    'street' => 'Street Address',
+                    'tonarigumi' => 'RT/RW',
+                    'district' => 'District',
+                    'city' => 'City',
+                    'state' => 'Province',
+                    'zipcode' => 'Zip Code',
+                ],
+            ],
+            'placeholders' => [
+                'name' => 'Write doctor name here...',
+                'email' => 'Write doctor email here...',
+                'password' => 'Write doctor password here...',
+                'password_confirmation' => 'Write doctor password confirmation here...',
+                'nipp' => 'Write doctor NIPP number here...',
+                'niptk' => 'Write doctor NIPTK number here...',
+                'address' => [
+                    'village' => 'Write doctor village here...',
+                    'street' => 'Write doctor street address here...',
+                    'tonarigumi' => 'Write doctor RT/RW here...',
+                    'district' => 'Write doctor district here...',
+                    'city' => 'Write doctor city here...',
+                    'state' => 'Write doctor province here...',
+                    'zipcode' => 'Write doctor ZIP code here...',
+                ],
+            ],
+            'buttons' => [
+                'update' => 'Save Profiles',
+            ],
+        ],
+    ],
+    'installment' => [
+        'index' => [
+            '_title' => 'Installment',
+            '_subtitle' => 'List of all installment transactions in your clinic. Shows transaction code, patient name, amount, status, and due date.',
+            'table' => [
+                'transaction_code' => 'Transaction Code',
+                'patient_data' => 'Patient Data',
+                'amount' => 'Amount',
+                'status' => 'Status',
+                'due_date' => 'Due Date',
+                'empty' => 'There is no installment transaction yet.',
+                'pending' => 'Pending',
+                'paid' => 'Paid',
+                'overdue' => 'Overdue',
+                'total' => 'Total',
+                'rest' => 'Rest',
+                'steps' => 'Steps',
+            ],
+            'action' => [
+                'add' => 'Create Installment',
+                'edit' => 'Edit',
+                'delete' => 'Delete',
+                'pay' => 'Pay',
+                'detail' => 'Detail',
+            ],
+        ],
+        'form' => [
+            '_title' => [
+                'add' => 'Add Installment',
+                'edit' => 'Edit Installment',
+            ],
+            'labels' => [
+                'transaction_code' => 'Transaction Code',
+                'patient_name' => 'Patient Name',
+                'amount' => 'Amount',
+                'status' => 'Status',
+                'due_date' => 'Due Date',
+                'steps' => 'Installment Steps',
+            ],
+            'placeholders' => [
+                'transaction_code' => 'Write transaction code here...',
+                'patient_name' => 'Write patient name here...',
+                'amount' => 'Write amount here...',
+                'status' => 'Choose status...',
+                'due_date' => 'Choose due date...',
+            ],
+            'buttons' => [
+                'add_step' => 'Add Step',
+                'update' => 'Save Installment',
+                'add' => 'Create Installment',
+            ],
+            'messages' => [
+                'success_create' => 'Installment successfully created.',
+                'success_update' => 'Installment successfully updated.',
+                'success_delete' => 'Installment successfully deleted.',
+                'error_create' => 'Installment failed to be created.',
+                'error_update' => 'Installment failed to be updated.',
+                'error_delete' => 'Installment failed to be deleted.',
+            ],
+        ],
+        'detail' => [
+            '_title' => 'Detail Installment',
+            '_subtitle' => 'List of all installment transactions in your clinic.
+            Shows transaction code, patient name, amount, status, and due date.',
+            'labels' => [
+                'transaction_code' => 'Transaction Code',
+                'patient_code' => 'Patient Code',
+                'patient_name' => 'Patient Name',
+                'amount' => 'Amount',
+                'status' => 'Status',
+                'total' => 'Total',
+                'paid' => 'Paid',
+                'rest' => 'Rest',
+                'due_date' => 'Due Date',
+                'steps' => 'Installment Steps',
+            ],
+        ],
+    ],
+];

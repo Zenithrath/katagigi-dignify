@@ -1,0 +1,46 @@
+@layer components {
+    .pad {
+        @apply bg-slate-50;
+        @apply dark:bg-slate-950;
+    }
+
+    a {
+        @apply basic-transition;
+        @apply text-brand-600 hover:text-brand-500 active:text-brand-700;
+    }
+
+    .danger {
+        @apply text-danger-600 hover:text-danger-500 active:text-danger-700;
+    }
+
+    .clickable {
+        @apply basic-transition;
+        @apply fill-none cursor-pointer;
+    }
+
+    .clickable-ghost {
+        @apply clickable;
+        @apply bg-transparent hover:border-2 hover:border-brand-200
+            active:bg-brand-500 text-slate-950
+            active:text-slate-50 stroke-slate-950
+            active:stroke-slate-50 disabled:text-slate-700;
+        @apply dark:hover:border-brand-700 dark:text-slate-50
+            dark:active:bg-brand-800 dark:stroke-slate-50
+            dark:disabled:text-slate-300;
+    }
+
+    .clickable-primary {
+        @apply clickable;
+        @apply text-sm;
+        @apply bg-brand-500 text-slate-50 stroke-slate-50
+            hover:text-slate-50 active:text-slate-50
+            hover:bg-brand-400 active:bg-brand-600
+            disabled:bg-brand-300;
+        @apply dark:bg-brand-800 dark:hover:bg-brand-700
+            dark:active:bg-brand-900 dark:disabled:bg-brand-700;
+    }
+
+    .clickable.icon-only {
+        @apply h-8 w-8 stroke-1 p-1 rounded-md;
+    }
+}

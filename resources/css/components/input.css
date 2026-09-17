@@ -1,0 +1,107 @@
+@layer components {
+    form {
+        @apply flex flex-col gap-4;
+    }
+
+    form .picture-container {
+        @apply relative mb-8 md:mb-20;
+    }
+
+    form .cover-picture {
+        @apply flex items-center justify-center w-full rounded-t-md
+            h-36;
+        @apply bg-slate-200;
+        @apply dark:bg-slate-800;
+    }
+
+    form .cover-picture img {
+        @apply w-full h-full object-cover object-center;
+    }
+
+    form .profile-picture {
+        @apply absolute flex items-center justify-center
+            left-4 h-28 w-28 rounded-full border-4
+            overflow-hidden;
+        @apply md:h-36 md:w-36 md:left-8;
+        @apply bg-slate-200 border-slate-50;
+        @apply dark:bg-slate-800 dark:border-slate-900;
+    }
+
+    form .profile-picture img {
+        @apply w-full h-full object-cover object-center;
+    }
+
+    form .picture-container .picture-action-container {
+        @apply flex gap-2;
+    }
+
+    form .picture-container .picture-action {
+        @apply basic-transition p-2 h-8 w-8 rounded-full stroke-1;
+        @apply fill-none bg-slate-300/80 stroke-slate-700;
+        @apply hover:bg-slate-300/50 active:bg-slate-300;
+        @apply dark:bg-slate-700/70 dark:stroke-slate-50;
+        @apply dark:hover:bg-slate-700 dark:active:bg-slate-700/40;
+    }
+
+    form .picture-container label {
+        @apply relative cursor-pointer;
+    }
+
+    form .picture-container input[type="file"] {
+        @apply absolute opacity-50 -top-96;
+    }
+
+    form .input-container {
+        @apply flex flex-col gap-4;
+    }
+
+    form .input-group {
+        @apply flex flex-col gap-2;
+    }
+
+    form .input-group label {
+        @apply text-sm;
+    }
+
+    form .input-group small.helper {
+        @apply text-xs text-slate-700 dark:text-slate-300;
+    }
+
+    form .input-group small.error {
+        @apply text-danger-500 text-sm;
+    }
+
+    form .password-input-container {
+        @apply relative w-full;
+    }
+
+    form input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="time"] {
+        @apply bg-transparent rounded-md text-sm;
+        @apply disabled:bg-slate-300 dark:disabled:bg-slate-700;
+        @apply read-only:bg-slate-300 dark:read-only:bg-slate-700;
+    }
+
+    form textarea {
+        @apply bg-transparent rounded-md text-sm;
+    }
+
+    form select {
+        @apply block w-full rounded-md border-0 py-1.5
+            shadow-sm ring-1 ring-inset focus:ring-2
+            focus:ring-inset  sm:text-sm sm:leading-6
+            bg-transparent;
+        @apply text-gray-950 ring-gray-500
+            focus:ring-brand-600;
+        @apply dark:text-gray-50;
+    }
+
+    form select option {
+        @apply text-slate-950;
+    }
+}
