@@ -1,6 +1,6 @@
 @layer components {
     .main-container {
-        @apply mb-auto px-8 pt-8 pb-12;
+        @apply mb-auto px-4 sm:px-5 pt-5 pb-8;
     }
 
     .main-table-container {

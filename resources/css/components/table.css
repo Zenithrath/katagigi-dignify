@@ -1,14 +1,14 @@
 @layer components {
     table {
-        @apply min-w-full divide-y rounded-lg shadow-md
-            overflow-hidden;
-        @apply divide-gray-300;
+        @apply min-w-full divide-y rounded-2xl shadow-sm
+            overflow-hidden border border-slate-100;
+        @apply divide-slate-100;
         @apply divide-gray-700;
     }
 
     table > thead {
         @apply border-b;
-        @apply bg-slate-100 border-slate-200;
+        @apply bg-slate-50 border-slate-100;
         @apply dark:bg-gray-900 dark:border-slate-700;
     }
 
@@ -30,13 +30,13 @@
     }
 
     table > tbody {
-        @apply bg-slate-50;
+        @apply bg-white;
         @apply dark:bg-slate-900;
     }
 
     table > tbody > tr {
         @apply h-fit;
-        @apply even:bg-gray-200;
+        @apply even:bg-slate-50;
         @apply dark:even:bg-gray-800;
     }
 

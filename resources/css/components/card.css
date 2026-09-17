@@ -1,7 +1,7 @@
 @layer components {
     .content-card {
-        @apply w-full my-4 p-8 rounded-lg;
-        @apply bg-slate-50;
+        @apply w-full my-4 p-5 sm:p-8 rounded-3xl shadow-sm border border-slate-100;
+        @apply bg-white;
         @apply dark:bg-slate-900;
     }
 
@@ -18,8 +18,8 @@
     }
 
     .statistic-card {
-        @apply rounded-md p-4 flex flex-col gap-1 shadow-md;
-        @apply bg-slate-50;
+        @apply rounded-2xl p-4 flex flex-col gap-1 shadow-sm border border-slate-100;
+        @apply bg-white;
         @apply dark:bg-slate-800;
     }
 

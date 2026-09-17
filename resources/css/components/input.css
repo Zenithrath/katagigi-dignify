@@ -82,17 +82,17 @@
     input[type="tel"],
     input[type="date"],
     input[type="time"] {
-        @apply bg-transparent rounded-md text-sm;
+        @apply bg-transparent rounded-xl text-sm;
         @apply disabled:bg-slate-300 dark:disabled:bg-slate-700;
         @apply read-only:bg-slate-300 dark:read-only:bg-slate-700;
     }
 
     form textarea {
-        @apply bg-transparent rounded-md text-sm;
+        @apply bg-transparent rounded-xl text-sm;
     }
 
     form select {
-        @apply block w-full rounded-md border-0 py-1.5
+        @apply block w-full rounded-xl border-0 py-1.5
             shadow-sm ring-1 ring-inset focus:ring-2
             focus:ring-inset  sm:text-sm sm:leading-6
             bg-transparent;

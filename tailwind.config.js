@@ -20,8 +20,9 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             // Palet warisan app lama (dipakai halaman-halaman port)
+            // brand = hijau emerald Donezo
             colors: {
-                brand: colors.blue,
+                brand: colors.emerald,
                 danger: colors.red,
                 warning: colors.yellow,
                 success: colors.green,

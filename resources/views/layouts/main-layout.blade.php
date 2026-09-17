@@ -28,7 +28,7 @@
     {{-- <script src="//unpkg.com/alpinejs" defer></script> --}}
 </head>
 
-<body x-data>
+<body x-data class="min-h-screen min-w-full flex gap-3 bg-[#eef0f2] p-3 text-slate-900">
     @yield('navigator')
 
     <div class="content-base">
