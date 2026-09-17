@@ -1,0 +1,50 @@
+@layer components {
+    /* Picture Upload Container */
+    .picture-container {
+        @apply relative overflow-hidden;
+        min-height: 200px;
+    }
+
+    /* Cover Picture */
+    .cover-picture {
+        @apply w-full h-40 md:h-48 bg-slate-100;
+    }
+
+    .cover-picture img {
+        @apply w-full h-full object-cover object-center;
+    }
+
+    /* Profile Picture */
+    .profile-picture {
+        @apply absolute left-6 md:left-8 w-24 h-24 md:w-32 md:h-32
+            rounded-full border-4 border-white
+            bg-slate-200 overflow-hidden
+            shadow-lg z-10 -translate-y-1/2;
+    }
+
+    .profile-picture img {
+        @apply w-full h-full object-cover object-center;
+    }
+
+    /* Picture Action Container (cover overlay) */
+    .picture-action-container {
+        @apply bottom-3 right-3 flex gap-2;
+    }
+
+    /* Picture Action Button */
+    .picture-action {
+        @apply w-9 h-9 rounded-xl flex items-center justify-center
+            bg-white/90 backdrop-blur-sm border border-slate-200
+            text-slate-600 hover:text-emerald-600 hover:border-emerald-300
+            cursor-pointer transition-all duration-200
+            shadow-sm hover:shadow-md;
+    }
+
+    .picture-action.browse {
+        @apply hover:bg-emerald-50;
+    }
+
+    .picture-action input[type="file"] {
+        @apply hidden;
+    }
+}
