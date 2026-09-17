@@ -159,38 +159,97 @@
                 </div>
             </dl>
 
-            @role('admin')
-                @if (!$data->canceled_at)
-                    <div class="w-full flex items-center justify-end text-xs mt-8">
-                        <template x-if="!isAskingCancelation">
-                            <div class="flex flex-col md:flex-row items-end md:items-center gap-4">
-                                <span>
-                                    {{ __('report.transaction.detail.helper.cancel') }}
-                                </span>
-                                <button type="button" @click="handleAskCancelation()"
-                                    class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2 px-4 rounded-md">
-                                    {{ __('report.transaction.detail.button.cancel') }}
-                                </button>
+            {{-- V2 usul-kunci-approve pembatalan nota --}}
+            @if (!$data->canceled_at)
+                @if (!empty($pendingProposal))
+                    <div class="w-full mt-8 rounded-md border border-warning-300 bg-warning-50 p-4 text-xs">
+                        <p class="font-semibold">Menunggu keputusan manajemen</p>
+                        <p class="mt-1">Diusulkan oleh {{ $pendingProposal->proposer->name ?? '-' }}: “{{ $pendingProposal->reason }}”</p>
+                        @role('manajemen')
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <form action="{{ route('cancellations.approve', ['id' => $pendingProposal->id]) }}" method="post" class="flex flex-wrap items-center gap-2">
+                                    @csrf
+                                    <input type="text" name="decision_note" class="w-56" placeholder="Catatan (opsional)" />
+                                    <button type="submit" class="clickable-primary py-2 px-4 rounded-md">Setujui</button>
+                                </form>
+                                <form action="{{ route('cancellations.reject', ['id' => $pendingProposal->id]) }}" method="post" class="flex flex-wrap items-center gap-2">
+                                    @csrf
+                                    <input type="text" name="decision_note" class="w-56" placeholder="Alasan penolakan" />
+                                    <button type="submit" class="clickable-ghost py-2 px-4 rounded-md">Tolak</button>
+                                </form>
                             </div>
-                        </template>
-
-                        <template x-if="isAskingCancelation">
-                            <form action="{{ route('transactions.cancel', ['id' => $data->id]) }}" method="post"
-                                class="w-full">
-                                @csrf
-                                <div class="flex flex-col md:flex-row items-end md:items-center md:justify-end gap-4 w-full">
-                                    <input type="text" name="cancel_reason" id="cancel_reason" class="w-full md:w-72"
-                                        placeholder="Type for a cancelation reason..." />
-                                    <button type="submit"
+                        @endrole
+                    </div>
+                @else
+                    @role('manajemen')
+                        <div class="w-full flex items-center justify-end text-xs mt-8">
+                            <template x-if="!isAskingCancelation">
+                                <div class="flex flex-col md:flex-row items-end md:items-center gap-4">
+                                    <span>
+                                        {{ __('report.transaction.detail.helper.cancel') }}
+                                    </span>
+                                    <button type="button" @click="handleAskCancelation()"
                                         class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2 px-4 rounded-md">
-                                        {{ __('report.transaction.detail.button.submit_cancel') }}
+                                        {{ __('report.transaction.detail.button.cancel') }}
                                     </button>
                                 </div>
-                            </form>
-                        </template>
-                    </div>
+                            </template>
+
+                            <template x-if="isAskingCancelation">
+                                <form action="{{ route('transactions.cancel', ['id' => $data->id]) }}" method="post"
+                                    class="w-full">
+                                    @csrf
+                                    <div class="flex flex-col md:flex-row items-end md:items-center md:justify-end gap-4 w-full">
+                                        <input type="text" name="cancel_reason" id="cancel_reason" class="w-full md:w-72"
+                                            placeholder="Type for a cancelation reason..." />
+                                        <button type="submit"
+                                            class="clickable-ghost hover:!bg-danger-500 hover:!border-danger-700 active:!bg-danger-600 active:!border-danger-700 py-2 px-4 rounded-md">
+                                            {{ __('report.transaction.detail.button.submit_cancel') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </template>
+                        </div>
+                    @endrole
+                    @role('admin')
+                        <div class="w-full flex items-center justify-end text-xs mt-8">
+                            <template x-if="!isAskingCancelation">
+                                <div class="flex flex-col md:flex-row items-end md:items-center gap-4">
+                                    <span>Butuh pembatalan? Usulkan ke manajemen.</span>
+                                    <button type="button" @click="handleAskCancelation()"
+                                        class="clickable-ghost py-2 px-4 rounded-md">
+                                        Usulkan Pembatalan
+                                    </button>
+                                </div>
+                            </template>
+
+                            <template x-if="isAskingCancelation">
+                                <form action="{{ route('transactions.propose-cancel', ['id' => $data->id]) }}" method="post"
+                                    class="w-full">
+                                    @csrf
+                                    <div class="flex flex-col md:flex-row items-end md:items-center md:justify-end gap-4 w-full">
+                                        <input type="text" name="cancel_reason" id="cancel_reason" class="w-full md:w-72"
+                                            placeholder="Alasan usulan pembatalan..." required />
+                                        <button type="submit" class="clickable-primary py-2 px-4 rounded-md">
+                                            Kirim Usulan
+                                        </button>
+                                    </div>
+                                </form>
+                            </template>
+                        </div>
+                    @endrole
                 @endif
-            @endrole
+            @endif
+            @if (!empty($proposalHistory) && count($proposalHistory) > 0)
+                <div class="w-full mt-4 text-xs">
+                    <p class="font-semibold mb-1">Riwayat usulan pembatalan</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($proposalHistory as $proposal)
+                            <li>{{ $proposal->status }} — {{ $proposal->reason }} ({{ $proposal->proposer->name ?? '-' }})</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </section>
     </main>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Patient;
 use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MedicalRecordRequest;
+use App\Models\DiagnosisCode;
 use App\Models\MedicalRecord;
 use App\Services\General\AppointmentService;
 use App\Services\General\ServiceService;
@@ -17,6 +18,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Throwable;
 
@@ -218,6 +221,9 @@ class MedicalRecordController extends Controller
                 ->withInput();
         }
 
+        // V2: simpan kode diagnosis resmi (wajib min. 1, tervalidasi di Request).
+        $this->syncDiagnosisCodes($inserted, $validated['diagnosis_codes'] ?? []);
+
         return redirect()->route('medical-records.index')
             ->with('success', __('messages.medical-record.success.oncreate'));
     }
@@ -237,6 +243,11 @@ class MedicalRecordController extends Controller
         return view('pages.patient.record.detail', [
             'data' => $this->service->readMedicalRecordByID($id),
             'toRupiah' => $toRupiah,
+            'diagnosisCodes' => DB::table('medical_record_diagnoses')
+                ->where('medical_record_id', $id)
+                ->orderBy('system')
+                ->orderBy('code')
+                ->get(),
         ]);
     }
 
@@ -260,6 +271,23 @@ class MedicalRecordController extends Controller
             'record' => $record,
             'services' => $services,
             'appointments' => $appointments,
+            'diagnosisCodes' => DB::table('medical_record_diagnoses')
+                ->join('diagnosis_codes', 'diagnosis_codes.id', '=', 'medical_record_diagnoses.diagnosis_code_id')
+                ->where('medical_record_diagnoses.medical_record_id', $id)
+                ->select([
+                    'diagnosis_codes.id',
+                    'diagnosis_codes.system',
+                    'diagnosis_codes.code',
+                    'diagnosis_codes.display_id',
+                ])
+                ->get()
+                ->map(fn ($row) => [
+                    'id' => $row->id,
+                    'system' => $row->system,
+                    'code' => $row->code,
+                    'display_id' => $row->display_id,
+                ])
+                ->all(),
             'action' => route('medical-records.update', ['medical_record' => $id]),
         ]);
     }
@@ -362,8 +390,38 @@ class MedicalRecordController extends Controller
                 ->withInput();
         }
 
+        // V2: sinkronkan ulang kode diagnosis resmi.
+        $this->syncDiagnosisCodes($id, $request->input('diagnosis_codes', []));
+
         return redirect()->route('medical-records.show', ['medical_record' => $id])
             ->with('success', __('messages.medical-record.success.onupdate'));
+    }
+
+    /**
+     * V2: simpan/timpa kode diagnosis resmi rekam medis beserta snapshot
+     * (agar riwayat tetap benar walau master berubah). Dipanggil setelah
+     * insert/update; daftar kode sudah tervalidasi exists di Request.
+     */
+    private function syncDiagnosisCodes(string $recordId, array $codeIds): void
+    {
+        DB::table('medical_record_diagnoses')->where('medical_record_id', $recordId)->delete();
+
+        $codes = DiagnosisCode::whereIn('id', array_unique($codeIds))->get();
+        $now = now();
+        $rows = $codes->map(fn ($code) => [
+            'id' => (string) Str::uuid(),
+            'medical_record_id' => $recordId,
+            'diagnosis_code_id' => $code->id,
+            'system' => $code->system,
+            'code' => $code->code,
+            'display' => $code->display_id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->all();
+
+        if ($rows !== []) {
+            DB::table('medical_record_diagnoses')->insert($rows);
+        }
     }
 
     /**

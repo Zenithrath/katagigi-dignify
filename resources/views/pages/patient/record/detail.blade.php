@@ -87,7 +87,17 @@
                     </dd>
                 </div>
                 <div class="preview-container py-2">
-                    <dt class="font-semibold">{{ __('patient.record.detail.data.diagnosis') }}</dt>
+                    <dt class="font-semibold">Kode Diagnosis Resmi</dt>
+                    <dd class="flex flex-col gap-1 font-bold">
+                        @forelse ($diagnosisCodes ?? [] as $code)
+                            <span>[{{ $code->system }} {{ $code->code }}] {{ $code->display }}</span>
+                        @empty
+                            <span>-</span>
+                        @endforelse
+                    </dd>
+                </div>
+                <div class="preview-container py-2">
+                    <dt class="font-semibold">{{ __('patient.record.detail.data.diagnosis') }} (catatan)</dt>
                     <dd class="flex flex-col gap-0 font-bold">
                         {{ $data->diagnosis }}
                     </dd>

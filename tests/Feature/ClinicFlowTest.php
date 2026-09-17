@@ -86,9 +86,11 @@ class ClinicFlowTest extends TestCase
         $this->actingAs($admin)->get(route('appointments.confirm', $appointment->id))->assertRedirect();
         $this->assertNotNull(DB::table('appointments')->where('id', $appointment->id)->first()->confirmed_at);
 
-        // 5. Rekam medis oleh dokter
+        // 5. Rekam medis oleh dokter (kode diagnosis resmi wajib)
+        $dxCode = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
         $this->actingAs($doctorUser)->post(route('medical-records.store'), [
             'appointment_id' => $appointment->id,
+            'diagnosis_codes' => [$dxCode->id],
             'service_id' => [$service->id],
             'service_price' => [$service->lower_price],
             'service_quantity' => [1],
@@ -109,6 +111,11 @@ class ClinicFlowTest extends TestCase
             'image_after' => [UploadedFile::fake()->image('after.jpg')],
         ])->assertRedirect();
         $this->assertDatabaseHas('medical_records', ['appointment_id' => $appointment->id]);
+        $recordId = DB::table('medical_records')->where('appointment_id', $appointment->id)->value('id');
+        $this->assertDatabaseHas('medical_record_diagnoses', [
+            'medical_record_id' => $recordId,
+            'diagnosis_code_id' => $dxCode->id,
+        ]);
 
         // 6. Transaksi oleh admin (kasir)
         $response = $this->actingAs($admin)->post(route('transactions.store'), [

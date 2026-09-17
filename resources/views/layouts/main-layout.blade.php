@@ -23,6 +23,7 @@
     <link rel="shortcut icon" href="/favicon.svg" type="image/x-icon" />
     @vite('resources/js/app.js')
     @vite('resources/css/app.css')
+    @livewireStyles
     <title>@yield('_title') - {{ __('Kata Gigi') }}</title>
     {{-- <script src="//unpkg.com/alpinejs" defer></script> --}}
 </head>
@@ -41,6 +42,7 @@
     </div>
 
     @stack('scripts')
+    @livewireScripts
 
     <script lang="text/javascript">
         document.addEventListener("alpine:init", function() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Report;
 use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TransactionRequest;
+use App\Models\TransactionCancellationRequest;
 use App\Services\OptionService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -187,6 +188,15 @@ class TransactionController extends Controller
                 return $this->getHumanizedInstallmentPhrase($type, $step, $status, true);
             },
             'data' => $detail,
+            // V2 usul-kunci-approve: usulan pending + riwayat usulan nota ini.
+            'pendingProposal' => TransactionCancellationRequest::with(['proposer', 'decider'])
+                ->where('transaction_id', $id)
+                ->where('status', 'PROPOSED')
+                ->first(),
+            'proposalHistory' => TransactionCancellationRequest::with(['proposer', 'decider'])
+                ->where('transaction_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get(),
         ]);
     }
 

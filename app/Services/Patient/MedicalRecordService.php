@@ -414,11 +414,12 @@ class MedicalRecordService extends Service
         }
     }
 
-    public function insertMedicalRecord(mixed $valid): bool|Exception
+    public function insertMedicalRecord(mixed $valid): string|Exception
     {
         try {
-            $saved = DB::table('medical_records')->insert([
-                'id' => Str::uuid(),
+            $id = (string) Str::uuid();
+            DB::table('medical_records')->insert([
+                'id' => $id,
                 'patient_id' => $valid['patient_id'],
                 'patient_code' => $valid['patient_code'],
                 'patient_name' => $valid['patient_name'],
@@ -449,9 +450,11 @@ class MedicalRecordService extends Service
                 'image_after' => json_encode($valid['image_after']),
             ]);
 
-            return DB::table('appointments')->where('id', $valid['appointment_id'])->update([
+            DB::table('appointments')->where('id', $valid['appointment_id'])->update([
                 'recorded_at' => date('Y-m-d H:i:s'),
             ]);
+
+            return $id;
         } catch (Exception $err) {
             $this->writeLog('MedicalRecordService::insertMedicalRecord', $err);
 

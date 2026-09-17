@@ -42,6 +42,9 @@ class MedicalRecordRequest extends FormRequest
             'anamnesis' => 'required',
             'diagnosis' => 'required',
             'therapy' => 'required',
+            // V2: kode diagnosis resmi wajib min. 1; teks di atas jadi catatan tambahan.
+            'diagnosis_codes' => 'required|array|min:1',
+            'diagnosis_codes.*' => 'required|string|distinct|exists:diagnosis_codes,id',
             'prescription' => '',
             'promat' => 'required',
             'blood_pressure' => 'required',

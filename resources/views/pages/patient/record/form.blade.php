@@ -165,7 +165,15 @@
 
                     <template x-if="isDataShown">
                         <div class="input-group mt-4">
-                            <label for="diagnosis">{{ __('form.labels.diagnosis') }}</label>
+                            <label>Kode Diagnosis Resmi <span class="danger">*</span></label>
+                            <livewire:diagnosis-search :selected="$diagnosisCodes ?? []" />
+                            <small class="helper">Wajib pilih minimal 1 kode (ICD-10 / ICD-9 / SNOMED). Ketik bahasa awam, mis. “gigi berlubang”.</small>
+                        </div>
+                    </template>
+
+                    <template x-if="isDataShown">
+                        <div class="input-group mt-4">
+                            <label for="diagnosis">{{ __('form.labels.diagnosis') }} (catatan tambahan)</label>
                             <textarea name="diagnosis" id="diagnosis" cols="30" rows="10"
                                 placeholder="{{ __('form.placeholders.diagnosis') }}">{{ $record->diagnosis ?? (old('diagnosis') ?? '') }}</textarea>
                             @error('diagnosis')
