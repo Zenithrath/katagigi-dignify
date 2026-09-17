@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.schedule.index.title') }}</x-slot:title>
 
-@section('_title', 'Dashboard')
-@section('header')
-    <x-main-header title="{{ __('features.schedule') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.SCHEDULE" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container" x-data="scheduleLookup">
         <section class="heading">
             <div>
@@ -22,510 +9,380 @@
             </div>
         </section>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
-
-        <section class="py-2 px-4 mt-4">
-            <span x-text="`Found: ${pagination.total} entries.`"></span>
-        </section>
-
+        {{-- FORM INPUT --}}
         @role('admin|nurse')
             <div class="content-card">
-                <h2 class="mb-5">{{ __('general.schedule.form.title._title') }}</h2>
-                <form method="post" action="{{ route('schedules.store') }}" id="schedule-form">
+                <div class="card-header-clean">
+                    <div class="icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M10 14h1"/><path d="M14 14h1"/></svg>
+                    </div>
+                    <h2>{{ __('general.schedule.form.title._title') }}</h2>
+                </div>
+
+                <form method="post" action="{{ route('schedules.store') }}" x-data="{ processing: false, doctorOpen: false, doctorValue: '{{ old('doctor_id') }}', dayOpen: false, dayValue: '{{ old('day') }}' }" @submit="processing = true">
                     @csrf
-                    <div class="input-container">
-                        <div class="flex flex-col md:flex-row gap-2">
-                            <div class="flex-1">
-                                <div class="input-group">
-                                    <label for="doctor"
-                                        class="input-label">{{ __('general.schedule.form.labels.doctor._title') }}</label>
-                                    <select name="doctor_id" id="doctor" class="selectable">
-                                        <option selected disabled>
-                                            {{ __('general.schedule.form.labels.doctor.default') }}
-                                        </option>
-                                        @if (count($doctorList) == 0)
-                                            <option disabled>
-                                                {{ __('general.schedule.form.labels.doctor.empty') }}
-                                            </option>
-                                        @else
-                                            @foreach ($doctorList as $doctor)
-                                                <option value="{{ $doctor->id }}">
-                                                    {{ $doctor->name }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                    @error('doctor_id')
-                                        <small class="danger">{{ $message }}</small>
-                                    @enderror
+                    <div class="form-grid">
+                        {{-- Dokter --}}
+                        <div class="input-wrapper col-4">
+                            <label>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                {{ __('general.schedule.form.labels.doctor._title') }}
+                            </label>
+                            <input type="hidden" name="doctor_id" :value="doctorValue" required />
+                            <div @click.away="doctorOpen = false" style="position: relative;">
+                                <button type="button" @click="doctorOpen = !doctorOpen"
+                                    class="dropdown-trigger"
+                                    :class="doctorValue ? 'has-value' : 'is-empty'">
+                                    <span x-text="doctorValue ? document.querySelector(`[data-doctor-val='${doctorValue}']`)?.textContent || '{{ __('general.schedule.form.labels.doctor.default') }}' : '{{ __('general.schedule.form.labels.doctor.default') }}'"></span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :style="doctorOpen ? 'transform: rotate(180deg)' : ''" style="transition: transform 0.2s; flex-shrink: 0; color: #94a3b8;"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                                <div x-show="doctorOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                    class="dropdown-panel">
+                                    <div class="dropdown-item is-placeholder" x-text="'{{ __('general.schedule.form.labels.doctor.default') }}'"></div>
+                                    @if (count($doctorList) == 0)
+                                        <div class="dropdown-item is-empty-state">{{ __('general.schedule.form.labels.doctor.empty') }}</div>
+                                    @else
+                                        @foreach ($doctorList as $doctor)
+                                            <div class="dropdown-item" :class="doctorValue === '{{ $doctor->id }}' ? 'is-selected' : ''"
+                                                data-doctor-val="{{ $doctor->id }}"
+                                                @click="doctorValue = '{{ $doctor->id }}'; doctorOpen = false">{{ $doctor->name }}</div>
+                                        @endforeach
+                                    @endif
                                 </div>
                             </div>
-                            @can('create schedule')
-                                <div class="flex-1">
-                                    <div class="input-group">
-                                        <label for="day"
-                                            class="input-label">{{ __('general.schedule.form.labels.day._title') }}</label>
-                                        <select name="day" id="day" autocomplete="day" class="h-10">
-                                            <option selected disabled>
-                                                {{ __('general.schedule.form.labels.day.default') }}
-                                            </option>
-                                            <option value="MONDAY">
-                                                {{ __('general.schedule.form.labels.day.monday') }}
-                                            </option>
-                                            <option value="TUESDAY">
-                                                {{ __('general.schedule.form.labels.day.tuesday') }}
-                                            </option>
-                                            <option value="WEDNESDAY">
-                                                {{ __('general.schedule.form.labels.day.wednesday') }}
-                                            </option>
-                                            <option value="THURSDAY">
-                                                {{ __('general.schedule.form.labels.day.thursday') }}
-                                            </option>
-                                            <option value="FRIDAY">
-                                                {{ __('general.schedule.form.labels.day.friday') }}
-                                            </option>
-                                            <option value="SATURDAY">
-                                                {{ __('general.schedule.form.labels.day.saturday') }}
-                                            </option>
-                                            <option value="SUNDAY">
-                                                {{ __('general.schedule.form.labels.day.sunday') }}
-                                            </option>
-                                        </select>
-                                        @error('day')
-                                            <small class="danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="flex-1 flex gap-2">
-                                    <div class="input-group flex-1">
-                                        <label for="start_time"
-                                            class="input-label">{{ __('general.schedule.form.labels.start_time') }}</label>
-                                        <input type="time" name="start_time" id="start_time" class="" value="" />
-                                        @error('start_time')
-                                            <small class="danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-                                    <div class="input-group flex-1">
-                                        <label for="end_time"
-                                            class="input-label">{{ __('general.schedule.form.labels.end_time') }}</label>
-                                        <input type="time" name="end_time" id="end_time" class="" value="" />
-                                        @error('end_time')
-                                            <small class="danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="flex items-end mt-2 md:mt-0">
-                                    <input type="submit" value="{{ __('general.schedule.form.buttons.add') }}"
-                                        class="clickable-primary px-4 py-2 mb-1 rounded-md flex-1" />
-                                </div>
-                            @endcan
+                            @error('doctor_id')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
                         </div>
+
+                        @can('create schedule')
+                            {{-- Hari --}}
+                            <div class="input-wrapper col-3">
+                                <label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                                    {{ __('general.schedule.form.labels.day._title') }}
+                                </label>
+                                <input type="hidden" name="day" :value="dayValue" required />
+                                <div @click.away="dayOpen = false" style="position: relative;">
+                                    <button type="button" @click="dayOpen = !dayOpen"
+                                        class="dropdown-trigger"
+                                        :class="dayValue ? 'has-value' : 'is-empty'">
+                                        <span x-text="dayValue ? document.querySelector(`[data-day-val='${dayValue}']`)?.textContent || '{{ __('general.schedule.form.labels.day.default') }}' : '{{ __('general.schedule.form.labels.day.default') }}'"></span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :style="dayOpen ? 'transform: rotate(180deg)' : ''" style="transition: transform 0.2s; flex-shrink: 0; color: #94a3b8;"><path d="m6 9 6 6 6-6"/></svg>
+                                    </button>
+                                    <div x-show="dayOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                        class="dropdown-panel">
+                                        <div class="dropdown-item is-placeholder" x-text="'{{ __('general.schedule.form.labels.day.default') }}'"></div>
+                                        @foreach (['MONDAY' => 'monday', 'TUESDAY' => 'tuesday', 'WEDNESDAY' => 'wednesday', 'THURSDAY' => 'thursday', 'FRIDAY' => 'friday', 'SATURDAY' => 'saturday', 'SUNDAY' => 'sunday'] as $value => $key)
+                                            <div class="dropdown-item" :class="dayValue === '{{ $value }}' ? 'is-selected' : ''"
+                                                data-day-val="{{ $value }}"
+                                                @click="dayValue = '{{ $value }}'; dayOpen = false">{{ __('general.schedule.form.labels.day.' . $key) }}</div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @error('day')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            {{-- Waktu Mulai --}}
+                            <div class="input-wrapper col-2">
+                                <label for="start_time">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    {{ __('general.schedule.form.labels.start_time') }}
+                                </label>
+                                <input type="time" name="start_time" id="start_time" class="custom-input" required value="{{ old('start_time') }}" />
+                                @error('start_time')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            {{-- Waktu Selesai --}}
+                            <div class="input-wrapper col-2">
+                                <label for="end_time">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    {{ __('general.schedule.form.labels.end_time') }}
+                                </label>
+                                <input type="time" name="end_time" id="end_time" class="custom-input" required value="{{ old('end_time') }}" />
+                                @error('end_time')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            {{-- Tombol Submit --}}
+                            <div class="col-12">
+                                <button type="submit" class="btn-submit" :disabled="processing">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                                    <span x-show="!processing">{{ __('general.schedule.form.buttons.add') }}</span>
+                                    <span x-show="processing">Menambahkan...</span>
+                                </button>
+                            </div>
+                        @endcan
                     </div>
                 </form>
             </div>
         @endrole
 
-        @role('doctor')
-            <section class="table-content">
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="column">{{ __('No.') }}</th>
-                            <th scope="col" class="index-column">{{ __('general.schedule.index.table.doctor') }}</th>
-                            <th scope="col" class="column">{{ __('general.schedule.index.table.day') }}</th>
-                            <th scope="col" class="column">{{ __('general.schedule.index.table.working_time') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <template x-if="scheduleList.length > 0 && !isLoading">
-                            <template x-for="(schedule, index) in scheduleList" :key="schedule.id">
-                                <tr>
-                                    <td class="column" x-text="(pagination.page - 1) * pagination.limit + index + 1"></td>
-                                    <td class="column" x-text="schedule.name"></td>
-                                    <td class="column" x-text="ucfirst(schedule.day)"></td>
-                                    <td class="column">
-                                        <template x-if="schedule.time_start">
-                                            <span x-text="formatTime(schedule.time_start)"></span>
-                                        </template>
-                                        -
-                                        <template x-if="schedule.time_end">
-                                            <span x-text="formatTime(schedule.time_end)"></span>
-                                        </template>
-                                    </td>
-                                </tr>
-                            </template>
-                        </template>
-                    </tbody>
-                </table>
-            </section>
-        @endrole
-
+        {{-- TABEL --}}
         @role('admin|nurse')
-            <section class="table-content">
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="column">{{ __('No.') }}</th>
-                            <th scope="col" class="index-column">{{ __('general.schedule.index.table.doctor') }}</th>
-                            <th scope="col" class="column">{{ __('general.schedule.index.table.day') }}</th>
-                            <th scope="col" class="column">{{ __('general.schedule.index.table.working_time') }}</th>
-                            <th scope="col" class="action-column">
-                                <span class="sr-only"></span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <template x-if="scheduleList.length > 0 && !isLoading">
-                            <template x-for="(schedule, index) in scheduleList" :key="schedule.id">
-                                <tr>
-                                    <td class="column" x-text="(pagination.page - 1) * pagination.limit + index + 1"></td>
-                                    <td class="column" x-text="schedule.name"></td>
-                                    <td class="column" x-text="ucfirst(schedule.day)"></td>
-                                    <td class="column">
-                                        <template x-if="schedule.time_start">
-                                            <span x-text="formatTime(schedule.time_start)"></span>
-                                        </template>
-                                        -
-                                        <template x-if="schedule.time_end">
-                                            <span x-text="formatTime(schedule.time_end)"></span>
-                                        </template>
-                                    </td>
-                                    <td class="action-column">
-                                        <div class="flex gap-2">
-                                            @role('nurse')
-                                                <button class="text-success-600 hover:text-success-500 active:text-success-700"
-                                                    type="submit" x-text="ucfirst(schedule.availability)"><span
-                                                        class="sr-only"></span></button>
-                                            @endrole
+            <div class="content-card !p-0">
+                {{-- Top Bar --}}
+                <div class="flex items-center justify-between px-7 py-5 border-b border-slate-200">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-sm font-bold text-slate-900">Daftar Jadwal Bekerja</h2>
+                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/70" x-text="pagination.total + ' Jadwal'"></span>
+                    </div>
 
-                                            @can('update schedule')
-                                                <form
-                                                    :action="(
-                                                        `{{ route('schedules.update_status', ['schedule' => 'schedule.id']) }}`
-                                                    )
-                                                    .replace('schedule.id', schedule.id)"
-                                                    method="post">
-                                                    @csrf
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-slate-500">Dokter:</span>
+                        <div x-data="{ open: false }" @click.away="open = false" class="relative" style="min-width: 180px;">
+                            <button type="button" @click="open = !open"
+                                class="dropdown-trigger !h-[34px] !text-[13px] !pl-3 !pr-8 !rounded-lg !border-slate-200 !bg-white"
+                                :class="filterDoctorId ? 'has-value' : 'is-empty'">
+                                <span x-text="filterDoctorId ? $el.parentElement.querySelector(`[data-value='${filterDoctorId}']`)?.textContent || 'Semua Dokter' : 'Semua Dokter'"></span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="open ? 'rotate-180' : ''" class="transition-transform shrink-0"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                class="dropdown-panel w-full">
+                                <div class="dropdown-item text-[13px] py-2 px-3.5" :class="filterDoctorId === '' ? 'is-selected' : ''"
+                                    @click="filterDoctorId = ''; pagination.page = 1; lookup(); open = false">Semua Dokter</div>
+                                @foreach ($doctorList as $doctor)
+                                    <div class="dropdown-item text-[13px] py-2 px-3.5" :class="filterDoctorId === '{{ $doctor->id }}' ? 'is-selected' : ''"
+                                        data-value="{{ $doctor->id }}"
+                                        @click="filterDoctorId = '{{ $doctor->id }}'; pagination.page = 1; lookup(); open = false">{{ $doctor->name }}</div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                                    <template x-if="schedule.availability == 'AVAILABLE'">
-                                                        <button
-                                                            class="text-success-600 hover:text-success-500 active:text-success-700"
-                                                            type="submit" x-text="ucfirst(schedule.availability)"><span
-                                                                class="sr-only"></span></button>
-                                                    </template>
-                                                    <template x-if="schedule.availability != 'AVAILABLE'">
-                                                        <button
-                                                            class="text-warning-600 hover:text-warning-500 active:text-warning-700"
-                                                            type="submit" x-text="ucfirst(schedule.availability)"><span
-                                                                class="sr-only"></span></button>
-                                                    </template>
-                                                </form>
-                                            @endcan
-
-                                            @can('delete schedule')
-                                                <form
-                                                    :action="(`{{ route('schedules.destroy', ['schedule' => 'schedule.id']) }}`)
-                                                    .replace('schedule.id', schedule.id)"
-                                                    method="post">
-                                                    @csrf
-                                                    @method('delete')
-
-                                                    <button class="text-danger-600 hover:text-danger-500 active:text-danger-700"
-                                                        type="submit">{{ __('general.schedule.index.buttons.delete') }}<span
-                                                            class="sr-only"></span></button>
-                                                </form>
-                                            @endcan
-                                        </div>
-                                    </td>
-                                </tr>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;" scope="col" class="column">NO</th>
+                                <th scope="col" class="index-column">NAMA DOKTER</th>
+                                <th scope="col" class="column">HARI</th>
+                                <th scope="col" class="column">JAM KERJA</th>
+                                <th scope="col" class="column">STATUS</th>
+                                <th scope="col" class="action-column">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-if="isLoading">
+                                <tr><td colspan="6" class="text-center py-12 text-slate-400">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        Memuat data...
+                                    </div>
+                                </td></tr>
                             </template>
-                        </template>
-                    </tbody>
-                </table>
-            </section>
+                            <template x-if="!isLoading && scheduleList.length === 0">
+                                <tr><td colspan="6" class="text-center py-12">
+                                    <div class="flex flex-col items-center gap-2 text-slate-400">
+                                        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                                        <span class="text-sm">{{ __('general.schedule.index.table.empty') }}</span>
+                                    </div>
+                                </td></tr>
+                            </template>
+                            <template x-if="!isLoading && scheduleList.length > 0">
+                                <template x-for="(schedule, index) in scheduleList" :key="schedule.id">
+                                    <tr>
+                                        <td class="index-column font-semibold text-slate-500" x-text="String((pagination.page - 1) * pagination.limit + index + 1).padStart(2, '0')"></td>
+                                        <td>
+                                            <div class="flex items-center gap-3.5">
+                                                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center font-bold text-emerald-700 text-sm border-2 border-slate-100 shrink-0" x-text="schedule.name ? schedule.name.split(' ').filter(n => n.length > 0).map(n => n[0]).slice(0,2).join('').toUpperCase() : '?'"></div>
+                                                <span class="font-bold text-slate-900 text-sm" x-text="schedule.name"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-lg text-[13px] font-semibold text-slate-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
+                                                <span x-text="ucfirst(schedule.day)"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="inline-flex items-center gap-1.5 font-semibold text-slate-800 text-[13px]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                <span x-text="formatTime(schedule.time_start)"></span>
+                                                <span class="text-slate-300">-</span>
+                                                <span x-text="formatTime(schedule.time_end)"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <template x-if="schedule.availability === 'AVAILABLE'">
+                                                <span class="badge badge-success"><span class="dot"></span> Tersedia</span>
+                                            </template>
+                                            <template x-if="schedule.availability !== 'AVAILABLE'">
+                                                <span class="badge badge-warning"><span class="dot"></span> Tidak Tersedia</span>
+                                            </template>
+                                        </td>
+                                        <td class="action-column">
+                                            <div class="flex items-center justify-end gap-1">
+                                                @can('update schedule')
+                                                    <form
+                                                        :action="`{{ route('schedules.update_status', ['schedule' => '__ID__']) }}`.replace('__ID__', schedule.id)"
+                                                        method="post"
+                                                        @submit.prevent="if(confirm(schedule.availability === 'AVAILABLE' ? 'Tandai tidak tersedia?' : 'Tandai tersedia?')) $el.submit()">
+                                                        @csrf
+                                                        <button class="action-btn" type="submit" :title="schedule.availability === 'AVAILABLE' ? 'Tandai tidak tersedia' : 'Tandai tersedia'">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                                        </button>
+                                                    </form>
+                                                @endcan
+
+                                                @can('delete schedule')
+                                                    <form
+                                                        :action="`{{ route('schedules.destroy', ['schedule' => '__ID__']) }}`.replace('__ID__', schedule.id)"
+                                                        method="post"
+                                                        @submit.prevent="if(confirm('Hapus jadwal ini?')) $el.submit()">
+                                                        @csrf
+                                                        @method('delete')
+                                                        <button class="action-btn" type="submit" title="Hapus">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                                        </button>
+                                                    </form>
+                                                @endcan
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         @endrole
 
+        {{-- Doctor table (read-only) --}}
+        @role('doctor')
+            <div class="content-card !p-0">
+                <div class="flex items-center gap-3 px-7 py-5 border-b border-slate-200">
+                    <h2 class="text-sm font-bold text-slate-900">Jadwal Saya</h2>
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/70" x-text="pagination.total + ' Jadwal'"></span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;" scope="col" class="column">NO</th>
+                                <th scope="col" class="index-column">HARI</th>
+                                <th scope="col" class="column">JAM KERJA</th>
+                                <th scope="col" class="column">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-if="isLoading">
+                                <tr><td colspan="4" class="text-center py-12 text-slate-400">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        Memuat data...
+                                    </div>
+                                </td></tr>
+                            </template>
+                            <template x-if="!isLoading && scheduleList.length === 0">
+                                <tr><td colspan="4" class="text-center py-12">
+                                    <div class="flex flex-col items-center gap-2 text-slate-400">
+                                        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                                        <span class="text-sm">{{ __('general.schedule.index.table.empty') }}</span>
+                                    </div>
+                                </td></tr>
+                            </template>
+                            <template x-if="!isLoading && scheduleList.length > 0">
+                                <template x-for="(schedule, index) in scheduleList" :key="schedule.id">
+                                    <tr>
+                                        <td class="index-column font-semibold text-slate-500" x-text="String((pagination.page - 1) * pagination.limit + index + 1).padStart(2, '0')"></td>
+                                        <td>
+                                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-lg text-[13px] font-semibold text-slate-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
+                                                <span x-text="ucfirst(schedule.day)"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="inline-flex items-center gap-1.5 font-semibold text-slate-800 text-[13px]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                <span x-text="formatTime(schedule.time_start)"></span>
+                                                <span class="text-slate-300">-</span>
+                                                <span x-text="formatTime(schedule.time_end)"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <template x-if="schedule.availability === 'AVAILABLE'">
+                                                <span class="badge badge-success"><span class="dot"></span> Tersedia</span>
+                                            </template>
+                                            <template x-if="schedule.availability !== 'AVAILABLE'">
+                                                <span class="badge badge-warning"><span class="dot"></span> Tidak Tersedia</span>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endrole
+
+        {{-- Pagination --}}
         <section class="mt-4">
-            <nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 sm:px-0">
-                <div class="-mt-px flex w-0 flex-1">
+            <nav class="flex items-center justify-between border-t border-slate-200 px-1 py-3">
+                <div class="flex w-0 flex-1">
                     <template x-if="pagination.page > 1">
                         <button type="button" @click="handlePreviousPage()"
-                            class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            <svg class="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a.75.75 0 01-.75.75H4.66l2.1 1.95a.75.75 0 11-1.02 1.1l-3.5-3.25a.75.75 0 010-1.1l3.5-3.25a.75.75 0 111.02 1.1l-2.1 1.95h12.59A.75.75 0 0118 10z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <span class="hidden md:block">
-                                {{ __('Previous') }}
-                            </span>
+                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
+                            <span class="hidden md:block">{{ __('Previous') }}</span>
                         </button>
                     </template>
                 </div>
 
-                <div class="hidden md:-mt-px md:flex">
+                <div class="hidden md:flex items-center gap-1">
                     <template x-if="pagination.page - 3 >= 0">
                         <button type="button" x-text="1"
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
                             @click="pagination.page = 1; lookup()"></button>
                     </template>
-
                     <template x-if="pagination.page - 3 > 0">
-                        <div
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`">
-                            ...</div>
+                        <span class="px-1 text-slate-400">...</span>
                     </template>
-
                     <template x-for="page in pagination.last" :key="page">
                         <template x-if="page > (pagination.page - 2) && page < (pagination.page + 2)">
                             <button type="button" x-text="page"
-                                :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md hover:bg-gray-50 dark:hover:bg-gray-800 ${(pagination.page == page) ? 'text-indigo-600 border-t-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700'}`"
+                                :class="`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${(pagination.page == page) ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`"
                                 @click="pagination.page = page; lookup()"></button>
                         </template>
                     </template>
-
                     <template x-if="pagination.page + 2 < pagination.last">
-                        <div
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`">
-                            ...</div>
+                        <span class="px-1 text-slate-400">...</span>
                     </template>
-
                     <template x-if="pagination.page + 2 <= pagination.last">
                         <button type="button" x-text="pagination.last"
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
                             @click="pagination.page = pagination.last; lookup()"></button>
                     </template>
                 </div>
 
-                <div class="-mt-px flex w-0 flex-1 justify-end">
+                <div class="flex w-0 flex-1 justify-end">
                     <template x-if="pagination.page < pagination.last">
                         <button type="button" @click="handleNextPage()"
-                            class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            <span class="hidden md:block">
-                                {{ __('Next') }}
-                            </span>
-                            <svg class="ml-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M2 10a.75.75 0 01.75-.75h12.59l-2.1-1.95a.75.75 0 111.02-1.1l3.5 3.25a.75.75 0 010 1.1l-3.5 3.25a.75.75 0 11-1.02-1.1l2.1-1.95H2.75A.75.75 0 012 10z"
-                                    clip-rule="evenodd" />s
-                            </svg>
+                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                            <span class="hidden md:block">{{ __('Next') }}</span>
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
                         </button>
                     </template>
                 </div>
             </nav>
         </section>
     </main>
-@endsection
 
 @pushOnce('scripts')
     <script type="text/javascript">
-        let doctor_id = null;
-        let day = null;
-
-        let url = "{{ route('schedules.filter') }}";
-        const body = document.getElementById('table-body');
-        @role('admin|nurse')
-            document.getElementById('doctor').addEventListener('change', function() {
-                doctor_id = this.value;
-                let params = {
-                    doctor_id: doctor_id
-                }
-                let url_query = new URLSearchParams(params).toString();
-                body.innerHTML = '';
-                getData(url + '?' + url_query)
-                    .then(data => {
-                        data.map((item) => {
-                            let tr = document.createElement('tr');
-
-                            let tdName = document.createElement('td');
-                            tdName.classList.add('column');
-                            tdName.innerText = item.name;
-
-                            let tdDay = document.createElement('td');
-                            tdDay.classList.add('column');
-                            tdDay.innerText = ucwords(item.day);
-
-                            let tdStartTime = document.createElement('td');
-                            tdStartTime.classList.add('column');
-                            let stringTime = item.time_start ? changeTimeFormat(item.time_start) : '-';
-                            stringTime += item.time_end ? ' - ' + changeTimeFormat(item.time_end) : '-';
-                            tdStartTime.innerText = stringTime;
-
-                            let tdAction = document.createElement('td');
-                            tdAction.classList.add('action-column');
-
-                            let div = document.createElement('div');
-                            div.classList.add('flex', 'gap-2');
-
-                            let formStatus = document.createElement('form');
-                            formStatus.setAttribute('action', '/schedules/update_status' + '/' + item
-                                .id);
-                            formStatus.setAttribute('method', 'post');
-
-                            let csrfStatus = document.createElement('input');
-                            csrfStatus.setAttribute('type', 'hidden');
-                            csrfStatus.setAttribute('name', '_token');
-                            csrfStatus.setAttribute('value', '{{ csrf_token() }}');
-
-                            let buttonStatus = document.createElement('button');
-
-                            if (item.availability == 'AVAILABLE')
-                                buttonStatus.classList.add('text-success-600', 'hover:text-success-500',
-                                    'active:text-success-700');
-                            else
-                                buttonStatus.classList.add('text-warning-600', 'hover:text-warning-500',
-                                    'active:text-warning-700');
-
-                            buttonStatus.setAttribute('type', 'submit');
-
-                            if (item.availability == 'AVAILABLE')
-                                buttonStatus.innerText =
-                                `{{ __('general.schedule.index.buttons.available') }}`;
-                            else
-                                buttonStatus.innerText =
-                                `{{ __('general.schedule.index.buttons.unavailable') }}`;
-
-                            let buttonStatusDefault = document.createElement('button');
-
-                            if (item.availability == 'AVAILABLE')
-                                buttonStatusDefault.classList.add('text-success-600',
-                                    'hover:text-success-500',
-                                    'active:text-success-700');
-                            else
-                                buttonStatusDefault.classList.add('text-warning-600',
-                                    'hover:text-warning-500',
-                                    'active:text-warning-700');
-
-                            buttonStatusDefault.setAttribute('type', 'button');
-
-                            if (item.availability == 'AVAILABLE')
-                                buttonStatusDefault.innerText =
-                                `{{ __('general.schedule.index.buttons.available') }}`;
-                            else
-                                buttonStatusDefault.innerText =
-                                `{{ __('general.schedule.index.buttons.unavailable') }}`;
-
-                            let spanStatus = document.createElement('span');
-                            spanStatus.classList.add('sr-only');
-                            spanStatus.innerText = item.name;
-
-                            let spanStatusDefault = document.createElement('span');
-                            spanStatusDefault.classList.add('sr-only');
-                            spanStatusDefault.innerText = item.name;
-
-                            let formDelete = document.createElement('form');
-                            formDelete.setAttribute('action', '/schedules/' + item.id);
-                            formDelete.setAttribute('method', 'post');
-
-                            let csrfDelete = document.createElement('input');
-                            csrfDelete.setAttribute('type', 'hidden');
-                            csrfDelete.setAttribute('name', '_token');
-                            csrfDelete.setAttribute('value', '{{ csrf_token() }}');
-
-                            let methodDelete = document.createElement('input');
-                            methodDelete.setAttribute('type', 'hidden');
-                            methodDelete.setAttribute('name', '_method');
-                            methodDelete.setAttribute('value', 'delete');
-
-                            let buttonDelete = document.createElement('button');
-                            buttonDelete.classList.add('text-danger-600', 'hover:text-danger-500',
-                                'active:text-danger-700');
-                            buttonDelete.setAttribute('type', 'submit');
-                            buttonDelete.innerText =
-                                `{{ __('general.schedule.index.buttons.delete') }}`;
-
-                            let spanDelete = document.createElement('span');
-                            spanDelete.classList.add('sr-only');
-                            spanDelete.innerText = item.name;
-
-                            @role('nurse')
-                                buttonStatusDefault.appendChild(spanStatusDefault);
-                                div.appendChild(buttonStatusDefault);
-                            @endrole
-
-                            @can('update schedule')
-                                buttonStatus.appendChild(spanStatus);
-                                formStatus.appendChild(csrfStatus);
-                                formStatus.appendChild(buttonStatus);
-                                div.appendChild(formStatus);
-                            @endcan
-
-                            @can('delete schedule')
-                                buttonDelete.appendChild(spanDelete);
-                                formDelete.appendChild(csrfDelete);
-                                formDelete.appendChild(methodDelete);
-                                formDelete.appendChild(buttonDelete);
-                                div.appendChild(formDelete);
-                            @endcan
-
-                            tdAction.appendChild(div);
-
-                            tr.appendChild(tdName);
-                            tr.appendChild(tdDay);
-                            tr.appendChild(tdStartTime);
-                            tr.appendChild(tdAction);
-
-                            body.appendChild(tr);
-                        });
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    })
-            });
-        @endrole
-
-        let headers = new Headers({
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        });
-
-        async function getData(url = "", data = {}) {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: headers,
-            });
-            return response.json();
-        }
-
-        function ucwords(str) {
-            // Split the string into an array of words
-            let words = str.toLowerCase().split(' ');
-
-            // Capitalize the first letter of each word
-            for (let i = 0; i < words.length; i++) {
-                let word = words[i];
-                words[i] = word.charAt(0).toUpperCase() + word.slice(1);
-            }
-
-            // Join the words back into a string
-            let result = words.join(' ');
-
-            return result;
-        }
-
-        function changeTimeFormat(time) {
-            var parts = time.split(':');
-            var hours = parts[0];
-            var minutes = parts[1];
-
-            var formattedTime = hours + ':' + minutes;
-            return formattedTime;
-        }
-
         const scheduleLookup = {
             keyword: "",
+            filterDoctorId: "",
             scheduleList: [],
             isLoading: false,
             pagination: {
@@ -545,6 +402,9 @@
                     page: this.pagination.page,
                     limit: this.pagination.limit,
                 });
+                if (this.filterDoctorId) {
+                    params.append('doctor_id', this.filterDoctorId);
+                }
                 @role('admin|nurse')
                     fetch(`{{ route('api.schedules.lookup') }}?${params}`)
                         .then(response => response.json())
@@ -552,13 +412,13 @@
                             this.scheduleList = data.data;
                             this.pagination = {
                                 ...this.pagination,
-                                last: data.pagination.last,
+                                last: Math.max(1, data.pagination.last),
                                 total: data.pagination.total,
                             };
                             this.isLoading = false;
                         })
+                        .catch(() => { this.isLoading = false; })
                 @endrole
-
                 @role('doctor')
                     fetch(`{{ route('api.schedules.lookup.doctor') }}?${params}`)
                         .then(response => response.json())
@@ -566,11 +426,12 @@
                             this.scheduleList = data.data;
                             this.pagination = {
                                 ...this.pagination,
-                                last: data.pagination.last,
+                                last: Math.max(1, data.pagination.last),
                                 total: data.pagination.total,
                             };
                             this.isLoading = false;
                         })
+                        .catch(() => { this.isLoading = false; })
                 @endrole
             },
             handleNextPage() {
@@ -582,18 +443,16 @@
                 this.lookup();
             },
             formatTime(timeString) {
-                const [hours, minutes] = timeString.split(':');
-                const formattedHours = hours.padStart(2, '0');
-                const formattedMinutes = minutes.padStart(2, '0');
-                return `${formattedHours}:${formattedMinutes}`;
+                if (!timeString) return '-';
+                const parts = timeString.split(':');
+                return (parts[0] || '00').padStart(2, '0') + ':' + (parts[1] || '00').padStart(2, '0');
             },
             ucfirst(text) {
-                const lowercaseText = text.toLowerCase();
-                const firstLetter = lowercaseText.charAt(0);
-                const remainingText = lowercaseText.slice(1);
-
-                return firstLetter.toUpperCase() + remainingText;
+                if (!text) return '';
+                const t = text.toLowerCase();
+                return t.charAt(0).toUpperCase() + t.slice(1);
             },
         }
     </script>
 @endPushOnce
+</x-app-layout>

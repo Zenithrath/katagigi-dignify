@@ -1,40 +1,17 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ $type == 'update' ? __('form.title.update.service') : __('form.title.create.service') }}</x-slot:title>
 
-@section('_title', $type == 'update' ? __('form.title.update.service') : __('form.title.create.service'))
-@section('header')
-    <x-main-header title="{{ __('features.service') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.SERVICE" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ route('services.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1>
                 {{ $type == 'update' ? __('form.title.update.service') : __('form.title.create.service') }}
             </h1>
         </div>
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <form method="post" enctype="multipart/form-data" action="{{ $action }}">
             <div class="content-card">
@@ -133,7 +110,8 @@
             </div>
         </form>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
 @endPushOnce
+</x-app-layout>

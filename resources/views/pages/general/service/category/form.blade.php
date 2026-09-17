@@ -1,35 +1,18 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ $type == 'update' ? __('form.title.update.category') : __('form.title.create.category') }}</x-slot:title>
 
-@section('_title', $type == 'update' ? __('form.title.update.category') : __('form.title.create.category'))
-@section('header')
-    <x-main-header title="{{ __('features.category') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.SERVICE" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ isset($back->redirect) ? url($back->redirect) : route('categories.index') }}"
                 class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1>
                 {{ $type == 'update' ? __('form.title.update.category') : __('form.title.create.category') }}
             </h1>
         </div>
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <form method="post" enctype="multipart/form-data" action="{{ $action }}">
             <div class="content-card">
@@ -67,7 +50,8 @@
             </div>
         </form>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
 @endPushOnce
+</x-app-layout>

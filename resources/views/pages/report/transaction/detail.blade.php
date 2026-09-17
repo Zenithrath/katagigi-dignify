@@ -1,24 +1,11 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('report.transaction.index._title') }}</x-slot:title>
 
-@section('_title', __('report.transaction.index._title'))
-@section('header')
-    <x-main-header title="{{ __('features.transaction') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="REPORT.TRANSACTION" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container" x-data="reschedule">
         <div class="flex gap-4">
             <div class="flex">
                 <a href="{{ route('transactions.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                    <x-icons.chevron-left />
+                    <x-lucide-chevron-left class="w-full h-full" />
                 </a>
             </div>
             <section class="heading w-full">
@@ -252,9 +239,9 @@
             @endif
         </section>
     </main>
-@endsection
 
-@section('printable')
+
+<x-slot:printable>
     <section class="w-56 pt-12 px-2">
         <div class="w-full text-center flex flex-col items-center gap-4">
             <img src="/assets/logo.svg" alt="Logo Klinik" class="h-12" />
@@ -421,7 +408,7 @@
             <span class="text-xs">{{ __('Telp. +62 821 777557 95') }}</span>
         </div>
     </section>
-@endsection
+</x-slot:printable>
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -473,3 +460,4 @@
         };
     </script>
 @endPushOnce
+</x-app-layout>

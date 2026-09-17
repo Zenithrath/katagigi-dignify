@@ -25,6 +25,7 @@ return [
             'installment' => 'Installments',
             'transaction' => 'Transactions',
             'turnover' => 'Turnovers',
+            'approval' => 'Approvals',
         ],
     ],
     'topnav' => [

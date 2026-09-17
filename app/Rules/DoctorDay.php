@@ -3,7 +3,6 @@
 namespace App\Rules;
 
 use App\Models\Schedule;
-use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Rule;
 
 class DoctorDay implements Rule
@@ -20,7 +19,7 @@ class DoctorDay implements Rule
     public function __construct($doctor_id, $day)
     {
         $this->doctor_id = $doctor_id;
-        $this->day = $day;
+        $this->day = strtoupper($day);
     }
 
     /**
@@ -32,8 +31,6 @@ class DoctorDay implements Rule
      */
     public function passes($attribute, $value)
     {
-        $day = strtoupper(Carbon::parse($this->day)->format('l'));
-
         $data = Schedule::where('doctor_id', $this->doctor_id)
             ->where('day', $this->day)
             ->exists();
@@ -48,6 +45,6 @@ class DoctorDay implements Rule
      */
     public function message()
     {
-        return 'The day working doctor is already exist.';
+        return 'Jadwal dokter untuk hari ini sudah ada.';
     }
 }

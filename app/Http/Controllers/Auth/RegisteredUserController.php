@@ -12,18 +12,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
     /**
      * Display the registration view.
-     *
-     * @return View
+     * Registrasi publik ditutup (lihat routes/auth.php) — Volt route tidak terdaftar.
      */
     public function create()
     {
-        return view('auth.register');
+        return redirect()->route('login');
     }
 
     /**

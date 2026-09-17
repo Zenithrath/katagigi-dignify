@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.service.index._title') }}</x-slot:title>
 
-@section('_title', __('general.service.index._title'))
-@section('header')
-    <x-main-header title="{{ __('features.category') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.SERVICE" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container">
         <section class="heading">
             <div>
@@ -36,17 +23,7 @@
             </div>
         </section>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <section class="table-content">
             <table>
@@ -111,4 +88,4 @@
             </table>
         </section>
     </main>
-@endsection
+</x-app-layout>

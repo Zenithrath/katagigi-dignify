@@ -10,8 +10,8 @@ use App\Types\Entities\NurseEntity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class NurseController extends Controller
 {
@@ -82,8 +82,7 @@ class NurseController extends Controller
         $inserted = $this->service->insertNurse($nurse);
 
         if ($inserted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($inserted->getMessage());
+            Log::error($inserted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.nurse.error.oncreate'))->withInput();
@@ -91,17 +90,6 @@ class NurseController extends Controller
 
         return redirect()->route('nurses.index')
             ->with('success', __('messages.nurse.success.oncreate'));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**
@@ -153,8 +141,7 @@ class NurseController extends Controller
         );
         $updated = $this->service->updateNurse($nurse);
         if ($updated instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($updated->getMessage());
+            Log::error($updated->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.nurse.error.onupdate'))->withInput();
@@ -182,8 +169,7 @@ class NurseController extends Controller
 
         $deleted = $this->service->deleteNurse($id);
         if ($deleted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($deleted->getMessage());
+            Log::error($deleted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.nurse.error.ondelete'))->withInput();

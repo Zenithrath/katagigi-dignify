@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('features.dashboard') }}</x-slot:title>
 
-@section('_title', __('features.dashboard'))
-@section('header')
-    <x-main-header feature="{{ __('features.dashboard') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.HOME" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="px-8 pt-8 pb-12 h-full flex flex-col">
         @role('admin')
             <h3 class="text-lg font-semibold mb-8 pl-2">{{ __('general.dashboard.statistic._title') }}</h3>
@@ -23,27 +10,27 @@
                     <div class="mx-auto max-w-7xl px-6 lg:px-8">
                         <dl class="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
                             <div class="mx-auto flex max-w-xs flex-col gap-y-4">
-                                <dt class="text-base leading-7 text-gray-600 dark:text-slate-300">
+                                <dt class="text-base leading-7 text-gray-600
                                     {{ __('details.dashboard.transactions-this-month') }}
                                 </dt>
                                 <dd
-                                    class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl">
+                                    class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
                                     {{ $data->transactions }}
                                 </dd>
                             </div>
                             <div class="mx-auto flex max-w-xs flex-col gap-y-4">
-                                <dt class="text-base leading-7 text-gray-600 dark:text-slate-300">
+                                <dt class="text-base leading-7 text-gray-600
                                     {{ __('details.dashboard.total-revenue') }}</dt>
                                 <dd
-                                    class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl">
+                                    class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
                                     {{ $data->revenue }}</dd>
                             </div>
                             <div class="mx-auto flex max-w-xs flex-col gap-y-4">
-                                <dt class="text-base leading-7 text-gray-600 dark:text-slate-300">
+                                <dt class="text-base leading-7 text-gray-600
                                     {{ __('details.dashboard.patient-registered') }}
                                 </dt>
                                 <dd
-                                    class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl">
+                                    class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
                                     {{ $data->patients }}
                                 </dd>
                             </div>
@@ -55,18 +42,18 @@
             <section class="mb-8" x-data="chartData()">
                 <h3 class="text-lg font-semibold mb-4 pl-2">{{ __('details.dashboard.chart.title') }}</h3>
                 <section class="grid lg:grid-cols-2 gap-4 mb-4">
-                    <div x-init="initChartLastYear()" class="p-4 bg-slate-50 dark:bg-slate-900 rounded-md">
+                    <div x-init="initChartLastYear()" class="p-4 bg-slate-50 rounded-md">
                         <h4 class="text-md font-semibold mb-4 p-4">{{ __('details.dashboard.chart.subtitle.last-year') }}
                         </h4>
                         <div id="chart-last-year" class="w-full"></div>
                     </div>
-                    <div x-init="initChartThisYear()" class="p-4 bg-slate-50 dark:bg-slate-900 rounded-md">
+                    <div x-init="initChartThisYear()" class="p-4 bg-slate-50 rounded-md">
                         <h4 class="text-md font-semibold mb-4 p-4">{{ __('details.dashboard.chart.subtitle.this-year') }}
                         </h4>
                         <div id="chart-this-year" class="w-full"></div>
                     </div>
                 </section>
-                <section class="col-span-2 p-4 bg-slate-50 dark:bg-slate-900 rounded-md" x-init="initChartLastMonth()">
+                <section class="col-span-2 p-4 bg-slate-50 rounded-md" x-init="initChartLastMonth()">
                     <h4 class="text-md font-semibold mb-4 p-4">{{ __('details.dashboard.chart.subtitle.last-month') }}</h4>
                     <div id="chart-last-month" class="w-full"></div>
                 </section>
@@ -74,7 +61,7 @@
 
             <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div></div>
-                <div class="h-fit px-8 py-8 bg-slate-50 dark:bg-slate-900 rounded-md">
+                <div class="h-fit px-8 py-8 bg-slate-50 rounded-md">
                     <table class="table-auto shadow-none">
                         <thead class="bg-transparent text-xs">
                             <tr>
@@ -97,7 +84,7 @@
                 </div>
 
                 {{-- <div
-                    class="h-fit col-span-1 md:col-span-2 flex items-center justify-center px-4 py-4 bg-slate-50 dark:bg-slate-900 rounded-md">
+                    class="h-fit col-span-1 md:col-span-2 flex items-center justify-center px-4 py-4 bg-slate-50 rounded-md">
                     <canvas id="myChart"></canvas>
                 </div> --}}
             </section>
@@ -112,8 +99,7 @@
                 </div>
             </section> --}}
 
-            <section class="w-full px-4 py-4 md:hidden bg-slate-50 dark:bg-slate-800 mt-8 rounded-md" x-data="schedule"
-                x-data="schedule">
+            <section class="w-full px-4 py-4 md:hidden bg-slate-50 mt-8 rounded-md" x-data="schedule">
                 <div class="w-full flex h-12 items-center justify-between sticky">
                     <div class="flex flex-col gap-1 items-center h-full">
                         <span class="text-xs font-thin">S</span>
@@ -121,7 +107,7 @@
                             <input type="radio" name="day" id="mob-day-sun" value="0" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(0)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[0]">
                             </span>
                         </label>
@@ -133,7 +119,7 @@
                             <input type="radio" name="day" id="mob-day-mon" value="1" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(1)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[1]">
                             </span>
                         </label>
@@ -145,7 +131,7 @@
                             <input type="radio" name="day" id="mob-day-tue" value="2" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(2)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[2]">
                             </span>
                         </label>
@@ -157,7 +143,7 @@
                             <input type="radio" name="day" id="mob-day-wed" value="3" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(3)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[3]">
                             </span>
                         </label>
@@ -169,7 +155,7 @@
                             <input type="radio" name="day" id="mob-day-thu" value="4" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(4)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[4]">
                             </span>
                         </label>
@@ -181,7 +167,7 @@
                             <input type="radio" name="day" id="mob-day-fri" value="5" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(5)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[5]">
                             </span>
                         </label>
@@ -193,7 +179,7 @@
                             <input type="radio" name="day" id="mob-day-sat" value="6" x-model="currentDay"
                                 class="peer absolute -left-full" @change="handleSetDay(6)" />
                             <span
-                                class="bg-slate-300 dark:bg-slate-600 peer-checked:bg-brand-300/70 dark:peer-checked:bg-brand-700/50 rounded-full px-3 py-1 text-xs"
+                                class="bg-slate-300 peer-checked:bg-brand-300/70 rounded-full px-3 py-1 text-xs"
                                 x-text="dateList[6]">
                             </span>
                         </label>
@@ -205,7 +191,7 @@
                         @foreach (range(0, 23) as $item)
                             <div class="flex gap-1">
                                 <span class="w-4 text-xs font-thin">{{ $item }}</span>
-                                <div class="h-[60px] flex-1 border-t border-slate-300 dark:border-slate-700"></div>
+                                <div class="h-[60px] flex-1 border-t border-slate-300
                             </div>
                         @endforeach
 
@@ -229,7 +215,7 @@
             </section>
         @endrole
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     @role('doctor|nurse|admin')
@@ -462,3 +448,4 @@
         </script>
     @endrole
 @endPushOnce
+</x-app-layout>

@@ -1,107 +1,175 @@
 @layer components {
-    form {
-        @apply flex flex-col gap-4;
+    /* Form Card Header */
+    .card-header-clean {
+        @apply flex items-center gap-3 mb-6 pb-5 border-b border-slate-200;
     }
 
-    form .picture-container {
-        @apply relative mb-8 md:mb-20;
+    .card-header-clean .icon-box {
+        @apply w-10 h-10 rounded-xl flex items-center justify-center;
+        background-color: rgb(209 250 229 / 0.7);
+        color: rgb(5 150 105);
     }
 
-    form .cover-picture {
-        @apply flex items-center justify-center w-full rounded-t-md
-            h-36;
-        @apply bg-slate-200;
-        @apply dark:bg-slate-800;
+    .card-header-clean h2 {
+        @apply text-sm font-bold text-slate-900;
     }
 
-    form .cover-picture img {
-        @apply w-full h-full object-cover object-center;
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+        align-items: end;
     }
 
-    form .profile-picture {
-        @apply absolute flex items-center justify-center
-            left-4 h-28 w-28 rounded-full border-4
-            overflow-hidden;
-        @apply md:h-36 md:w-36 md:left-8;
-        @apply bg-slate-200 border-slate-50;
-        @apply dark:bg-slate-800 dark:border-slate-900;
+    .form-grid .col-12 { grid-column: span 12; }
+    .form-grid .col-4 { grid-column: span 4; }
+    .form-grid .col-3 { grid-column: span 3; }
+    .form-grid .col-2 { grid-column: span 2; }
+
+    @media (max-width: 992px) {
+        .form-grid .col-4,
+        .form-grid .col-3,
+        .form-grid .col-2 { grid-column: span 12; }
     }
 
-    form .profile-picture img {
-        @apply w-full h-full object-cover object-center;
-    }
-
-    form .picture-container .picture-action-container {
-        @apply flex gap-2;
-    }
-
-    form .picture-container .picture-action {
-        @apply basic-transition p-2 h-8 w-8 rounded-full stroke-1;
-        @apply fill-none bg-slate-300/80 stroke-slate-700;
-        @apply hover:bg-slate-300/50 active:bg-slate-300;
-        @apply dark:bg-slate-700/70 dark:stroke-slate-50;
-        @apply dark:hover:bg-slate-700 dark:active:bg-slate-700/40;
-    }
-
-    form .picture-container label {
-        @apply relative cursor-pointer;
-    }
-
-    form .picture-container input[type="file"] {
-        @apply absolute opacity-50 -top-96;
-    }
-
-    form .input-container {
-        @apply flex flex-col gap-4;
-    }
-
-    form .input-group {
+    /* Input Wrapper */
+    .input-wrapper {
         @apply flex flex-col gap-2;
     }
 
-    form .input-group label {
-        @apply text-sm;
+    .input-wrapper label {
+        @apply text-xs font-semibold text-slate-600 flex items-center gap-1.5;
     }
 
-    form .input-group small.helper {
-        @apply text-xs text-slate-700 dark:text-slate-300;
+    .input-wrapper label svg {
+        @apply w-3.5 h-3.5;
     }
 
-    form .input-group small.error {
-        @apply text-danger-500 text-sm;
+    .custom-input,
+    .custom-select {
+        @apply w-full h-11 px-4 text-sm font-medium text-slate-900
+            border border-slate-200 rounded-xl
+            outline-none transition-all duration-200;
+        background-color: #f8fafc;
     }
 
-    form .password-input-container {
-        @apply relative w-full;
+    .custom-input::placeholder {
+        @apply text-slate-400;
     }
 
-    form input[type="text"],
-    input[type="email"],
-    input[type="number"],
-    input[type="password"],
-    input[type="tel"],
-    input[type="date"],
-    input[type="time"] {
-        @apply bg-transparent rounded-xl text-sm;
-        @apply disabled:bg-slate-300 dark:disabled:bg-slate-700;
-        @apply read-only:bg-slate-300 dark:read-only:bg-slate-700;
+    .custom-input:focus,
+    .custom-select:focus {
+        @apply bg-white border-brand-500;
+        box-shadow: 0 0 0 4px rgb(16 185 129 / 0.1);
     }
 
-    form textarea {
-        @apply bg-transparent rounded-xl text-sm;
+    .custom-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 40px;
+        cursor: pointer;
     }
 
-    form select {
-        @apply block w-full rounded-xl border-0 py-1.5
-            shadow-sm ring-1 ring-inset focus:ring-2
-            focus:ring-inset  sm:text-sm sm:leading-6
-            bg-transparent;
-        @apply text-gray-950 ring-gray-500
-            focus:ring-brand-600;
-        @apply dark:text-gray-50;
+    /* Submit Button — shiny emerald 3D */
+    .btn-submit {
+        @apply w-full h-11 rounded-xl text-sm font-bold text-white
+            inline-flex items-center justify-center gap-2
+            cursor-pointer;
+        background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 40%, #051d11 80%);
+        box-shadow: inset 1px 1.5px 2px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
     }
 
-    form select option {
-        @apply text-slate-950;
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 2px; left: 6px;
+        width: 40%; height: 45%;
+        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.28) 0%, transparent 75%);
+        pointer-events: none;
+        border-radius: 999px;
+        z-index: 1;
+    }
+
+    .btn-submit:hover {
+        background: radial-gradient(circle at 20% 20%, #1c7347 0%, #0c3e26 40%, #062415 80%);
+        box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.4);
+        border-color: rgba(34, 197, 94, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:hover::before {
+        width: 55%; height: 55%; left: 4px;
+        background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.45) 0%, transparent 80%);
+    }
+
+    .btn-submit:active {
+        transform: translateY(1px);
+        box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.8), inset -1px -1px 2px rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-submit:active::before { opacity: 0.3; }
+
+    .btn-submit > * {
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-submit:disabled {
+        @apply opacity-50 cursor-not-allowed;
+        transform: none;
+    }
+
+    /* Custom Dropdown (Alpine.js) */
+    .dropdown-trigger {
+        @apply w-full h-11 px-4 text-sm font-medium text-slate-900
+            border border-slate-200 rounded-xl
+            outline-none transition-all duration-200
+            flex items-center justify-between cursor-pointer select-none;
+        background-color: #f8fafc;
+    }
+
+    .dropdown-trigger:hover {
+        @apply border-slate-300;
+    }
+
+    .dropdown-trigger.has-value {
+        @apply text-slate-900;
+    }
+
+    .dropdown-trigger.is-empty {
+        @apply text-slate-400;
+    }
+
+    .dropdown-panel {
+        @apply absolute z-50 w-full mt-1.5 bg-white border border-slate-200 rounded-xl overflow-hidden;
+        box-shadow: 0 10px 25px -5px rgb(15 23 42 / 0.08), 0 8px 10px -6px rgb(15 23 42 / 0.04);
+    }
+
+    .dropdown-panel .dropdown-item {
+        @apply w-full px-4 py-2.5 text-sm text-left cursor-pointer transition-colors duration-100;
+    }
+
+    .dropdown-panel .dropdown-item:hover {
+        background-color: rgb(241 245 249);
+    }
+
+    .dropdown-panel .dropdown-item.is-selected {
+        @apply font-semibold;
+        color: rgb(5 150 105);
+        background-color: rgb(209 250 229 / 0.4);
+    }
+
+    .dropdown-panel .dropdown-item.is-placeholder {
+        @apply text-slate-400 pointer-events-none;
+    }
+
+    .dropdown-panel .dropdown-item.is-empty-state {
+        @apply text-slate-400 italic pointer-events-none;
     }
 }

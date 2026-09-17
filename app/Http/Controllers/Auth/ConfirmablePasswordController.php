@@ -7,18 +7,15 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 
 class ConfirmablePasswordController extends Controller
 {
     /**
-     * Show the confirm password view.
-     *
-     * @return View
+     * Show the confirm password view (Volt).
      */
     public function show()
     {
-        return view('auth.confirm-password');
+        return redirect()->route('password.confirm');
     }
 
     /**

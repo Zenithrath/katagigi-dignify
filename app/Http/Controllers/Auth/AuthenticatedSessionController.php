@@ -10,7 +10,6 @@ use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -22,13 +21,11 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Display the login view.
-     *
-     * @return View
+     * Display the login view (Volt).
      */
     public function create()
     {
-        return view('auth.login');
+        return redirect()->route('login');
     }
 
     /**

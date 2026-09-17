@@ -11,7 +11,7 @@ use App\Services\OptionService;
 use App\Services\Patient\MasterService;
 use Exception;
 use Illuminate\Http\Request;
-use Symfony\Component\Console\Output\ConsoleOutput;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
@@ -108,8 +108,7 @@ class AppointmentController extends Controller
         $patient = $this->patientService->getPatientBySearching($search);
 
         if ($patient instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($patient->getMessage());
+            Log::error($patient->getMessage());
 
             return response()->json((object) ['error' => 'Patient not found'], 404);
         }
@@ -161,8 +160,7 @@ class AppointmentController extends Controller
         $inserted = $this->appointmentService->createAppointment($validated);
 
         if ($inserted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($inserted->getMessage());
+            Log::error($inserted->getMessage());
 
             return redirect()->back()
                 ->with('error', __('messages.appointment.error.oncreate'));
@@ -228,8 +226,7 @@ class AppointmentController extends Controller
 
         $updated = $this->appointmentService->updateAppointment($validated, $id);
         if ($updated instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($updated->getMessage());
+            Log::error($updated->getMessage());
 
             return redirect()->back()->with('error', __('messages.appointment.error.onupdate'));
         }
@@ -249,8 +246,7 @@ class AppointmentController extends Controller
         $status = $this->appointmentService->patchAppointmentStatus('CANCELED', $id);
 
         if ($status instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($status->getMessage());
+            Log::error($status->getMessage());
 
             return redirect()->back()->with('error', __('messages.appointment.error.oncancel'));
         }

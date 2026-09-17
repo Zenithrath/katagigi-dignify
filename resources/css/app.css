@@ -17,9 +17,13 @@ body {
 /* Base warisan app lama — hanya untuk halaman port (layouts.main-layout).
    body flex lama sengaja tidak dibawa agar shell Donezo tidak rusak. */
 @layer base {
+    html {
+        color-scheme: light;
+    }
+
     ::-webkit-calendar-picker-indicator,
     ::-webkit-time-picker-indicator {
-        @apply invert-0 dark:invert;
+        @apply invert-0;
     }
 
     .legacy-scope h1 {
@@ -28,7 +32,6 @@ body {
 
     .legacy-scope p {
         @apply text-sm text-slate-700;
-        @apply dark:text-slate-400;
     }
 
     .legacy-scope .basic-transition {
@@ -42,7 +45,6 @@ body {
     .content-base {
         font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
         @apply bg-white text-slate-900;
-        @apply rounded-3xl shadow-sm border border-white;
         @apply flex flex-col flex-1 min-w-0 print:hidden;
     }
 

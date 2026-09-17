@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.appointment.index._title') }}</x-slot:title>
 
-@section('_title', __('general.appointment.index._title'))
-@section('header')
-    <x-main-header title="{{ __('features.appointment') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.APPOINTMENT" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container" x-data="appointmentLookup">
         <section class="heading">
             <div>
@@ -22,26 +9,16 @@
             </div>
 
             @can('create appointment')
-                <a href="{{ route('appointments.create') }}" class="clickable-primary py-2 px-4 rounded-md">
+                <a href="{{ route('appointments.create') }}" class="clickable-primary py-2 px-4 rounded-lg">
                     {{ __('general.appointment.index.action.add') }}
                 </a>
             @endcan
         </section>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
-
-        <section class="py-2 px-4 mt-4">
-            <span x-text="`Found: ${pagination.total} entries.`"></span>
+        <section class="py-2 px-1 mt-2">
+            <span class="text-sm text-slate-500" x-text="`Menampilkan ${pagination.total} janji`"></span>
         </section>
 
         @role('admin|nurse')
@@ -60,123 +37,89 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
-                        <template x-if="appointmentList.length > 0 && !isLoading">
+                    <tbody>
+                        <template x-if="isLoading">
+                            <tr><td colspan="7" class="text-center py-12 text-slate-400">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    Memuat data...
+                                </div>
+                            </td></tr>
+                        </template>
+                        <template x-if="!isLoading && appointmentList.length > 0">
                             <template x-for="(appointment, index) in appointmentList" :key="appointment.id">
                                 <tr>
                                     <td class="column" x-text="(pagination.page - 1) * pagination.limit + index + 1"></td>
                                     <td class="index-column w-64 truncate">
                                         <div class="flex flex-col items-start justify-center gap-0">
-                                            <a
-                                                :href="(
-                                                    `{{ route('appointments.show', ['appointment' => 'appointment.id']) }}`
-                                                )
-                                                .replace('appointment.id', appointment.id)">
+                                            <a class="font-medium text-slate-900 hover:text-brand-600"
+                                                :href="`{{ route('appointments.show', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)">
                                                 <span x-text="appointment.patient_name"></span>
                                             </a>
-                                            <small x-text="appointment.patient_code"></small>
+                                            <small class="text-slate-400" x-text="appointment.patient_code"></small>
                                         </div>
                                     </td>
                                     <td class="column w-64">
                                         <div class="flex flex-col">
-                                            <span x-text="appointment.doctor_name"></span>
-                                            <small>NIPP. <span x-text="appointment.doctor_nipp"></span></small>
+                                            <span class="text-slate-700" x-text="appointment.doctor_name"></span>
+                                            <small class="text-slate-400">NIPP. <span x-text="appointment.doctor_nipp"></span></small>
                                         </div>
                                     </td>
                                     <td class="column">
-                                        <div class="flex flex-col">
-                                            <span x-text="count(appointment.services)+' Services'"></span>
-                                        </div>
+                                        <span class="text-slate-700" x-text="count(appointment.services)+' Layanan'"></span>
                                     </td>
                                     <td class="column w-32">
                                         <div class="flex flex-col">
-                                            <span
-                                                x-text="changeTimeFormat(appointment.time_start)+' - '+changeTimeFormat(appointment.time_end)"></span>
-
-                                            <small x-text="appointment.date"></small>
+                                            <span class="text-slate-700" x-text="changeTimeFormat(appointment.time_start)+' - '+changeTimeFormat(appointment.time_end)"></span>
+                                            <small class="text-slate-400" x-text="appointment.date"></small>
                                         </div>
                                     </td>
                                     <td class="column w-32">
-                                        <template
-                                            x-if="appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
-                                            <small class="px-2 py-0.5 bg-red-100 border border-red-600 text-red-600 rounded-md">
-                                                {{ __('general.appointment.index.table.canceled') }}
-                                            </small>
+                                        <template x-if="appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-danger">{{ __('general.appointment.index.table.canceled') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="appointment.confirmed_at && appointment.paid_at && appointment.recorded_at && !appointment.canceled_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-blue-100 border border-blue-600 text-blue-600 rounded-md">
-                                                {{ __('general.appointment.index.table.completed') }}
-                                            </small>
+                                        <template x-if="appointment.confirmed_at && appointment.paid_at && appointment.recorded_at && !appointment.canceled_at">
+                                            <span class="badge badge-info">{{ __('general.appointment.index.table.completed') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="!appointment.canceled_at && appointment.confirmed_at && appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-green-100 border border-green-600 text-green-600 rounded-md">
-                                                {{ __('general.appointment.index.table.served and paid') }}
-                                            </small>
+                                        <template x-if="!appointment.canceled_at && appointment.confirmed_at && appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-success">{{ __('general.appointment.index.table.served and paid') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="!appointment.canceled_at && appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-yellow-100 border border-yellow-600 text-yellow-600 rounded-md">
-                                                {{ __('general.appointment.index.table.confirmed') }}
-                                            </small>
+                                        <template x-if="!appointment.canceled_at && appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-warning">{{ __('general.appointment.index.table.confirmed') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="!appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-gray-100 border border-gray-600 text-gray-600 rounded-md">
-                                                {{ __('general.appointment.index.table.pending') }}
-                                            </small>
+                                        <template x-if="!appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-neutral">{{ __('general.appointment.index.table.pending') }}</span>
                                         </template>
                                     </td>
                                     <td class="action-column">
-                                        <div class="flex flex-col lg:flex-row justify-left gap-2">
+                                        <div class="flex items-center gap-2">
                                             @can('update appointment')
                                                 <template x-if="!appointment.confirmed_at">
-                                                    <a :href="(
-                                                        `{{ route('appointments.confirm', ['appointment' => 'appointment.id']) }}`
-                                                    )
-                                                    .replace('appointment.id', appointment.id)"
-                                                        class="h-full">
+                                                    <a :href="`{{ route('appointments.confirm', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)"
+                                                        class="text-sm text-brand-600 hover:text-brand-700">
                                                         {{ __('general.appointment.index.action.confirm') }}
-                                                        <span class="sr-only" x-text="appointment.patient_name"></span>
                                                     </a>
                                                 </template>
                                             @endcan
                                             @can('update appointment')
                                                 <template x-if="!appointment.confirmed_at">
-                                                    <a :href="(
-                                                        `{{ route('appointments.edit', ['appointment' => 'appointment.id']) }}`
-                                                    )
-                                                    .replace('appointment.id', appointment.id)"
-                                                        class="h-full">
+                                                    <a :href="`{{ route('appointments.edit', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)"
+                                                        class="text-sm text-slate-500 hover:text-slate-700">
                                                         {{ __('general.appointment.index.action.edit') }}
-                                                        <span class="sr-only" x-text="appointment.patient_name"></span>
                                                     </a>
                                                 </template>
                                             @endcan
                                             @can('delete appointment')
                                                 <template x-if="!appointment.paid_at">
                                                     <form
-                                                        :action="(
-                                                            `{{ route('appointments.destroy', ['appointment' => 'appointment.id']) }}`
-                                                        )
-                                                        .replace('appointment.id', appointment.id)"
-                                                        method="post">
+                                                        :action="`{{ route('appointments.destroy', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)"
+                                                        method="post"
+                                                        @submit.prevent="if(confirm('Batalkan janji ini?')) $el.submit()">
                                                         @csrf
                                                         @method('delete')
-                                                        <button
-                                                            class="text-danger-600 hover:text-danger-500 active:text-danger-700 text-left"
-                                                            type="submit">
-                                                            {{ __('general.appointment.index.action.delete') }}<span
-                                                                class="sr-only" x-text="appointment.patient_name"></span></button>
+                                                        <button class="text-sm text-slate-400 hover:text-red-600 transition-colors" type="submit">
+                                                            {{ __('general.appointment.index.action.delete') }}
+                                                        </button>
                                                     </form>
                                                 </template>
                                             @endcan
@@ -185,15 +128,13 @@
                                 </tr>
                             </template>
                         </template>
-
-                        <template x-if="appointmentList.length == 0 && !isLoading">
-                            <tr>
-                                <td class="column text-center" colspan="7">
-                                    <div class="h-24 w-full flex items-center justify-center">
-                                        {{ __('general.appointment.index.table.empty') }}
-                                    </div>
-                                </td>
-                            </tr>
+                        <template x-if="!isLoading && appointmentList.length === 0">
+                            <tr><td colspan="7" class="text-center py-12">
+                                <div class="flex flex-col items-center gap-2 text-slate-400">
+                                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                                    <span class="text-sm">{{ __('general.appointment.index.table.empty') }}</span>
+                                </div>
+                            </td></tr>
                         </template>
                     </tbody>
                 </table>
@@ -212,176 +153,142 @@
                             <th scope="col" class="column">{{ __('general.appointment.index.table.status') }}</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body">
-                        <template x-if="appointmentList.length > 0 && !isLoading">
+                    <tbody>
+                        <template x-if="isLoading">
+                            <tr><td colspan="5" class="text-center py-12 text-slate-400">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    Memuat data...
+                                </div>
+                            </td></tr>
+                        </template>
+                        <template x-if="!isLoading && appointmentList.length > 0">
                             <template x-for="appointment in appointmentList" :key="appointment.id">
                                 <tr>
                                     <td class="index-column w-64 truncate">
                                         <div class="flex flex-col items-start justify-center gap-0">
-                                            <a
-                                                :href="(
-                                                    `{{ route('appointments.show', ['appointment' => 'appointment.id']) }}`
-                                                )
-                                                .replace('appointment.id', appointment.id)">
+                                            <a class="font-medium text-slate-900 hover:text-brand-600"
+                                                :href="`{{ route('appointments.show', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)">
                                                 <span x-text="appointment.patient_name"></span>
                                             </a>
-                                            <small x-text="appointment.patient_code"></small>
+                                            <small class="text-slate-400" x-text="appointment.patient_code"></small>
                                         </div>
                                     </td>
                                     <td class="column w-64">
                                         <div class="flex flex-col">
-                                            <span x-text="appointment.doctor_name"></span>
-                                            <small>NIPP. <span x-text="appointment.doctor_nipp"></span></small>
+                                            <span class="text-slate-700" x-text="appointment.doctor_name"></span>
+                                            <small class="text-slate-400">NIPP. <span x-text="appointment.doctor_nipp"></span></small>
                                         </div>
                                     </td>
                                     <td class="column">
-                                        <div class="flex flex-col">
-                                            <span x-text="count(appointment.services)+' Services'"></span>
-                                        </div>
+                                        <span class="text-slate-700" x-text="count(appointment.services)+' Layanan'"></span>
                                     </td>
                                     <td class="column w-32">
                                         <div class="flex flex-col">
-                                            <span
-                                                x-text="changeTimeFormat(appointment.time_start)+' - '+changeTimeFormat(appointment.time_end)"></span>
-
-                                            <small x-text="appointment.date"></small>
+                                            <span class="text-slate-700" x-text="changeTimeFormat(appointment.time_start)+' - '+changeTimeFormat(appointment.time_end)"></span>
+                                            <small class="text-slate-400" x-text="appointment.date"></small>
                                         </div>
                                     </td>
                                     <td class="column w-32">
-                                        <template
-                                            x-if="appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-red-100 border border-red-600 text-red-600 rounded-md">
-                                                {{ __('general.appointment.index.table.canceled') }}
-                                            </small>
+                                        <template x-if="appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-danger">{{ __('general.appointment.index.table.canceled') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="appointment.confirmed_at && appointment.paid_at && appointment.recorded_at && !appointment.canceled_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-blue-100 border border-blue-600 text-blue-600 rounded-md">
-                                                {{ __('general.appointment.index.table.completed') }}
-                                            </small>
+                                        <template x-if="appointment.confirmed_at && appointment.paid_at && appointment.recorded_at && !appointment.canceled_at">
+                                            <span class="badge badge-info">{{ __('general.appointment.index.table.completed') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="!appointment.canceled_at && appointment.confirmed_at && appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-green-100 border border-green-600 text-green-600 rounded-md">
-                                                {{ __('general.appointment.index.table.served and paid') }}
-                                            </small>
+                                        <template x-if="!appointment.canceled_at && appointment.confirmed_at && appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-success">{{ __('general.appointment.index.table.served and paid') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="!appointment.canceled_at && appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-yellow-100 border border-yellow-600 text-yellow-600 rounded-md">
-                                                {{ __('general.appointment.index.table.confirmed') }}
-                                            </small>
+                                        <template x-if="!appointment.canceled_at && appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-warning">{{ __('general.appointment.index.table.confirmed') }}</span>
                                         </template>
-
-                                        <template
-                                            x-if="!appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
-                                            <small
-                                                class="px-2 py-0.5 bg-gray-100 border border-gray-600 text-gray-600 rounded-md">
-                                                {{ __('general.appointment.index.table.pending') }}
-                                            </small>
+                                        <template x-if="!appointment.canceled_at && !appointment.confirmed_at && !appointment.paid_at && !appointment.recorded_at">
+                                            <span class="badge badge-neutral">{{ __('general.appointment.index.table.pending') }}</span>
                                         </template>
                                     </td>
                                 </tr>
                             </template>
+                        </template>
+                        <template x-if="!isLoading && appointmentList.length === 0">
+                            <tr><td colspan="5" class="text-center py-12">
+                                <div class="flex flex-col items-center gap-2 text-slate-400">
+                                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                                    <span class="text-sm">{{ __('general.appointment.index.table.empty') }}</span>
+                                </div>
+                            </td></tr>
                         </template>
                     </tbody>
                 </table>
             </section>
         @endrole
 
+        {{-- Pagination --}}
         <section class="mt-4">
-            <nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 sm:px-0">
-                <div class="-mt-px flex w-0 flex-1">
+            <nav class="flex items-center justify-between border-t border-slate-200 px-1 py-3">
+                <div class="flex w-0 flex-1">
                     <template x-if="pagination.page > 1">
                         <button type="button" @click="handlePreviousPage()"
-                            class="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
-                            <svg class="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a.75.75 0 01-.75.75H4.66l2.1 1.95a.75.75 0 11-1.02 1.1l-3.5-3.25a.75.75 0 010-1.1l3.5-3.25a.75.75 0 111.02 1.1l-2.1 1.95h12.59A.75.75 0 0118 10z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
                             <span class="hidden md:block">{{ __('Previous') }}</span>
                         </button>
                     </template>
                 </div>
 
-                <div class="md:-mt-px flex">
+                <div class="hidden md:flex items-center gap-1">
                     <template x-if="pagination.page - 3 >= 0">
                         <button type="button" x-text="1"
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
                             @click="pagination.page = 1; lookup()"></button>
                     </template>
 
                     <template x-if="pagination.page - 3 > 0">
-                        <div
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`">
-                            ...</div>
+                        <span class="px-1 text-slate-400">...</span>
                     </template>
 
                     <template x-for="page in pagination.last" :key="page">
                         <template x-if="page > (pagination.page - 2) && page < (pagination.page + 2)">
                             <button type="button" x-text="page"
-                                :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md hover:bg-gray-50 dark:hover:bg-gray-800 ${(pagination.page == page) ? 'text-indigo-600 border-t-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700'}`"
+                                :class="`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${(pagination.page == page) ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`"
                                 @click="pagination.page = page; lookup()"></button>
                         </template>
                     </template>
 
                     <template x-if="pagination.page + 2 < pagination.last">
-                        <div
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`">
-                            ...</div>
+                        <span class="px-1 text-slate-400">...</span>
                     </template>
 
                     <template x-if="pagination.page + 2 <= pagination.last">
                         <button type="button" x-text="pagination.last"
-                            :class="`mx-1 inline-flex items-center px-4 py-2 text-sm font-medium rounded-b-md text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800`"
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
                             @click="pagination.page = pagination.last; lookup()"></button>
                     </template>
                 </div>
 
-                <div class="-mt-px flex w-0 flex-1 justify-end">
+                <div class="flex w-0 flex-1 justify-end">
                     <template x-if="pagination.page < pagination.last">
                         <button type="button" @click="handleNextPage()"
-                            class="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
                             <span class="hidden md:block">{{ __('Next') }}</span>
-                            <svg class="ml-3 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M2 10a.75.75 0 01.75-.75h12.59l-2.1-1.95a.75.75 0 111.02-1.1l3.5 3.25a.75.75 0 010 1.1l-3.5 3.25a.75.75 0 11-1.02-1.1l2.1-1.95H2.75A.75.75 0 012 10z"
-                                    clip-rule="evenodd" />s
-                            </svg>
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
                         </button>
                     </template>
                 </div>
             </nav>
         </section>
     </main>
-@endsection
 
 @pushOnce('scripts')
     <script type="text/javascript">
         function count(string) {
             const jsonObject = JSON.parse(string);
-            const arrayLength = jsonObject.length;
-
-            return arrayLength;
+            return jsonObject.length;
         }
 
         function changeTimeFormat(time) {
-            var parts = time.split(':');
-            var hours = parts[0];
-            var minutes = parts[1];
-
-            var formattedTime = hours + ':' + minutes;
-            return formattedTime;
+            if (!time) return '-';
+            const parts = time.split(':');
+            return (parts[0] || '00').padStart(2, '0') + ':' + (parts[1] || '00').padStart(2, '0');
         }
 
         const appointmentLookup = {
@@ -412,11 +319,12 @@
                             this.appointmentList = data.data;
                             this.pagination = {
                                 ...this.pagination,
-                                last: data.pagination.last,
+                                last: Math.max(1, data.pagination.last),
                                 total: data.pagination.total,
                             };
                             this.isLoading = false;
-                        });
+                        })
+                        .catch(() => { this.isLoading = false; });
                 @endrole
                 @role('doctor')
                     fetch(`{{ route('api.appointments.lookup.doctor') }}?${params}`)
@@ -425,11 +333,12 @@
                             this.appointmentList = data.data;
                             this.pagination = {
                                 ...this.pagination,
-                                last: data.pagination.last,
+                                last: Math.max(1, data.pagination.last),
                                 total: data.pagination.total,
                             };
                             this.isLoading = false;
-                        });
+                        })
+                        .catch(() => { this.isLoading = false; });
                 @endrole
             },
             handleNextPage() {
@@ -443,3 +352,4 @@
         }
     </script>
 @endpushOnce
+</x-app-layout>

@@ -1,33 +1,16 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record') }}</x-slot:title>
 
-@section('_title', $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record'))
-@section('header')
-    <x-main-header title="{{ __('features.medical-record') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="PATIENT.RECORD" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container">
         <section class="flex gap-4 items-center">
             <a href="{{ route('medical-records.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record') }}
             </h1>
         </section>
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <section id="form-body" x-data="recordState" x-init="$watch('isDataShown', unmountChangeAppointment)">
             <form method="post" action="{{ $action }}" enctype="multipart/form-data">
@@ -118,7 +101,7 @@
                                                     class="clickable-ghost !border-danger-500 px-2 rounded-md stroke-danger-500"
                                                     @click.prevent="handleRemoveService(index)">
                                                     <div class="w-6 h-6">
-                                                        <x-icons.trash />
+                                                        <x-lucide-trash-2 class="w-6 h-6" />
                                                     </div>
                                                 </button>
                                             </div>
@@ -384,7 +367,7 @@
             </form>
         </section>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -467,8 +450,8 @@
                         lower_price: selectedService.lower_price ?? 0,
                         upper_price: selectedService.upper_price ?? 0,
                         helper_text: `{{ __('form.helpers.pricing', ['lower' => 'lower', 'higher' => 'higher']) }}`
-                            .replace('lower', this.convertRupiah(Number(selectedService.lower_price)))
-                            .replace('higher', this.convertRupiah(Number(selectedService.upper_price))) ??
+                            .replace('lower', convertRupiah(Number(selectedService.lower_price)))
+                            .replace('higher', convertRupiah(Number(selectedService.upper_price))) ??
                             `{{ __('form.helpers.service') }}`,
                     };
                 });
@@ -478,13 +461,6 @@
             handleAppointmentChange() {
                 this.selectedAppointmentID = document.getElementById('appointment_id').value;
                 this.findAppointment();
-            },
-            convertRupiah(value) {
-                if (typeof value != 'number') return value;
-                value = parseFloat(value.toFixed(2)).toString();
-                const [integer, decimal] = value.split(',');
-                const numberString = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                return `Rp. ${numberString}.${decimal ?? "00"}`;
             },
             handleAddService() {
                 this.selectedServices.push({
@@ -510,8 +486,8 @@
                     lower_price: service.lower_price ?? 0,
                     upper_price: service.upper_price ?? 0,
                     helper_text: `{{ __('form.helpers.pricing', ['lower' => 'lower', 'higher' => 'higher']) }}`
-                        .replace('lower', this.convertRupiah(Number(service.lower_price)))
-                        .replace('higher', this.convertRupiah(Number(service.upper_price))) ??
+                        .replace('lower', convertRupiah(Number(service.lower_price)))
+                        .replace('higher', convertRupiah(Number(service.upper_price))) ??
                         `{{ __('form.helpers.service') }}`,
                 };
 
@@ -614,3 +590,4 @@
         };
     </script>
 @endPushOnce
+</x-app-layout>

@@ -5,79 +5,89 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'KataGigi Dignify') }}</title>
+        <title>{{ $title ?? config('app.name', 'KataGigi Dignify') }}</title>
 
-        <!-- Fonts: Plus Jakarta Sans (gaya Donezo) -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+        <link rel="shortcut icon" href="/favicon.svg" type="image/x-icon" />
 
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
     <body class="antialiased">
-        <div class="min-h-screen bg-[#eef0f2] p-3 sm:p-4 flex gap-3 sm:gap-4 text-slate-900">
+        <div class="app-shell" x-data="{ sidebarOpen: false }" x-on:open-sidebar.window="sidebarOpen = true">
 
-            {{-- Sidebar kartu putih --}}
-            <aside class="hidden lg:flex w-60 shrink-0 flex-col rounded-3xl bg-white p-5 shadow-sm border border-white">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-1" wire:navigate>
-                    <span class="grid h-9 w-9 place-items-center rounded-full bg-emerald-700 text-white font-extrabold">K</span>
-                    <span class="font-extrabold text-lg tracking-tight">KataGigi</span>
+            {{-- Sidebar: full-height, flush edges --}}
+            <aside class="app-sidebar hidden lg:flex flex-col sticky top-0 h-screen bg-[#f8fafc] border-r border-slate-200/80">
+                <a href="{{ route('dashboard') }}" class="logo" wire:navigate>
+                    <img src="{{ asset('assets/logo.svg') }}" alt="KataGigi" />
                 </a>
-
-                <p class="mt-7 mb-2 px-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Menu</p>
-                <nav class="space-y-1 text-[15px]">
-                    <a href="{{ route('dashboard') }}" wire:navigate
-                       class="relative flex items-center gap-3 rounded-xl px-3 py-2.5 font-semibold {{ request()->routeIs('dashboard') ? 'text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">
-                        @if (request()->routeIs('dashboard'))
-                            <span class="absolute -left-5 top-1.5 h-8 w-1.5 rounded-r-full bg-emerald-700"></span>
-                        @endif
-                        <span>⊞</span> Dashboard
-                    </a>
-                    @can('read schedule')
-                        <a href="{{ route('schedules.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('schedules.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">◷ Jadwal</a>
-                    @endcan
-                    @can('read appointment')
-                        <a href="{{ route('appointments.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('appointments.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">✚ Appointment</a>
-                    @endcan
-                    @can('read patient')
-                        <a href="{{ route('patients.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('patients.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">♿ Pasien</a>
-                    @endcan
-                    @can('read medical record')
-                        <a href="{{ route('medical-records.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('medical-records.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">☰ Rekam Medis</a>
-                    @endcan
-                    @can('read transaction')
-                        <a href="{{ route('transactions.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('transactions.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">⇄ Transaksi</a>
-                    @endcan
-                    @can('read turnover')
-                        <a href="{{ route('incomes.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('incomes.*') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">▤ Omzet</a>
-                    @endcan
-                    @role('manajemen')
-                        <a href="{{ route('transactions.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-slate-500 hover:bg-slate-50">✓ Persetujuan <em class="ml-auto not-italic text-[10px] bg-slate-100 rounded-full px-2 py-0.5">via nota</em></a>
-                    @endrole
-                </nav>
-
-                <p class="mt-6 mb-2 px-2 text-[11px] font-semibold uppercase tracking-widest text-slate-400">General</p>
-                <nav class="space-y-1 text-[15px]">
-                    <a href="{{ route('profile') }}" wire:navigate class="flex items-center gap-3 rounded-xl px-3 py-2.5 {{ request()->routeIs('profile') ? 'font-semibold text-slate-900' : 'text-slate-500 hover:bg-slate-50' }}">⚙ Profile</a>
-                    <livewire:sidebar-logout />
-                </nav>
-
-                <div class="mt-auto rounded-2xl bg-emerald-950 p-4 text-white">
-                    <p class="font-semibold text-sm leading-snug">Panduan kasir & rekam medis</p>
-                    <p class="mt-1 text-xs text-emerald-200/80">Alur baru: kode diagnosis wajib.</p>
+                <div class="sidebar-scroll min-h-0 flex-1 overflow-y-auto">
+                    <x-sidebar-nav />
                 </div>
             </aside>
 
-            {{-- Kolom utama --}}
-            <div class="flex min-w-0 flex-1 flex-col gap-3 sm:gap-4">
+            {{-- Drawer mobile --}}
+            <div x-show="sidebarOpen" class="fixed inset-0 z-40 lg:hidden" style="display: none;">
+                <div x-show="sidebarOpen" x-transition.opacity class="absolute inset-0 bg-slate-900/50" x-on:click="sidebarOpen = false"></div>
+                <aside class="app-sidebar absolute inset-y-0 left-0 flex h-full w-72 flex-col bg-[#f8fafc] border-r border-slate-200/80 shadow-xl z-50" x-show="sidebarOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+                    <div class="relative mx-5 flex items-center justify-center pt-5 pb-6">
+                        <a href="{{ route('dashboard') }}" class="logo !mb-0" wire:navigate>
+                            <img src="{{ asset('assets/logo.svg') }}" alt="KataGigi" />
+                        </a>
+                        <button type="button" x-on:click="sidebarOpen = false" class="absolute right-0 grid h-9 w-9 place-items-center rounded-md text-slate-500 hover:bg-slate-200/60" aria-label="Tutup menu">
+                            <x-lucide-x class="h-5 w-5" />
+                        </button>
+                    </div>
+                    <div class="sidebar-scroll min-h-0 flex-1 overflow-y-auto" x-on:click="if ($event.target.closest('a')) sidebarOpen = false">
+                        <x-sidebar-nav />
+                    </div>
+                </aside>
+            </div>
+
+            {{-- Main column --}}
+            <div class="main-column flex min-w-0 flex-1 flex-col min-h-screen">
+                {{-- Topbar --}}
                 <livewire:layout.navigation />
 
-                <main class="min-w-0 flex-1">
-                    {{ $slot }}
+                {{-- Content area: white background --}}
+                <main class="content-area flex-1">
+                    @isset($header)
+                        <div class="border-b border-slate-100 px-4 sm:px-6 py-4">{{ $header }}</div>
+                    @endisset
+
+                    <div class="p-4 sm:p-6">
+                        {{ $slot }}
+                    </div>
                 </main>
+
+                <x-main-footer />
             </div>
         </div>
+
+        @isset($printable)
+            <div class="print-base">{{ $printable }}</div>
+        @endisset
+
+        @stack('scripts')
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', () => {
+                const elems = document.getElementsByClassName('selectable');
+                for (let index = 0; index < elems.length; index++) {
+                    initSelectable(elems[index]);
+                }
+            });
+            function initSelectable(element) {
+                $(element).select2({
+                    width: '100%',
+                    id: element.getAttribute('id'),
+                    dropdownParent: $(element).parent()
+                });
+            }
+        </script>
         @livewireScripts
     </body>
 </html>

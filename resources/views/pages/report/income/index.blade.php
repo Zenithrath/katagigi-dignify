@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('features.income') }}</x-slot:title>
 
-@section('_title', __('features.income'))
-@section('header')
-    <x-main-header title="{{ __('features.income') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="REPORT.TURNOVER" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container" x-data="state">
         <section class="heading">
             <div>
@@ -117,7 +104,7 @@
             </section>
         </template>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -136,12 +123,6 @@
             isEmpty: true,
             init() {
                 this.lookup();
-            },
-            convertRupiah(value) {
-                value = String(value);
-                const [integer, decimal] = value.split(',');
-                const numberString = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                return `Rp. ${numberString}`;
             },
             lookup() {
                 this.isLoading = true;
@@ -200,3 +181,4 @@
         }
     </script>
 @endPushOnce
+</x-app-layout>

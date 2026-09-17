@@ -1,0 +1,125 @@
+/* ============================================================
+   Style 3D Shiny Emerald — Hijau Tua Alami (Ijo Tua)
+   Sesuai snippet original: radial gradient pekat, kilau kaca (glass sheen),
+   dan kedalaman inset shadow taktil.
+   ============================================================ */
+
+/* ---------- 1. Button Ijo 3D Emerald + Animasi ---------- */
+.btn-shiny-emerald {
+  background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 40%, #051d11 80%);
+  box-shadow: inset 1px 1.5px 2px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #ffffff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* Kilau kaca di atas */
+.btn-shiny-emerald::before {
+  content: '';
+  position: absolute;
+  top: 2px; left: 6px;
+  width: 40%; height: 45%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.28) 0%, transparent 75%);
+  pointer-events: none;
+  border-radius: 999px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* Overlay gradient ijo */
+.btn-shiny-emerald::after {
+  content: '';
+  position: absolute;
+  inset: 0; border-radius: inherit;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* HOVER: lebih terang + kilau membesar */
+.btn-shiny-emerald:hover {
+  background: radial-gradient(circle at 20% 20%, #1c7347 0%, #0c3e26 40%, #062415 80%);
+  box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.4);
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #ffffff;
+}
+.btn-shiny-emerald:hover::before {
+  width: 55%; height: 55%; left: 4px;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.45) 0%, transparent 80%);
+}
+.btn-shiny-emerald:hover::after { opacity: 1; }
+
+/* ACTIVE (ditekan): efek tenggelam */
+.btn-shiny-emerald:active {
+  transform: translateY(1px);
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.8), inset -1px -1px 2px rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: all 0.08s ease-out;
+}
+.btn-shiny-emerald:active::before { opacity: 0.3; }
+
+.btn-shiny-emerald > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------- 2. Card Ijo 3D Emerald + Glass Shine (Ijo Tua) ---------- */
+.card-shiny-emerald {
+  background: radial-gradient(circle at 18% 18%, #165b38 0%, #0a331f 40%, #051d11 85%);
+  box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.35), inset -3px -3px 6px rgba(0, 0, 0, 0.7), 0 10px 25px -4px rgba(5, 29, 17, 0.45);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #ffffff;
+}
+
+/* Kilau kaca melintang halus di atas kartu */
+.card-shiny-emerald::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%;
+  width: 65%; height: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 999px;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* Subtle glow overlay */
+.card-shiny-emerald::after {
+  content: '';
+  position: absolute;
+  inset: 0; border-radius: inherit;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, transparent 60%);
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+/* HOVER: ngangkat + lebih terang + kilau membesar */
+.card-shiny-emerald:hover {
+  transform: translateY(-4px);
+  background: radial-gradient(circle at 18% 18%, #1c7347 0%, #0d4027 40%, #062315 85%);
+  box-shadow: inset 2px 2.5px 4px rgba(255, 255, 255, 0.5), inset -3px -3px 6px rgba(0, 0, 0, 0.8), 0 18px 32px -6px rgba(5, 29, 17, 0.55);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+.card-shiny-emerald:hover::before {
+  width: 80%; height: 60%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.28) 0%, transparent 75%);
+}
+.card-shiny-emerald:hover::after {
+  opacity: 1;
+}
+
+.card-shiny-emerald > * {
+  position: relative;
+  z-index: 2;
+}

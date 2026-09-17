@@ -1,24 +1,11 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('patient.record.detail.index._title') }}</x-slot:title>
 
-@section('_title', __('patient.record.detail.index._title'))
-@section('header')
-    <x-main-header title="{{ __('features.medical-record') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="PATIENT.RECORD" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container">
         <section class="heading">
             <div class="flex items-start gap-4">
                 <a href="{{ route('medical-records.index') }}" class="clickable-ghost p-2 rounded-md w-12 h-12">
-                    <x-icons.chevron-left />
+                    <x-lucide-chevron-left class="w-full h-full" />
                 </a>
                 <div>
                     <h1>{{ __('Medical Record') }} #{{ strtoupper(substr($data->id, 0, 7)) }}</h1>
@@ -151,4 +138,4 @@
             </dl>
         </section>
     </main>
-@endsection
+</x-app-layout>

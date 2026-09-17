@@ -1,23 +1,10 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.installment.detail._title') }}</x-slot:title>
 
-@section('_title', __('general.installment.detail._title'))
-@section('header')
-    <x-main-header title="{{ __('features.installment') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="REPORT.INSTALLMENT" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ route('installments.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ __('general.installment.detail._title') }} </h1>
         </div>
@@ -90,4 +77,4 @@
             </dl>
         </section>
     </main>
-@endsection
+</x-app-layout>

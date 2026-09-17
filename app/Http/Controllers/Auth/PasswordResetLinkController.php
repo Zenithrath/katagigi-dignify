@@ -7,18 +7,15 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
     /**
-     * Display the password reset link request view.
-     *
-     * @return View
+     * Display the password reset link request view (Volt).
      */
     public function create()
     {
-        return view('auth.forgot-password');
+        return redirect()->route('password.request');
     }
 
     /**

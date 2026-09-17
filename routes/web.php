@@ -81,15 +81,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('categories', CategoryController::class);
-    Route::resource('admins', AdminController::class);
-    Route::resource('doctors', DoctorController::class);
-    Route::resource('nurses', NurseController::class);
+    Route::resource('admins', AdminController::class)->except('show');
+    Route::resource('doctors', DoctorController::class)->except('show');
+    Route::resource('nurses', NurseController::class)->except('show');
     Route::resource('patients', MasterController::class);
-    Route::resource('schedules', ScheduleController::class);
+    Route::resource('schedules', ScheduleController::class)->except(['create', 'show', 'edit', 'update']);
     Route::resource('medical-records', MedicalRecordController::class);
     Route::resource('transactions', TransactionController::class);
     Route::resource('incomes', IncomeController::class);
-    Route::post('schedules/filter', [ScheduleController::class, 'filter'])->name('schedules.filter');
     Route::post(
         'schedules/update_status/{schedule}',
         [ScheduleController::class, 'updateStatus']

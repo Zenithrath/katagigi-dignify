@@ -1,33 +1,16 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('report.transaction.index._title') }}</x-slot:title>
 
-@section('_title', __('report.transaction.index._title'))
-@section('header')
-    <x-main-header title="{{ __('features.transaction') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="REPORT.TRANSACTION" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container">
         <section class="flex gap-4 items-center">
             <a href="{{ route('transactions.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ $type == 'update' ? __('form.title.update.transaction') : __('form.title.create.transaction') }}
             </h1>
         </section>
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <section class="content-card" x-data="appointmentState" x-init="$watch('isDataShown', unmountChangeAppointment)">
             <form action="{{ route('transactions.store') }}" method="post">
@@ -122,7 +105,7 @@
                                                     class="clickable-ghost !border-danger-500 px-2 rounded-md stroke-danger-500"
                                                     @click.prevent="handleRemoveService(index)">
                                                     <div class="w-6 h-6">
-                                                        <x-icons.trash />
+                                                        <x-lucide-trash-2 class="w-6 h-6" />
                                                     </div>
                                                 </button>
                                             </div>
@@ -174,7 +157,7 @@
                                                     :id="`installment_step_${index}`" :value="item.id"
                                                     class="absolute hidden peer" />
                                                 <div
-                                                    class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 dark:border-slate-700 rounded-md basic-transition">
+                                                    class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 rounded-md basic-transition">
                                                     {{ __('form.labels.pay') }}
                                                 </div>
                                             </label>
@@ -275,7 +258,7 @@
                                     <input type="radio" name="payment_method" id="payment_method_transfer"
                                         value="TRANSFER" class="absolute hidden peer" />
                                     <div
-                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 dark:border-slate-700 rounded-md basic-transition">
+                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 rounded-md basic-transition">
                                         {{ __('form.labels.transfer') }}
                                     </div>
                                 </label>
@@ -283,7 +266,7 @@
                                     <input type="radio" name="payment_method" id="payment_method_cash" value="CASH"
                                         class="absolute hidden peer" />
                                     <div
-                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 dark:border-slate-700 rounded-md basic-transition">
+                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 rounded-md basic-transition">
                                         {{ __('form.labels.cash') }}
                                     </div>
                                 </label>
@@ -291,7 +274,7 @@
                                     <input type="radio" name="payment_method" id="payment_method_qris" value="QRIS"
                                         class="absolute hidden peer" />
                                     <div
-                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 dark:border-slate-700 rounded-md basic-transition">
+                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 rounded-md basic-transition">
                                         {{ __('form.labels.qris') }}
                                     </div>
                                 </label>
@@ -299,7 +282,7 @@
                                     <input type="radio" name="payment_method" id="payment_method_owlexa"
                                         value="OWLEXA_INSURANCE" class="absolute hidden peer" />
                                     <div
-                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 dark:border-slate-700 rounded-md basic-transition">
+                                        class="py-2 px-4 hover:bg-brand-700 hover:text-item-50 peer-checked:text-item-50 peer-checked:bg-brand-800 cursor-pointer peer-checked:cursor-default border border-slate-200 rounded-md basic-transition">
                                         {{ __('form.labels.owlexa_insurance') }}
                                     </div>
                                 </label>
@@ -318,7 +301,7 @@
             </form>
         </section>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -366,13 +349,6 @@
                     this.services = this.appointment.services;
                 }
             },
-            convertRupiah(value) {
-                if (typeof value !== 'number') return value;
-                value = parseFloat(value.toFixed(2)).toString();
-                const [integer, decimal] = value.split('.');
-                const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                return `Rp. ${formattedInteger}.${decimal ?? "00"}`;
-            },
             setDataFromAppointment(appointment) {
                 this.detailData = {
                     patient: {
@@ -402,8 +378,8 @@
                             lower_price: selectedService?.lower_price ?? 0,
                             upper_price: selectedService?.upper_price ?? 0,
                             helper_text: `{{ __('form.helpers.pricing', ['lower' => 'lower', 'higher' => 'higher']) }}`
-                                .replace('lower', this.convertRupiah(Number(selectedService?.lower_price)))
-                                .replace('higher', this.convertRupiah(Number(selectedService?.upper_price))) ??
+                                .replace('lower', convertRupiah(Number(selectedService?.lower_price)))
+                                .replace('higher', convertRupiah(Number(selectedService?.upper_price))) ??
                                 `{{ __('form.helpers.service') }}`,
                         };
                     });
@@ -454,8 +430,8 @@
                     lower_price: service?.lower_price ?? 0,
                     upper_price: service?.upper_price ?? 0,
                     helper_text: `{{ __('form.helpers.pricing', ['lower' => 'lower', 'higher' => 'higher']) }}`
-                        .replace('lower', this.convertRupiah(Number(service?.lower_price)))
-                        .replace('higher', this.convertRupiah(Number(service?.upper_price))) ??
+                        .replace('lower', convertRupiah(Number(service?.lower_price)))
+                        .replace('higher', convertRupiah(Number(service?.upper_price))) ??
                         `{{ __('form.helpers.service') }}`,
                 };
 
@@ -535,3 +511,4 @@
         };
     </script>
 @endPushOnce
+</x-app-layout>

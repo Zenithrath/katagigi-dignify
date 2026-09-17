@@ -2,7 +2,6 @@
     .auth-base {
         @apply absolute top-0 z-20 flex flex-col w-full h-full;
         @apply bg-gradient-to-bl from-transparent to-brand-100;
-        @apply dark:to-brand-800/20;
         @apply text-base 2xl:text-lg;
     }
 
@@ -20,7 +19,6 @@
     .auth-accent {
         @apply h-full w-full bg-gradient-to-bl from-brand-500
             to-blue-500;
-        @apply md:dark:from-brand-900 md:dark:to-blue-900;
     }
 
     .auth-container {
@@ -38,7 +36,7 @@
 
     .auth-form-container {
         @apply  w-5/6 sm:w-[400px] p-8 rounded-md;
-        @apply bg-slate-50 dark:bg-slate-800;
+        @apply bg-slate-50;
     }
 
     .auth-password-revealer {
@@ -54,6 +52,6 @@
     }
 
     .auth-checkbox-caption {
-        @apply text-sm text-gray-600 dark:text-gray-200;
+        @apply text-sm text-gray-600;
     }
 }

@@ -11,8 +11,8 @@ use App\Types\Entities\DoctorEntity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class DoctorController extends Controller
 {
@@ -83,8 +83,7 @@ class DoctorController extends Controller
         $inserted = $this->service->insertDoctor($doctor);
 
         if ($inserted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($inserted->getMessage());
+            Log::error($inserted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.doctor.error.oncreate'))->withInput();
@@ -92,17 +91,6 @@ class DoctorController extends Controller
 
         return redirect()->route('doctors.index')
             ->with('success', __('messages.doctor.success.oncreate'));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**
@@ -156,8 +144,7 @@ class DoctorController extends Controller
         );
         $updated = $this->service->updateDoctor($doctor);
         if ($updated instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($updated->getMessage());
+            Log::error($updated->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.doctor.error.onupdate'))->withInput();
@@ -185,8 +172,7 @@ class DoctorController extends Controller
 
         $deleted = $this->service->deleteDoctor($id);
         if ($deleted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($deleted->getMessage());
+            Log::error($deleted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.doctor.error.ondelete'))->withInput();

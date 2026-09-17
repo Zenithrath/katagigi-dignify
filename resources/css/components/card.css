@@ -1,8 +1,8 @@
 @layer components {
     .content-card {
-        @apply w-full my-4 p-5 sm:p-8 rounded-3xl shadow-sm border border-slate-100;
-        @apply bg-white;
-        @apply dark:bg-slate-900;
+        @apply w-full my-4 p-6 bg-white rounded-2xl;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     }
 
     section.statistic {
@@ -14,13 +14,12 @@
     }
 
     section.statistic .content {
-        @apply grid grid-cols-2 md:grid-cols-4 gap-2;
+        @apply grid grid-cols-2 md:grid-cols-4 gap-3;
     }
 
     .statistic-card {
-        @apply rounded-2xl p-4 flex flex-col gap-1 shadow-sm border border-slate-100;
-        @apply bg-white;
-        @apply dark:bg-slate-800;
+        @apply rounded-2xl p-4 flex flex-col gap-1 bg-white;
+        @apply ring-1 ring-slate-900/5 shadow-sm;
     }
 
     .statistic-card .title-container {
@@ -30,21 +29,18 @@
     .statistic-card .title-container .title {
         @apply text-xs flex-1 mb-0 pl-0 overflow-clip;
         @apply lg:text-sm;
-        @apply text-slate-800;
-        @apply dark:text-slate-200;
+        @apply text-slate-500;
     }
 
     .statistic-card .title-container .icon {
         @apply fill-none stroke-1 w-4 h-4 hidden;
         @apply lg:block;
-        @apply stroke-slate-800;
-        @apply dark:stroke-slate-200;
+        @apply stroke-slate-400;
     }
 
     .statistic-card .value {
         @apply text-sm font-semibold;
         @apply lg:text-lg;
-        @apply text-brand-800;
-        @apply dark:text-brand-300;
+        @apply text-slate-900;
     }
 }

@@ -10,9 +10,9 @@ use App\Types\Entities\AdminEntity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class AdminController extends Controller
 {
@@ -83,8 +83,7 @@ class AdminController extends Controller
         $inserted = $this->service->insertAdmin($admin);
 
         if ($inserted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($inserted->getMessage());
+            Log::error($inserted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.admin.error.oncreate'))->withInput();
@@ -92,17 +91,6 @@ class AdminController extends Controller
 
         return redirect()->route('admins.index')
             ->with('success', __('messages.admin.success.oncreate'));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**
@@ -153,8 +141,7 @@ class AdminController extends Controller
         );
         $updated = $this->service->updateAdmin($admin);
         if ($updated instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($updated->getMessage());
+            Log::error($updated->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.admin.error.onupdate'))->withInput();
@@ -182,8 +169,7 @@ class AdminController extends Controller
 
         $deleted = $this->service->deleteAdmin($id);
         if ($deleted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($deleted->getMessage());
+            Log::error($deleted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.admin.error.ondelete'))->withInput();

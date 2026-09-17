@@ -11,7 +11,7 @@ use App\Services\Patient\MedicalRecordService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Symfony\Component\Console\Output\ConsoleOutput;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class MasterController extends Controller
@@ -211,8 +211,7 @@ class MasterController extends Controller
 
         $deleted = $this->service->deletePatient($id);
         if ($deleted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($deleted->getMessage());
+            Log::error($deleted->getMessage());
 
             return back()
                 ->withErrors('error', __('messages.patient.error.ondelete'))->withInput();

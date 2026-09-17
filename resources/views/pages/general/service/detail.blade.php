@@ -1,23 +1,10 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.service.detail._title') }}</x-slot:title>
 
-@section('_title', __('general.service.detail._title'))
-@section('header')
-    <x-main-header title="{{ __('features.service') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.SERVICE" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ route('services.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ __('general.service.detail._title') }} </h1>
         </div>
@@ -54,7 +41,7 @@
             </dl>
         </section>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -65,3 +52,4 @@
         }
     </script>
 @endPushOnce
+</x-app-layout>

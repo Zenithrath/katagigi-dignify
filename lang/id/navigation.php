@@ -22,8 +22,10 @@ return [
         ],
         'report' => [
             '_title' => 'Laporan',
+            'installment' => 'Cicilan',
             'transaction' => 'Transaksi',
             'turnover' => 'Omset',
+            'approval' => 'Persetujuan',
         ],
     ],
     'topnav' => [

@@ -20,7 +20,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Symfony\Component\Console\Output\ConsoleOutput;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class MedicalRecordController extends Controller
@@ -164,8 +164,7 @@ class MedicalRecordController extends Controller
         $services = $this->serviceService->readServicesByIDList($request['service_id']);
 
         if ($services instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($services->getMessage());
+            Log::error($services->getMessage());
 
             return redirect()->back()
                 ->with('error', __('messages.medical-record.error.oncreate'))
@@ -213,8 +212,7 @@ class MedicalRecordController extends Controller
 
         $inserted = $this->service->insertMedicalRecord($validated);
         if ($inserted instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($inserted->getMessage());
+            Log::error($inserted->getMessage());
 
             return redirect()->back()
                 ->with('error', __('messages.medical-record.error.oncreate'))
@@ -349,8 +347,7 @@ class MedicalRecordController extends Controller
         $services = $this->serviceService->readServicesByIDList($request['service_id']);
 
         if ($services instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($services->getMessage());
+            Log::error($services->getMessage());
 
             return redirect()->back()
                 ->with('error', __('messages.medical-record.error.onupdate'))
@@ -382,8 +379,7 @@ class MedicalRecordController extends Controller
         $updated = $this->service->update($id, $request);
 
         if ($updated instanceof Throwable) {
-            $output = new ConsoleOutput;
-            $output->writeln($updated->getMessage());
+            Log::error($updated->getMessage());
 
             return redirect()->back()
                 ->with('error', __('messages.medical-record.error.onupdate'))
@@ -446,8 +442,7 @@ class MedicalRecordController extends Controller
 
         $status = $this->service->deleteMedicalRecord($id);
         if ($status instanceof Exception) {
-            $output = new ConsoleOutput;
-            $output->writeln($status->getMessage());
+            Log::error($status->getMessage());
 
             return redirect()->back()
                 ->with('error', __('messages.medical-record.success.ondelete'));

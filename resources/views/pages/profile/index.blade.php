@@ -1,92 +1,22 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.profile.index._title') }}</x-slot:title>
 
-@section('_title', __('general.profile.index._title'))
-@section('header')
-    <x-main-header title="{{ __('general.profile.index._title') }}
-        {{  $role == 'admin' ? __('general.profile.index.type.admin') : ($role == 'doctor' ? __('general.profile.index.type.doctor') : __('general.profile.index.type.nurse') ) }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12" x-data>
         <div class="flex gap-4 items-center">
             <a href="{{ route('admins.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ __('general.profile.index.menu') }} </h1>
         </div>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <div class="content-card p-0">
             <form method="post" enctype="multipart/form-data" action="{{ $action }}">
                 @csrf
                 @method('put')
 
-                <div class="picture-container" x-data="pictureState">
-                    <div class="cover-picture overflow-hidden relative">
-                        <img id="cover-preview" x-show="isCoverPreviewMode"
-                            src="{{ isset($data->cover_picture) ? url('storage/' . $data->cover_picture) : '' }}"
-                            alt="" srcset="" />
-                        <div class="picture-action-container absolute">
-                            <label>
-                                <input type="file" name="cover_image" id="cover_image"
-                                    @change="showCoverPreview(event, 'cover-preview')" />
-                                <div class="picture-action browse">
-                                    <x-icons.camera-plus />
-                                </div>
-                            </label>
-                            <button class="picture-action" @click="clearCover(event, 'cover_image', 'cover-preview')">
-                                <x-icons.x />
-                            </button>
-                        </div>
-                    </div>
-                    <div class="profile-picture top-1/2 md:top-1/2">
-                        <div class="relative w-full h-full">
-                            <img id="profile-preview" x-show="isProfilePreviewMode"
-                                src="{{ isset($data->profile_picture) ? url('storage/' . $data->profile_picture) : '' }}"
-                                alt="" srcset="" class="absolute w-full" />
-                            <div class="absolute flex items-center justify-center w-full h-full">
-                                <label>
-                                    <input type="file" name="profile_image" id="profile"
-                                        @change="showProfilePreview(event, 'profile-preview')" />
-                                    <div class="picture-action browse">
-                                        <x-icons.camera-plus />
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    @error('cover_image')
-                        <div class="ml-36 md:ml-48">
-                            <small class="danger">{{ $message }}</small>
-                        </div>
-                    @enderror
-
-                    @error('profile_image')
-                        <div class="ml-36 md:ml-48">
-                            <small class="danger">{{ $message }}</small>
-                        </div>
-                    @enderror
-                </div>
+                <x-picture-upload :data="$data" type="update" />
 
                 <div class="pb-8 px-8 flex flex-col">
                     <div class="input-container">
@@ -216,45 +146,6 @@
             </form>
         </div>
     </main>
-@endsection
 
-@pushOnce('scripts')
-    <script type="text/javascript">
-        const pictureState = {
-            isProfilePreviewMode: false,
-            isCoverPreviewMode: false,
-            init() {
-                if ("{{ $data->cover_picture ?? '' }}" != "") {
-                    this.isCoverPreviewMode = true;
-                }
 
-                if ("{{ $data->profile_picture ?? '' }}" != "") {
-                    this.isProfilePreviewMode = true;
-                }
-            },
-            showCoverPreview(event, targetID) {
-                if (event.target.files.length <= 0) return;
-                let src = URL.createObjectURL(event.target.files[0]);
-                let preview = document.getElementById(targetID);
-                this.isCoverPreviewMode = true;
-                preview.src = src;
-                preview.style.display = "block";
-            },
-            showProfilePreview(event, targetID) {
-                if (event.target.files.length <= 0) return;
-                let src = URL.createObjectURL(event.target.files[0]);
-                let preview = document.getElementById(targetID);
-                this.isProfilePreviewMode = true;
-                preview.src = src;
-                preview.style.display = "block";
-            },
-            clearCover(selfElem, inputID, previewID) {
-                selfElem.preventDefault();
-                document.getElementById(inputID).value = '';
-                let preview = document.getElementById(previewID);
-                this.isCoverPreviewMode = false;
-                preview.src = "";
-            }
-        };
-    </script>
-@endPushOnce
+</x-app-layout>

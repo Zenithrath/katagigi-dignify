@@ -1,40 +1,17 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ $type == 'update' ? __('form.title.update.appointment') : __('form.title.create.appointment') }}</x-slot:title>
 
-@section('_title', $type == 'update' ? __('form.title.update.appointment') : __('form.title.create.appointment'))
-@section('header')
-    <x-main-header title="{{ __('features.appointment') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="GENERAL.APPOINTMENT" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ route('appointments.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1>
                 {{ $type == 'update' ? __('form.title.update.appointment') : __('form.title.create.appointment') }}
             </h1>
         </div>
 
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <form method="post" enctype="multipart/form-data" action="{{ $action }}">
             <div class="content-card">
@@ -140,7 +117,7 @@
                                     <button class="clickable-ghost !border-danger-500 px-2 rounded-md stroke-danger-500"
                                         @click.prevent="handleRemoveService(index)">
                                         <div class="w-6 h-6">
-                                            <x-icons.trash />
+                                            <x-lucide-trash-2 class="w-6 h-6" />
                                         </div>
                                     </button>
                                 </div>
@@ -196,7 +173,7 @@
             </div>
         </form>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -261,3 +238,4 @@
         };
     </script>
 @endPushOnce
+</x-app-layout>

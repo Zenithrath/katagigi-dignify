@@ -7,6 +7,13 @@ use Livewire\Component;
 
 class SidebarLogout extends Component
 {
+    public bool $collapsible = false;
+
+    public function mount(bool $collapsible = false): void
+    {
+        $this->collapsible = $collapsible;
+    }
+
     public function logout(Logout $logout): void
     {
         $logout();

@@ -1,23 +1,10 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('patient.master.detail.title') }}</x-slot:title>
 
-@section('_title', __('patient.master.detail.title'))
-@section('header')
-    <x-main-header title="{{ __('features.patient') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="PATIENT.MASTER" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ route('patients.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ __('patient.master.detail.title') }} </h1>
         </div>
@@ -28,8 +15,8 @@
                     alt="" srcset="" class="absolute w-36 h-36 -top-16 rounded-full object-cover object-center" />
             @else
                 <div
-                    class="absolute w-36 h-36 -top-16 rounded-full bg-slate-300 dark:bg-slate-700 border-4 border-slate-200 dark:border-slate-950 fill-none stroke-1 stroke-slate-200 dark:stroke-slate-500">
-                    <x-icons.user-circle />
+                    class="absolute w-36 h-36 -top-16 rounded-full bg-slate-300 border-4 border-slate-200 fill-none stroke-1 stroke-slate-200
+                    <x-lucide-user-circle class="w-full h-full" />
                 </div>
             @endif --}}
 
@@ -172,7 +159,7 @@
                     </section>
 
                     <section id="main-content-history">
-                        {{-- <section class="bg-slate-50 dark:bg-slate-900 dark:border dark:border-slate-700 p-8 rounded-md">
+                        {{-- <section class="bg-slate-50 p-8 rounded-md">
                             <form action="" method="GET">
                                 <div class="input-group">
                                     <label for="keyword">{{ __('patient.record.index.table.patient_keyword_history') }}</label>
@@ -374,7 +361,7 @@
             </div>
         </div>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
@@ -428,3 +415,4 @@
         // }
     </script>
 @endPushOnce
+</x-app-layout>

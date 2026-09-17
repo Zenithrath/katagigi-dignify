@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.service.index._title') }}</x-slot:title>
 
-@section('_title', __('general.service.index._title'))
-@section('header')
-    <x-main-header title="{{ __('features.installment') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="REPORT.INSTALLMENT" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container">
         <section class="heading">
             <div>
@@ -22,17 +9,7 @@
             </div>
         </section>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <section class="table-content overflow-x-auto">
             <table cal>
@@ -98,7 +75,7 @@
         </section>
 
         <section class="mt-4">
-            <nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 sm:px-0">
+            <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0">
                 <div class="-mt-px flex w-0 flex-1">
                     @if ($pagination->page > 1)
                         <a href="{{ route('installments.index', ['page' => $pagination->page - 1]) }}"
@@ -170,4 +147,4 @@
             </nav>
         </section>
     </main>
-@endsection
+</x-app-layout>

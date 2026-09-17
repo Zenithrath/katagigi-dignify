@@ -1,0 +1,176 @@
+/* ============================================================
+   Sidebar — full-height, flush edges, broken white bg
+   ============================================================ */
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+.app-sidebar {
+    --dz-green-dark: #0d5c3e;
+    --dz-green-light-bg: #eaf6f0;
+    --dz-text-main: #111827;
+    --dz-text-muted: #6b7280;
+    --dz-text-sub: #9ca3af;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    width: 260px;
+    flex-shrink: 0;
+    z-index: 30;
+}
+
+.main-column {
+    flex: 1;
+    min-width: 0;
+    background: #ffffff;
+}
+
+/* ---------- Logo ---------- */
+.app-sidebar .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--dz-text-main);
+    padding: 24px 24px 28px;
+    text-decoration: none;
+}
+
+.app-sidebar .logo img {
+    height: 30px;
+    width: auto;
+    display: block;
+}
+
+/* ---------- Section & list ---------- */
+.app-sidebar .menu-section {
+    margin-bottom: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.app-sidebar .menu-section:last-child {
+    margin-bottom: 0;
+}
+
+.app-sidebar .menu-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dz-text-sub);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 12px;
+}
+
+.app-sidebar .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- Item + active capsule ---------- */
+.app-sidebar .nav-item {
+    position: relative;
+}
+
+.app-sidebar .nav-item::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 4px;
+    height: 22px;
+    background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 50%, #051d11 100%);
+    box-shadow: inset 1px 1px 1.5px rgba(255, 255, 255, 0.45), inset -1px -1px 2px rgba(0, 0, 0, 0.7), 0 2px 5px rgba(5, 29, 17, 0.35);
+    border-radius: 0 4px 4px 0;
+    opacity: 0;
+}
+
+.app-sidebar .nav-item:hover::before {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
+}
+
+.app-sidebar .nav-item.active::before {
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
+}
+
+/* ---------- Link ---------- */
+.app-sidebar .nav-item a,
+.app-sidebar .nav-item button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    color: var(--dz-text-muted);
+    background: transparent;
+    border: 0;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: left;
+    text-decoration: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.app-sidebar .nav-item:hover a,
+.app-sidebar .nav-item:hover button {
+    transition: background-color 0.2s ease, color 0.2s ease;
+    background-color: var(--dz-green-light-bg);
+    color: var(--dz-green-dark);
+}
+
+.app-sidebar .nav-item.active a,
+.app-sidebar .nav-item.active button {
+    background-color: var(--dz-green-light-bg);
+    color: var(--dz-green-dark);
+    font-weight: 700;
+}
+
+.app-sidebar .nav-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.app-sidebar .nav-item .nav-label {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-sidebar .nav-item .badge {
+    margin-left: auto;
+    background-color: var(--dz-green-dark);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+/* ---------- Scrollbar hidden ---------- */
+.app-sidebar .sidebar-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.app-sidebar .sidebar-scroll::-webkit-scrollbar {
+    display: none;
+}

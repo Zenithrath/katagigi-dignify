@@ -1,38 +1,15 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ __('general.password.index._title') }}</x-slot:title>
 
-@section('_title', __('general.password.index._title'))
-@section('header')
-    <x-main-header title="{{ __('general.password.index.menu') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12" x-data>
         <div class="flex gap-4 items-center">
             <a href="{{ url()->previous() }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ __('general.password.index._title') }} </h1>
         </div>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <div class="content-card p-0">
             <form method="post" action="{{ $action }}">
@@ -68,4 +45,4 @@
             </form>
         </div>
     </main>
-@endsection
+</x-app-layout>

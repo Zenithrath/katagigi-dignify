@@ -11,18 +11,15 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
     /**
-     * Display the password reset view.
-     *
-     * @return View
+     * Display the password reset view (Volt).
      */
     public function create(Request $request)
     {
-        return view('auth.reset-password', ['request' => $request]);
+        return redirect()->route('password.reset', $request->only('token') + ['email' => $request->email]);
     }
 
     /**

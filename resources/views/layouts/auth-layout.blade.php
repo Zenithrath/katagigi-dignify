@@ -9,8 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
-    @vite('resources/css/app.css')
-    @vite('resources/js/app.js')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <title>@yield('_title') - {{ __('Kata Gigi') }}</title>
     {{-- <script src="//unpkg.com/alpinejs" defer></script> --}}
 </head>

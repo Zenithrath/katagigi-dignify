@@ -1,51 +1,18 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ $type == 'update' ? __('form.title.update.patient') : __('form.title.create.patient') }}</x-slot:title>
 
-@section('_title', $type == 'update' ? __('form.title.update.patient') : __('form.title.create.patient'))
-@section('header')
-    <x-main-header title="{{ __('features.patient') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="PATIENT.MASTER" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="mb-auto px-8 pt-8 pb-12">
         <div class="flex gap-4 items-center">
             <a href="{{ route('patients.index') }}" class="clickable-ghost w-8 h-8 rounded-md">
-                <x-icons.chevron-left />
+                <x-lucide-chevron-left class="w-full h-full" />
             </a>
             <h1> {{ $type == 'update' ? __('form.title.update.patient') : __('form.title.create.patient') }} </h1>
         </div>
 
-        @if (Session::has('error'))
-            <div class="mb-16">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <form method="post" enctype="multipart/form-data" action="{{ $action }}">
             <div class="picture-container">
-                {{-- <div class="profile-picture -top-12" x-data="pictureState">
-                    <div class="relative w-full h-full">
-                        <img id="profile-preview" x-show="isProfilePreviewMode"
-                            src="{{ $type == 'update' && (isset($data->picture) || old('picture')) ? asset('storage/' . $data->picture) : '' }}"
-                            alt="" srcset="" class="absolute w-full" />
-                        <div class="absolute flex items-center justify-center w-full h-full">
-                            <label>
-                                <input type="file" name="picture" id="profile"
-                                    @change="showProfilePreview(event, 'profile-preview')" />
-                                <div class="picture-action browse">
-                                    <x-icons.camera-plus />
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div> --}}
 
                 <div class="content-card">
                     @csrf
@@ -318,27 +285,10 @@
             </div>
         </form>
     </main>
-@endsection
+
 
 @pushOnce('scripts')
     <script type="text/javascript">
-        const pictureState = {
-            isProfilePreviewMode: false,
-            init() {
-                if ("{{ $data->picture }}" != "") {
-                    this.isProfilePreviewMode = true;
-                }
-            },
-            showProfilePreview(event, targetID) {
-                if (event.target.files.length <= 0) return;
-                let src = URL.createObjectURL(event.target.files[0]);
-                let preview = document.getElementById(targetID);
-                this.isProfilePreviewMode = true;
-                preview.src = src;
-                preview.style.display = "block";
-            }
-        };
-
         function copyEmail() {
             let email = document.getElementById('email');
             let payment_email = document.getElementById('payment_email');
@@ -346,3 +296,4 @@
         }
     </script>
 @endPushOnce
+</x-app-layout>

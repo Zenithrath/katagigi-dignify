@@ -12,17 +12,25 @@ use Throwable;
 
 class ScheduleService extends Service
 {
-    public function countTotalData()
+    public function countTotalData(mixed $filter = null)
     {
         try {
-            $schedule = DB::table('schedules')
+            $query = DB::table('schedules')
                 ->selectRaw('count(*) as counter');
 
-            return $schedule->first();
+            if ($filter && ! empty($filter->doctor_id)) {
+                $query->where('doctor_id', $filter->doctor_id);
+            }
+
+            if ($filter && ! empty($filter->day)) {
+                $query->where('day', $filter->day);
+            }
+
+            return $query->first();
         } catch (Throwable $th) {
             $this->writeLog('ScheduleService::countTotalData', $th);
 
-            return new Collection;
+            return (object) ['counter' => 0];
         }
     }
 
@@ -47,7 +55,7 @@ class ScheduleService extends Service
         $limit = $filter->limit ?? 20;
 
         try {
-            $schedule = DB::table('schedules')
+            $query = DB::table('schedules')
                 ->join('doctors', 'doctors.user_id', '=', 'schedules.doctor_id', 'left')
                 ->join('users', 'users.id', '=', 'doctors.user_id', 'left')
                 ->select([
@@ -59,11 +67,20 @@ class ScheduleService extends Service
                     'time_start',
                     'time_end',
                 ])
-                ->orderBy('name', 'asc')
-                ->limit($limit)
+                ->orderBy('name', 'asc');
+
+            if (! empty($filter->doctor_id)) {
+                $query->where('schedules.doctor_id', $filter->doctor_id);
+            }
+
+            if (! empty($filter->day)) {
+                $query->where('schedules.day', $filter->day);
+            }
+
+            $query->limit($limit)
                 ->offset(($page - 1) * $limit);
 
-            return $schedule->get();
+            return $query->get();
         } catch (Throwable $th) {
             $this->writeLog('ScheduleService::readScheduleByFilter', $th);
 

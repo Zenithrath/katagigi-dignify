@@ -1,19 +1,6 @@
-@extends('layouts.main-layout')
+<x-app-layout>
+    <x-slot:title>{{ 'Dashboard' }}</x-slot:title>
 
-@section('_title', 'Dashboard')
-@section('header')
-    <x-main-header title="{{ __('features.doctor') }}" />
-@endsection
-
-@section('navigator')
-    <x-main-sidenav feature="MASTER.DOCTOR" />
-@endsection
-
-@section('footer')
-    <x-main-footer />
-@endsection
-
-@section('content')
     <main class="main-table-container">
         <section class="heading">
             <div>
@@ -28,17 +15,7 @@
             @endcan
         </section>
 
-        @if (Session::has('success'))
-            <div class="mb-8">
-                <x-alerts.success message="{{ Session::get('success') }}" />
-            </div>
-        @endif
-
-        @if (Session::has('error'))
-            <div class="mb-8">
-                <x-alerts.failed message="{{ Session::get('error') }}" />
-            </div>
-        @endif
+        <x-flash-alerts />
 
         <section class="table-content">
             <table>
@@ -64,8 +41,8 @@
                                             alt="{{ $doctor->name . "'s Profile Picture" }}"
                                             class="w-12 h-12 object-cover object-center rounded-full" />
                                     @else
-                                        <div class="w-12 h-12 fill-none stroke-1 stroke-slate-900 dark:stroke-slate-100">
-                                            <x-icons.user-circle />
+                                        <div class="w-12 h-12 fill-none stroke-1 stroke-slate-900
+                                            <x-lucide-user-circle class="w-full h-full" />
                                         </div>
                                     @endif
                                     <div class="flex flex-col w-64">
@@ -115,4 +92,4 @@
             </table>
         </section>
     </main>
-@endsection
+</x-app-layout>
