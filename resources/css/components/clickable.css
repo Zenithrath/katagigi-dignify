@@ -5,7 +5,12 @@
 
     a {
         @apply basic-transition;
-        @apply text-brand-600 hover:text-brand-500 active:text-brand-700;
+        @apply text-slate-700 hover:text-slate-900;
+    }
+
+    a.clickable-primary,
+    a.btn-shiny-emerald {
+        @apply text-white hover:text-white;
     }
 
     .danger {

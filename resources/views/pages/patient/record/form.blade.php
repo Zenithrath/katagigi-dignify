@@ -2,12 +2,11 @@
     <x-slot:title>{{ $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record') }}</x-slot:title>
 
     <main class="main-table-container">
-        <section class="flex gap-4 items-center">
-            <a href="{{ route('medical-records.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
-                <x-lucide-chevron-left class="w-full h-full" />
-            </a>
-            <h1 class="text-xl font-bold text-slate-900"> {{ $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record') }}
-            </h1>
+        <section class="heading">
+            <div>
+                <h1>{{ $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record') }}</h1>
+                <p>{{ $type == 'update' ? 'Update medical record' : 'Create a new medical record' }}</p>
+            </div>
         </section>
 
         <x-flash-alerts />
@@ -24,7 +23,7 @@
                     <div class="input-group">
                         <label for="appointment_id">{{ __('form.labels.appointment') }}</label>
                         <div class="flex flex-col md:flex-row md:justify-center gap-4 md:gap-2">
-                            <select name="appointment_id" id="appointment_id" class="selectable">
+                            <select name="appointment_id" id="appointment_id" class="custom-select selectable flex-1">
                                 <option value="" selected disabled>
                                     {{ __('form.placeholders.select_appointment') }}</option>
                                 @foreach ($appointments as $appointment)
@@ -35,7 +34,7 @@
                                 @endforeach
                             </select>
 
-                            <button type="button" class="clickable-primary py-2 px-4 rounded-md w-full md:w-fit"
+                            <button type="button" class="btn-submit !w-auto !px-6"
                                 @click.prevent="handleAppointmentChange()">
                                 Find
                             </button>
@@ -47,19 +46,19 @@
                     </div>
 
                     <template x-if="isDataShown">
-                        <div id="client-detail" class="my-4" x-show="isDataShown">
+                        <div id="client-detail" class="my-4 p-4 bg-slate-50 rounded-xl border border-slate-200" x-show="isDataShown">
                             <dl class="detail-list">
                                 <div class="preview-container py-2">
-                                    <dt>{{ __('form.labels.patient_data') }}</dt>
-                                    <dd x-text="patientData"></dd>
+                                    <dt class="text-sm font-semibold text-slate-600">{{ __('form.labels.patient_data') }}</dt>
+                                    <dd class="font-medium text-slate-900" x-text="patientData"></dd>
                                 </div>
                                 <div class="preview-container py-2">
-                                    <dt>{{ __('form.labels.doctor_nipp') }}</dt>
-                                    <dd x-text="doctorNIPP"></dd>
+                                    <dt class="text-sm font-semibold text-slate-600">{{ __('form.labels.doctor_nipp') }}</dt>
+                                    <dd class="font-medium text-slate-900" x-text="doctorNIPP"></dd>
                                 </div>
                                 <div class="preview-container py-2">
-                                    <dt>{{ __('form.labels.doctor_name') }}</dt>
-                                    <dd x-text="doctorName"></dd>
+                                    <dt class="text-sm font-semibold text-slate-600">{{ __('form.labels.doctor_name') }}</dt>
+                                    <dd class="font-medium text-slate-900" x-text="doctorName"></dd>
                                 </div>
                             </dl>
                         </div>
@@ -68,11 +67,11 @@
                     <template x-if="isDataShown">
                         <div class="input-group">
                             <label>{{ __('form.labels.service') }}</label>
-                            <div id="service-container" class="flex flex-col gap-2" x-init="$watch('selectedServices.length', unmountAddService)">
+                            <div id="service-container" class="flex flex-col gap-3" x-init="$watch('selectedServices.length', unmountAddService)">
                                 <template x-for="(service, index) in selectedServices">
-                                    <div>
+                                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                         <div class="flex flex-col md:flex-row gap-2">
-                                            <select name="service_id[]" :id="`service-${index}`" class="flex-1 selectable"
+                                            <select name="service_id[]" :id="`service-${index}`" class="flex-1 custom-select selectable"
                                                 @change="handleServiceChange(index, event)">
                                                 <option value="" disabled selected>
                                                     {{ __('form.placeholders.service') }}
@@ -83,30 +82,28 @@
                                                 </template>
                                             </select>
                                             <input type="number" name="service_quantity[]"
-                                                :id="`service-quantity-${index}`" class="w-full md:w-28"
+                                                :id="`service-quantity-${index}`" class="custom-input !w-28"
                                                 @change="handleQuantityChange(index, event)" required min="1"
                                                 placeholder="{{ __('Quantity') }}" x-model="quantityList[index]" />
                                             <input type="number" name="service_price[]" :id="`service-price-${index}`"
-                                                :min="service.lower_price" :max="service.upper_price" class="w-full md:w-48"
+                                                :min="service.lower_price" :max="service.upper_price" class="custom-input !w-48"
                                                 @change="handlePricingChange(index, event)" required
                                                 placeholder="{{ __('Harga Satuan') }}" x-model="priceList[index]" />
                                             <div class="flex gap-2 w-full md:w-64">
                                                 <input type="number" name="service_discount[]"
                                                     :id="`service-discount-${index}`" :max="service.upper_price"
-                                                    class="w-full md:w-64" min="0"
+                                                    class="custom-input !w-64" min="0"
                                                     @change="handleDiscountChange(index, event)"
                                                     x-model="discountList[index]"
                                                     placeholder="{{ __('form.placeholders.discount') }}" />
                                                 <button
-                                                    class="clickable-ghost !border-danger-500 px-2 rounded-md stroke-danger-500"
+                                                    class="clickable-ghost !border-red-300 !text-red-500 px-2 rounded-xl"
                                                     @click.prevent="handleRemoveService(index)">
-                                                    <div class="w-6 h-6">
-                                                        <x-lucide-trash-2 class="w-6 h-6" />
-                                                    </div>
+                                                    <x-lucide-trash-2 class="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
-                                        <small class="helper" :id="`service-helper-${index}`"
+                                        <small class="helper mt-1" :id="`service-helper-${index}`"
                                             x-text="service.helper_text"></small>
                                         @error('service_id[]')
                                             <small class="danger">{{ $message }}</small>
@@ -119,79 +116,74 @@
 
                     <template x-if="isDataShown">
                         <div class="input-group items-start mt-4">
-                            <button class="clickable-primary px-4 py-2 rounded-md"
-                                @click.prevent="handleAddService()">{{ __('patient.record.form.buttons.add_service') }}</button>
+                            <button class="btn-submit !w-auto !px-5"
+                                @click.prevent="handleAddService()">
+                                <x-lucide-plus class="w-4 h-4" />
+                                {{ __('patient.record.form.buttons.add_service') }}
+                            </button>
                         </div>
                     </template>
 
                     <template x-if="isDataShown">
-                        <div class="input-group mt-4">
-                            <label for="anamnesis">{{ __('form.labels.anamnesis') }}</label>
-                            <textarea name="anamnesis" id="anamnesis" cols="30" rows="10"
-                                placeholder="{{ __('form.placeholders.anamnesis') }}">{{ $record->anamnesis ?? (old('anamnesis') ?? '') }}</textarea>
-                            @error('anamnesis')
-                                <small class="danger">{{ $message }}</small>
-                            @enderror
+                        <div class="mt-6 pt-6 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                            <div class="input-group md:col-span-2">
+                                <label for="anamnesis">{{ __('form.labels.anamnesis') }}</label>
+                                <textarea name="anamnesis" id="anamnesis" cols="30" rows="4" class="custom-input"
+                                    placeholder="{{ __('form.placeholders.anamnesis') }}">{{ $record->anamnesis ?? (old('anamnesis') ?? '') }}</textarea>
+                                @error('anamnesis')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label for="checkup_result">{{ __('form.labels.checkup_result') }}</label>
+                                <textarea name="checkup_result" id="checkup_result" cols="30" rows="4" class="custom-input"
+                                    placeholder="{{ __('form.placeholders.checkup_result') }}">{{ $record->checkup_result ?? (old('checkup_result') ?? '') }}</textarea>
+                                @error('checkup_result')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label>Kode Diagnosis Resmi <span class="text-red-500">*</span></label>
+                                <livewire:diagnosis-search :selected="$diagnosisCodes ?? []" />
+                                <small class="helper">Wajib pilih minimal 1 kode (ICD-10 / ICD-9 / SNOMED). Ketik bahasa awam, mis. "gigi berlubang".</small>
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label for="diagnosis">{{ __('form.labels.diagnosis') }} (catatan tambahan)</label>
+                                <textarea name="diagnosis" id="diagnosis" cols="30" rows="4" class="custom-input"
+                                    placeholder="{{ __('form.placeholders.diagnosis') }}">{{ $record->diagnosis ?? (old('diagnosis') ?? '') }}</textarea>
+                                @error('diagnosis')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label for="therapy">{{ __('form.labels.therapy') }}</label>
+                                <textarea name="therapy" id="therapy" cols="30" rows="4" class="custom-input"
+                                    placeholder="{{ __('form.placeholders.therapy') }}">{{ $record->therapy ?? (old('therapy') ?? '') }}</textarea>
+                                @error('therapy')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label for="prescription">{{ __('form.labels.prescription') }}</label>
+                                <textarea name="prescription" id="prescription" cols="30" rows="4" class="custom-input"
+                                    placeholder="{{ __('form.placeholders.prescription') }}">{{ $record->prescription ?? (old('prescription') ?? '') }}</textarea>
+                                @error('prescription')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
                         </div>
                     </template>
 
                     <template x-if="isDataShown">
-                        <div class="input-group mt-4">
-                            <label for="checkup_result">{{ __('form.labels.checkup_result') }}</label>
-                            <textarea name="checkup_result" id="checkup_result" cols="30" rows="10"
-                                placeholder="{{ __('form.placeholders.checkup_result') }}">{{ $record->checkup_result ?? (old('checkup_result') ?? '') }}</textarea>
-                            @error('checkup_result')
-                                <small class="danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </template>
-
-                    <template x-if="isDataShown">
-                        <div class="input-group mt-4">
-                            <label>Kode Diagnosis Resmi <span class="danger">*</span></label>
-                            <livewire:diagnosis-search :selected="$diagnosisCodes ?? []" />
-                            <small class="helper">Wajib pilih minimal 1 kode (ICD-10 / ICD-9 / SNOMED). Ketik bahasa awam, mis. “gigi berlubang”.</small>
-                        </div>
-                    </template>
-
-                    <template x-if="isDataShown">
-                        <div class="input-group mt-4">
-                            <label for="diagnosis">{{ __('form.labels.diagnosis') }} (catatan tambahan)</label>
-                            <textarea name="diagnosis" id="diagnosis" cols="30" rows="10"
-                                placeholder="{{ __('form.placeholders.diagnosis') }}">{{ $record->diagnosis ?? (old('diagnosis') ?? '') }}</textarea>
-                            @error('diagnosis')
-                                <small class="danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </template>
-
-                    <template x-if="isDataShown">
-                        <div class="input-group mt-4">
-                            <label for="therapy">{{ __('form.labels.therapy') }}</label>
-                            <textarea name="therapy" id="therapy" cols="30" rows="10"
-                                placeholder="{{ __('form.placeholders.therapy') }}">{{ $record->therapy ?? (old('therapy') ?? '') }}</textarea>
-                            @error('therapy')
-                                <small class="danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </template>
-
-                    <template x-if="isDataShown">
-                        <div class="input-group mt-4">
-                            <label for="prescription">{{ __('form.labels.prescription') }}</label>
-                            <textarea name="prescription" id="prescription" cols="30" rows="10"
-                                placeholder="{{ __('form.placeholders.prescription') }}">{{ $record->prescription ?? (old('prescription') ?? '') }}</textarea>
-                            @error('prescription')
-                                <small class="danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </template>
-
-                    <template x-if="isDataShown">
-                        <div class="flex flex-col md:flex-row w-full gap-2 md:gap-4">
-                            <div class="input-group mt-4 flex-1">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 mt-4">
+                            <div class="input-group">
                                 <label for="promat">{{ __('form.labels.promat') }}</label>
-                                <select name="promat" id="promat" class="selectable">
+                                <select name="promat" id="promat" class="custom-select">
                                     <option value="PROMAT" @selected($record->promat === 'PROMAT')>Promat</option>
                                     <option value="NO PROMAT" @selected($record->promat === 'NO PROMAT')>No Promat</option>
                                 </select>
@@ -200,9 +192,9 @@
                                 @enderror
                             </div>
 
-                            <div class="input-group mt-4 flex-1">
+                            <div class="input-group">
                                 <label for="blood_pressure">{{ __('form.labels.blood_pressure') }}</label>
-                                <input type="text" name="blood_pressure" id="blood_pressure"
+                                <input type="text" name="blood_pressure" id="blood_pressure" class="custom-input"
                                     value="{{ $record->blood_pressure ?? '' }}"
                                     placeholder="{{ __('form.placeholders.blood_pressure') }}" />
                                 @error('blood_pressure')
@@ -210,9 +202,9 @@
                                 @enderror
                             </div>
 
-                            <div class="input-group mt-4 flex-1">
+                            <div class="input-group">
                                 <label for="cooperativity">{{ __('form.labels.cooperativity') }}</label>
-                                <select name="cooperativity" id="cooperativity" class="selectable">
+                                <select name="cooperativity" id="cooperativity" class="custom-select">
                                     <option value="COOPERATIVE" @selected($record->cooperativity === 'COOPERATIVE')>
                                         {{ __('patient.record.form.select.cooperativity.cooperative') }}</option>
                                     <option value="LESS COOPERATIVE" @selected($record->cooperativity === 'LESS COOPERATIVE')>
@@ -227,27 +219,27 @@
                         </div>
                     </template>
 
-                    <div class="flex flex-col md:flex-row gap-2 w-full">
-                        <div class="input-group mt-4 flex-1">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 mt-4 pt-4 border-t border-slate-200">
+                        <div class="input-group">
                             <label for="price">{{ __('form.labels.total_price') }}</label>
-                            <input type="number" name="price" id="price" x-model="currentPrice"
+                            <input type="number" name="price" id="price" x-model="currentPrice" class="custom-input"
                                 placeholder="{{ __('form.placeholders.price') }}"
                                 value="{{ old('price') ?? ($record->price ?? 0) }}" readonly />
                             @error('price')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="input-group mt-4 flex-1">
+                        <div class="input-group">
                             <label for="discount">{{ __('Discount') }}</label>
-                            <input type="number" name="discount" id="discount" x-model="currentDiscount"
+                            <input type="number" name="discount" id="discount" x-model="currentDiscount" class="custom-input"
                                 value="{{ old('discount') }}" readonly />
                             @error('discount')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="input-group mt-4 flex-1">
+                        <div class="input-group">
                             <label for="billing">{{ __('Total') }}</label>
-                            <input type="number" name="billing" id="billing" x-model="billing"
+                            <input type="number" name="billing" id="billing" x-model="billing" class="custom-input"
                                 value="{{ old('billing') ?? ($record->billing ?? 0) }}" readonly />
                             @error('billing')
                                 <small class="danger">{{ $message }}</small>
@@ -258,7 +250,7 @@
                     <template x-if="isDataShown">
                         <div class="input-group mt-4">
                             <label for="next_schedule">{{ __('form.labels.next_schedule') }}</label>
-                            <input type="date" name="next_schedule" id="next_schedule"
+                            <input type="date" name="next_schedule" id="next_schedule" class="custom-input"
                                 value="{{ $record->next_schedule ? date('Y-m-d', strtotime($record->next_schedule)) : 0 }}" />
                             @error('next_schedule')
                                 <small class="danger">{{ $message }}</small>
@@ -267,15 +259,15 @@
                     </template>
 
                     <template x-if="isDataShown">
-                        <div class="w-full grid grid-cols-1 flex-wrap md:grid-cols-2 gap-4 mt-4">
+                        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-200">
                             <div class="input-group">
-                                <span>{{ __('form.labels.image_before') }}</span>
+                                <label class="text-sm font-semibold text-slate-700">{{ __('form.labels.image_before') }}</label>
                                 <div class="flex flex-wrap gap-2">
                                     <template x-for="(image, index) in imageBeforeList">
                                         <label :for="`image_before[${index}]`"
-                                            class="relative w-20 h-20 border-2 border-dashed border-slate-300 rounded-md overflow-hidden cursor-pointer">
+                                            class="relative w-20 h-20 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden cursor-pointer hover:border-emerald-400 transition-colors">
                                             <template x-if="imageBeforeList[index].src == ''">
-                                                <div class="w-full h-full flex items-center justify-center">
+                                                <div class="w-full h-full flex items-center justify-center text-slate-400 text-xs font-medium">
                                                     + {{ __('form.actions.add') }}
                                                 </div>
                                             </template>
@@ -313,13 +305,13 @@
                                 @enderror
                             </div>
                             <div class="input-group">
-                                <span>{{ __('form.labels.image_after') }}</span>
+                                <label class="text-sm font-semibold text-slate-700">{{ __('form.labels.image_after') }}</label>
                                 <div class="flex flex-wrap gap-2">
                                     <template x-for="(image, index) in imageAfterList">
                                         <label :for="`image_after[${index}]`"
-                                            class="relative w-20 h-20 border-2 border-dashed border-slate-300 rounded-md overflow-hidden cursor-pointer">
+                                            class="relative w-20 h-20 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden cursor-pointer hover:border-emerald-400 transition-colors">
                                             <template x-if="imageAfterList[index].src == ''">
-                                                <div class="w-full h-full flex items-center justify-center">
+                                                <div class="w-full h-full flex items-center justify-center text-slate-400 text-xs font-medium">
                                                     + {{ __('form.actions.add') }}
                                                 </div>
                                             </template>
@@ -359,9 +351,11 @@
                     </template>
 
                     <template x-if="isDataShown">
-                        <input type="submit"
-                            value="{{ $type == 'update' ? __('form.actions.update') : __('form.actions.add') }}"
-                            class="btn-submit" />
+                        <div class="mt-6 pt-6 border-t border-slate-200 flex justify-end">
+                            <button type="submit" class="btn-submit !w-auto !px-8">
+                                {{ $type == 'update' ? __('form.actions.update') : __('form.actions.add') }}
+                            </button>
+                        </div>
                     </template>
                 </div>
             </form>

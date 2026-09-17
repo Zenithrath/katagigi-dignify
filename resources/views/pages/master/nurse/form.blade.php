@@ -1,29 +1,31 @@
 <x-app-layout>
-    <x-slot:title>{{ 'Dashboard' }}</x-slot:title>
+    <x-slot:title>{{ $type == 'update' ? __('master.nurse.form.title.edit') : __('master.nurse.form.title.add') }}</x-slot:title>
 
     <main class="main-table-container">
-        <div class="flex gap-4 items-center">
-            <a href="{{ route('nurses.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
-                <x-lucide-chevron-left class="w-full h-full" />
-            </a>
-            <h1 class="text-xl font-bold text-slate-900"> {{ $type == 'update' ? __('master.nurse.form.title.edit') : __('master.nurse.form.title.add') }} </h1>
-        </div>
+        <section class="heading">
+            <div>
+                <h1>{{ $type == 'update' ? __('master.nurse.form.title.edit') : __('master.nurse.form.title.add') }}</h1>
+                <p>{{ $type == 'update' ? 'Update nurse information' : 'Register a new nurse' }}</p>
+            </div>
+        </section>
 
-        <div class="content-card p-0">
-            <form method="post" enctype="multipart/form-data" action="{{ $action }}">
-                @csrf
+        <x-flash-alerts />
 
-                @if ($type == 'update')
-                    @method('put')
-                @endif
+        <form method="post" enctype="multipart/form-data" action="{{ $action }}">
+            @csrf
 
+            @if ($type == 'update')
+                @method('put')
+            @endif
+
+            <div class="content-card p-0 overflow-hidden">
                 <x-picture-upload :data="$data" :type="$type" />
 
-                <div class="pb-8 px-8 flex flex-col">
-                    <div class="input-container">
+                <div class="p-8 flex flex-col">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
                         <div class="input-group">
                             <label for="name">{{ __('form.labels.name') }}</label>
-                            <input type="text" name="name" id="name"
+                            <input type="text" name="name" id="name" class="custom-input"
                                 placeholder="{{ __('form.placeholders.name') }}" value="{{ $data->name ?? '' }}" />
                             <small class="helper">{{ __('form.helpers.english_alpha_min', ['minlength' => 5]) }}</small>
                             @error('name')
@@ -33,8 +35,8 @@
 
                         <div class="input-group">
                             <label for="nipp">{{ __('form.labels.nipp') }}</label>
-                            <input type="text" name="nipp" id="nipp"
-                                placeholder="{{ __('form.placeholders.nipp') }}." value="{{ $data->nipp ?? '' }}" />
+                            <input type="text" name="nipp" id="nipp" class="custom-input"
+                                placeholder="{{ __('form.placeholders.nipp') }}" value="{{ $data->nipp ?? '' }}" />
                             <small class="helper">{{ __('form.helpers.english_alpha_min', ['minlength' => 5]) }}</small>
                             @error('nipp')
                                 <small class="danger">{{ $message }}</small>
@@ -43,23 +45,24 @@
 
                         <div class="input-group">
                             <label for="niptk">{{ __('form.labels.niptk') }}</label>
-                            <input type="text" name="niptk" id="niptk"
+                            <input type="text" name="niptk" id="niptk" class="custom-input"
                                 placeholder="{{ __('form.placeholders.niptk') }}" value="{{ $data->niptk ?? '' }}" />
                             <small class="helper">{{ __('form.helpers.english_alpha_min', ['minlength' => 5]) }}</small>
                             @error('niptk')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
+                    </div>
 
-                        <div class="border-b border-slate-700"></div>
-
+                    <div class="mt-4 pt-4 border-t border-slate-200">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">{{ __('form.labels.address._title') ?? 'Address' }}</h3>
                         <x-address-fields :data="$data" />
+                    </div>
 
-                        <div class="border-b border-slate-700"></div>
-
+                    <div class="mt-4 pt-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
                         <div class="input-group">
                             <label for="email">{{ __('form.labels.email') }}</label>
-                            <input type="text" name="email" id="email"
+                            <input type="text" name="email" id="email" class="custom-input"
                                 placeholder="{{ __('form.placeholders.email') }}" value="{{ $data->email ?? '' }}" />
                             <small class="helper">{{ __('form.helpers.valid_email') }}</small>
                             <small class="helper">{{ __('form.helpers.incase-sensitive') }}</small>
@@ -68,10 +71,9 @@
                             @enderror
                         </div>
 
-                        {{-- @if ($type == 'create') --}}
                         <div class="input-group">
                             <label for="password">{{ __('form.labels.password') }}</label>
-                            <input type="password" name="password" id="password"
+                            <input type="password" name="password" id="password" class="custom-input"
                                 placeholder="{{ __('form.placeholders.password') }}" />
                             <small class="helper">{{ __('form.helpers.password') }}</small>
                             @error('password')
@@ -81,22 +83,21 @@
 
                         <div class="input-group">
                             <label for="password_confirmation">{{ __('form.labels.password_confirmation') }}</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation"
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="custom-input"
                                 placeholder="{{ __('form.placeholders.password_confirmation') }}" />
                             @error('password_confirmation')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        {{-- @endif --}}
                     </div>
 
-                    <input type="submit"
-                        value="{{ $type == 'update' ? __('form.buttons.update') : __('form.buttons.add') }}"
-                        class="btn-submit" />
+                    <div class="mt-6 pt-6 border-t border-slate-200 flex justify-end">
+                        <button type="submit" class="btn-submit !w-auto !px-8">
+                            {{ $type == 'update' ? __('form.buttons.update') : __('form.buttons.add') }}
+                        </button>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </main>
-
-
 </x-app-layout>
