@@ -1,54 +1,24 @@
 @layer components {
-    /* Picture Upload Container */
-    .picture-container {
-        @apply relative;
-        min-height: 200px;
-    }
-
-    /* Cover Picture */
-    .cover-picture {
-        @apply w-full h-40 md:h-48 bg-slate-100 overflow-hidden relative;
-    }
-
-    .cover-picture img {
-        @apply w-full h-full object-cover object-center;
-    }
-
-    /* Profile Picture */
-    .profile-picture {
-        @apply absolute left-6 md:left-8 w-24 h-24 md:w-32 md:h-32
-            rounded-full border-4 border-white
-            bg-slate-200 overflow-hidden
-            shadow-lg z-10;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .profile-picture img {
-        @apply w-full h-full object-cover object-center;
-    }
-
-    /* Picture Action Container (cover overlay) */
-    .picture-action-container {
-        @apply absolute bottom-3 right-3 flex gap-2 z-20;
-    }
-
     /* Picture Action Button */
     .picture-action {
-        @apply w-9 h-9 rounded-xl flex items-center justify-center
+        @apply w-7 h-7 rounded-lg flex items-center justify-center
             bg-white/90 backdrop-blur-sm border border-slate-200
             text-slate-600 hover:text-emerald-600 hover:border-emerald-300
             cursor-pointer transition-all duration-200
             shadow-sm hover:shadow-md;
     }
 
-    .picture-action.browse {
-        @apply hover:bg-emerald-50;
-    }
-
-    /* Hide ALL file inputs inside picture-container */
-    .picture-container input[type="file"] {
-        @apply !absolute !-left-[9999px] !opacity-0 !w-0 !h-0 !p-0 !m-0;
-        pointer-events: none;
+    /* Hide native file inputs */
+    .picture-container input[type="file"],
+    .picture-cover-input,
+    .picture-profile-input {
+        position: absolute !important;
+        left: -9999px !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
     }
 }

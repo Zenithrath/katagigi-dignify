@@ -15,9 +15,37 @@
     --dz-text-muted: #6b7280;
     --dz-text-sub: #9ca3af;
     font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-    width: 260px;
+    width: 220px;
     flex-shrink: 0;
     z-index: 30;
+    transition: width 0.2s ease;
+}
+
+.app-sidebar.collapsed {
+    width: 68px;
+}
+
+.app-sidebar.collapsed .logo span,
+.app-sidebar.collapsed .menu-title,
+.app-sidebar.collapsed .nav-label,
+.app-sidebar.collapsed .badge {
+    display: none;
+}
+
+.app-sidebar.collapsed .nav-item a,
+.app-sidebar.collapsed .nav-item button {
+    justify-content: center;
+    padding: 10px;
+}
+
+.app-sidebar.collapsed .logo {
+    padding: 20px 0;
+    justify-content: center;
+}
+
+.app-sidebar.collapsed .menu-section {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .main-column {
@@ -31,11 +59,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     font-weight: 800;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--dz-text-main);
-    padding: 24px 24px 28px;
+    padding: 16px 16px 20px;
     text-decoration: none;
 }
 
@@ -47,9 +75,9 @@
 
 /* ---------- Section & list ---------- */
 .app-sidebar .menu-section {
-    margin-bottom: 20px;
-    padding-left: 16px;
-    padding-right: 16px;
+    margin-bottom: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
 }
 
 .app-sidebar .menu-section:last-child {
@@ -57,12 +85,12 @@
 }
 
 .app-sidebar .menu-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--dz-text-sub);
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     padding-left: 12px;
 }
 
@@ -110,19 +138,19 @@
 .app-sidebar .nav-item button {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
-    padding: 10px 14px;
+    padding: 8px 12px;
     color: var(--dz-text-muted);
     background: transparent;
     border: 0;
     font-family: inherit;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.4;
     text-align: left;
     text-decoration: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
@@ -141,8 +169,8 @@
 }
 
 .app-sidebar .nav-item svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
 }
 

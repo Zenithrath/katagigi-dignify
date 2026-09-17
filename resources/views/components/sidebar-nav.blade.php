@@ -70,13 +70,3 @@
         </ul>
     </div>
 @endcanany
-
-<div class="menu-section">
-    <x-sidebar-section :collapsible="$collapsible">General</x-sidebar-section>
-    <ul class="nav-list">
-        <x-sidebar-link href="{{ route('profile') }}" :active="request()->routeIs('profile')" icon="settings" :collapsible="$collapsible">{{ __('navigation.topnav.account_settings') }}</x-sidebar-link>
-        <li class="nav-item">
-            <livewire:sidebar-logout :collapsible="$collapsible" />
-        </li>
-    </ul>
-</div>
