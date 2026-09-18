@@ -7,6 +7,11 @@
 
 ## 1. Gap yang harus ditutup (prioritas)
 
+> **Known failure v1 (terverifikasi 18 Sep 2026):**
+> `ClinicSmokeTest::test_manajemen_can_open_all_main_pages` gagal —
+> `medical-records.index` me-return 500. Terbukti bug bawaan v1 (gagal juga dengan
+> perubahan docs di-stash), bukan akibat kerja v2. Masuk antrean Fase 1.
+
 | # | Gap | Dampak jika dibiarkan |
 |---|---|---|
 | 1 | `MasterService insert/update` tidak menyimpan `nik/ihs_id/consent` | Data SATUSEHAT-ready kosong → bridging gagal |

@@ -1,106 +1,164 @@
-# PRD — RME Dental Klinik Gigi (v1 Baseline → v2)
+# PRD — RME Dental Klinik Gigi (v1 aktual client → v2 update kita)
 
-> Status: **v1 FROZEN** (baseline kode saat ini, commit `dc2b1f6` + dokumen ini).
-> V2 dikembangkan di `develop/v2`. Rollback kapan saja ke tag `v1.0.0` / branch `release/v1`.
-> Lihat juga: `BLUEPRINT-RME-DENTAL-v1.md`, `ROADMAP-v1-to-v2.md`, `BRANCHING.md`.
+> **v1 = versi bawaan client, dibekukan.** Kode `dc2b1f6`, tag `v1.0.0`, branch `release/v1`.
+> Rollback kapan saja ke `release/v1` / `v1.0.0` — aman.
+> **v2 = update kita**, dikerjakan di `develop/v2` + `feature/*`, rilis ke `main` (production).
+> Pelengkap: `BLUEPRINT-RME-DENTAL-v1.md` (matriks + skema), `ROADMAP-v1-to-v2.md` (fase),
+> `BRANCHING.md` (alur branch + rollback).
+> Acuan produk: fitur publik DentalDiary (RME, odontogram, ICD-10/ICD-9, appointment,
+> billing, inventory, SATUSEHAT, WhatsApp). Detail internal DentalDiary yang tidak
+> dipublikasikan TIDAK diklaim — bagian itu adalah desain kita dan ditandai `[DESAIN-KITA]`.
 
 ## 1. Ringkasan eksekutif
 
-Membangun RME + Clinic Management khusus klinik gigi dengan acuan fitur DentalDiary
-(RME, odontogram, ICD-10/ICD-9, appointment, billing, inventory, SATUSEHAT, WhatsApp —
-sumber: materi publik P2MW Kemdiktisaintek & situs DentalDiary).
+Sistem adalah **RME + Clinic Management** khusus klinik gigi: pasien → appointment →
+antrian → pemeriksaan (termasuk odontogram) → diagnosis ICD-10 → tindakan ICD-9 →
+resep → rencana perawatan → billing → pembayaran → laporan, plus inventory,
+multi-cabang (nanti), WhatsApp automation (nanti), dan integrasi SATUSEHAT (nanti).
 
-Prinsip: **jangan rewrite**. v1 dibekukan apa adanya sebagai jaring pengaman.
-v2 dikerjakan inkremental menuju blueprint, dengan urutan
-`Patient → Visit → Clinical → Odontogram → Billing → Inventory → WA → SATUSEHAT`.
+Keputusan yang sudah dikunci:
 
-Tanpa WhatsApp dulu (sesuai keputusan): reminder diganti calendar view + pengingat in-app.
+1. **Tanpa WhatsApp dulu** — reminder diganti calendar view + pengingat in-app.
+2. **Tanpa rewrite** — v2 tetap Laravel 13 + Livewire + Blade + Spatie (monolit modular).
+   Usulan Next.js/Prisma/PostgreSQL dari draft awal DITOLAK (biaya rewrite > manfaat).
+3. **Tanpa role baru** di v2 awal — 4 role aktual
+   (`manajemen, admin, doctor, nurse`) dipetakan ke jobdesk profesional.
+   `Owner ≈ manajemen`, `Front Office ≈ admin`, kasir dirangkap `admin/nurse`
+   sesuai praktik klinik saat ini. `Cashier`/`Super Admin` terpisah hanya bila
+   benar-benar dibutuhkan nanti.
+4. **Tidak ada klaim "Terintegrasi SATUSEHAT / WA otomatis"** sebelum bridging
+   production lolos — klaim prematur = risiko hukum/marketing.
 
-## 2. Tujuan & keberhasilan
+## 2. Definisi v1 (versi client — FROZEN)
 
-1. Setiap pasien punya **satu profil + timeline kunjungan** yang bisa ditelusuri.
-2. Setiap kejadian medis terikat pada **visit/encounter**, bukan atribut pasien.
-3. Aliran **Clinical → Financial**: tindakan dokter mengalir ke billing tanpa ketik ulang.
-4. Setiap role fokus ke jobdesknya (matriks §6).
-5. Siap audit **Permenkes 24/2022** (kontrol akses, audit trail, backup, retensi)
-   dan siap bridging **SATUSEHAT Use Case Gigi** (Encounter, Condition ICD-10,
-   Procedure ICD-9-CM, Observation odontogram/OHIS, Medication KFA).
+### 2.1 Stack & fondasi
 
-## 3. Scope v1 (YANG SUDAH ADA — dibekukan)
+Laravel 13, PHP 8.3, Livewire 3 + Volt, Blade + Tailwind, Spatie Permission 8,
+SQLite (dev) / MySQL/PgSQL (portabel — service menghindari fungsi spesifik DB),
+auth Breeze (email+password, verified, throttle login 5x), UUID sebagai PK
+di hampir semua tabel domain.
 
-Berdasarkan audit kode aktual (Laravel 13 + Livewire + Blade + Spatie Permission):
+### 2.2 Modul v1 yang ADA dan jalan
 
-| Modul | Kondisi v1 aktual |
-|---|---|
-| Auth + RBAC | Login Breeze, 4 role (`manajemen, admin, doctor, nurse`), 48 permission. Enforcement lemah (hanya Blade, minim `authorize`) — dicatat sebagai tech debt, BUKAN dirombak di v1 |
-| Pasien | CRUD `patients` + `patient_addresses`, kolom SATUSEHAT-ready (`nik, ihs_id, birth_place, satusehat_consent`), riwayat kunjungan |
-| Appointment + Jadwal | CRUD `appointments`, `schedules`, status `confirmed/paid/recorded/canceled`. Belum calendar view, belum queue |
-| RME | `medical_records` + teks `anamnesis/diagnosis/therapy`, foto before/after, master `diagnosis_codes (ICD10/ICD9/SNOMED)` + pivot `medical_record_diagnoses`. Belum odontogram, belum SOAP terstruktur, belum visit |
-| Kasir | `transactions`, `installments` (cicilan), laporan income, export Excel, approval pembatalan nota. Model masih `transactions`, BELUM split `invoices/payments/receipts` |
-| Dashboard | Per role (admin/manajemen vs doctor vs nurse) + pasien data belum lengkap (NIK/HP/tgl lahir/alamat) |
-| Follow-up WA | Hanya redirect `wa.me` manual — BUKAN Official API, tidak diklaim otomatis |
-
-## 4. Out of scope v1 → masuk v2 (bertahap)
-
-`odontogram FDI`, `queues`, `treatment_plans`, `prescriptions` terstruktur,
-`invoices/payments/receipts` split, `inventory`, `expenses`, `multi-branch`,
-`WhatsApp Official API`, `SATUSEHAT bridging`, `audit_logs` formal, `e-sign`.
-
-## 5. Kebutuhan fungsional v2 (ringkas, detail di Blueprint)
-
-1. **Patient**: NIK 16 digit valid, IHS ID via MPI/KYC, consent, alamat terstruktur.
-2. **Appointment**: status `BOOKED→CONFIRMED→CHECKED_IN→IN_PROGRESS→COMPLETED→CANCELLED/NO_SHOW/RESCHEDULED`, calendar view, check-in → queue.
-3. **Visit/Encounter**: `visit` sebagai inti (pasien + dokter + appointment + tanggal + status medis TERPISAH dari status billing).
-4. **Clinical**: anamnesis, examination (SOAP + intra/extra oral), odontogram per-gigi FDI + surface + SNOMED finding, diagnosis ICD-10 (primer/sekunder, wajib ≥1), tindakan ICD-9-CM (mengalir ke billing), resep (obat KFA + dosis), treatment plan (PLANNED→COMPLETED), lampiran (foto/X-ray, private storage + signed URL).
-5. **Billing**: invoice (DRAFT→PAID/VOID) + items dari treatment, payment terpisah (mendukung cicilan + multiple method: CASH/TRANSFER/QRIS/DEBIT/KREDIT), receipt/kwitansi, jasa medis dokter (persentase per tindakan).
-6. **Operasional**: jadwal dokter, inventory (item+batch+expiry, movement IN/OUT/ADJUST, low-stock alert), expense, laporan (klinik/dokter/keuangan/inventory).
-7. **Integrasi**: SATUSEHAT sebagai integration layer + sync log (PENDING/SUCCESS/FAILED/RETRY). Implementasi ikut spesifikasi resmi saat coding, bukan asumsi. WhatsApp Business API + message log (ditunda sampai v2 akhir).
-
-## 6. Role & jobdesk (final, dipetakan ke role AKTUAL)
-
-> Blueprint asli mengusulkan Owner/Cashier/Super Admin — **disesuaikan**: tidak ada
-> role baru di v2 awal. `manajemen` = Owner, `admin` = Front Office, kasir dirangkap
-> `admin`+`nurse` sesuai praktik saat ini, `Super Admin` hanya untuk SaaS kelak.
-
-| Modul | manajemen (Owner) | admin (FO) | doctor | nurse (Asisten) |
+| # | Modul | Route (lihat Blueprint §2) | Data | Status v1 |
 |---|---|---|---|---|
-| Dashboard | penuh + keuangan | operasional/antrian | workspace klinis | antrian/bantuan |
-| Pasien | CRUD + hapus | CREATE/VIEW/EDIT (tanpa hapus) | VIEW | VIEW (+draft anamnesis) |
+| 1 | Dashboard per role | `dashboard` | ringkasan admin (omzet, pasien, NIK tak lengkap), dokter (antrian+RM), nurse | Jalan |
+| 2 | Pasien | `patients.*` + `api/patients/lookup` | `patients` + `patient_addresses`; kolom SATUSEHAT-ready (`nik, ihs_id, birth_place, satusehat_consent`) ADA di DB tapi TIDAK disimpan form (tech debt D-01) | Jalan, berlubang |
+| 3 | Appointment | `appointments.*` + confirm + 3 API lookup | `appointments` + snapshot pasien/dokter, `services` JSON, status via `confirmed/paid/recorded/canceled_at` | Jalan (list, belum calendar) |
+| 4 | Jadwal dokter | `schedules.*` (tanpa create/show/edit/update) + update_status | `schedules` (hari enum, jam, availability) | Jalan |
+| 5 | Layanan & kategori | `services.*`, `categories.*` | `services` (harga bawah-atas, komisi dokter string) + `categories` | Jalan |
+| 6 | Master user | `admins.*`, `doctors.*`, `nurses.*` (tanpa show) | `users` + `admins/doctors/nurses` + `user_addresses`; `doctors.ihs_id` ADA tapi tak ada form (D-02) | Jalan |
+| 7 | Rekam medis | `medical-records.*` + lookup + history | `medical_records` (teks anamnesis/diagnosis/therapy + foto before/after) + `diagnosis_codes` (ICD10/ICD9/SNOMED, 6 seed) + pivot `medical_record_diagnoses` + wajib ≥1 kode (`MedicalRecordRequest`) | Jalan; ICD-9/10 campur satu field (D-03) |
+| 8 | Transaksi/nota | `transactions.*` + usul-kunci-approve batal + reschedule API | `transactions` (sequence YYNNNNN, DP, cicilan flag, lock) + `transaction_services/nurses` | Jalan |
+| 9 | Cicilan | `installments.index/show` | `installments` + `installment_steps` | Jalan (read-only) |
+| 10 | Omzet | `incomes.*` + lookup API | agregat `transactions` (filter dokter bila role doctor) | Jalan |
+| 11 | Gaji dokter | `GET /salaries` (tanpa nama route!) | hitung share 30–35%, rontgen, shift, target 55 | Jalan, tak ada di sidebar |
+| 12 | Export | `export-transactions` (XLSX) | `MonthlyReports` | Jalan |
+| 13 | Profil + bahasa | `profile.*`, `switch-language` | profil per role + ganti password | Jalan |
+| 14 | Follow-up WA | `api.followup.whatsapp` redirect `wa.me` manual | — | BUKAN Official API |
+
+### 2.3 Yang TIDAK ADA di v1 (masuk v2 bertahap)
+
+Odontogram, queue/antrian, treatment plan, resep terstruktur, SOAP terstruktur,
+tabel `visits`, split `invoices/payments/receipts`, inventory, expenses,
+multi-branch (`branch_id`), WhatsApp Official API, SATUSEHAT bridging,
+`audit_logs` formal, e-sign dokter, calendar view.
+
+### 2.4 Tech debt v1 yang dicatat (D-xx, detail di Blueprint §6)
+
+* **D-01**: `PatientRequest` tidak validasi/menyimpan `nik/ihs_id/birth_place/consent`;
+  `MasterService::insert/updatePatient` tidak menyimpan kolom itu.
+* **D-02**: `doctors.ihs_id` tanpa form/validasi (`UserRequest`, `UpdateDoctorRequest` diam).
+* **D-03**: diagnosis ICD-10 (penyakit) + ICD-9 (tindakan) campur satu field
+  `diagnosis_codes min:1` — SATUSEHAT menolak (Condition wajib ICD-10).
+* **D-04**: enforcement akses kosmetik — route `auth` saja; `Appointment/Schedule/
+  Service/Category/MedicalRecord/Income/InstallmentController` nol `authorize`;
+  edit/update/destroy master tanpa gate; Blade `@can` bisa dilewati via URL.
+* **D-05**: `medical_records` tanpa FK (orphan risk); relasi `Patient` key terbalik;
+  `MedicalRecord` model `fillable` kadaluarsa.
+* **D-06**: `transaction_cancellation_requests.proposed_by/decided_by` bigint vs
+  `users.id` uuid (migrasi gagal di PG/MySQL ketat); `CategoryRequest` unique tanpa
+  ignore; `UpdateTransactionRequest::authorize=false` (mati total);
+  bug `upper_price => 1, 600000` di `ServiceProstodonsiaSeeder`; 4 seeder
+  prostodonsia orphan; `transaction_services.price` string; `salaries` tanpa nama route;
+  `ICD10Controller`/`AddressController` tanpa route (file `dental_icd_x.json` tak ada).
+
+## 3. Scope v2 (update kita)
+
+### 3.1 Fase 1 — Fondasi aman (wajib pertama)
+
+Tutup D-01 s/d D-04 tanpa tabel besar baru: validasi + simpan NIK/IHS/consent,
+`birthdate string→date`, pisah input diagnosis (ICD-10 wajib ≥1) vs tindakan (ICD-9),
+`middleware can:` + `authorize()` di semua controller, perbaiki relasi/model,
+migration fix D-06 yang blocking. Hasil: **v1.1**.
+
+### 3.2 Fase 2 — RME gigi layak (uji internal)
+
+`visits`, `odontogram_findings` (FDI 11–48/51–85 + surface + SNOMED),
+`diagnoses` per visit+gigi, `treatments` ICD-9-CM → invoice otomatis,
+resep terstruktur (obat KFA), treatment plan, attachments signed URL,
+Doctor Workspace + calendar + queue. Hasil: **v2.0-beta**.
+
+### 3.3 Fase 3 — Keuangan & operasional
+
+Split `invoices(+items)/payments/receipts` (migrasi dari `transactions`, data lama
+dipertahankan), doctor fee, inventory ringan + alert, expenses, laporan.
+Hasil: **v2.0**.
+
+### 3.4 Fase 4 — Integrasi (terakhir)
+
+`SatuSehatService` (Auth → Organization → Location → Practitioner → Patient/MPI →
+Encounter → Condition/Procedure/Observation/…) + sync log + dashboard monitoring,
+uji **sandbox** dulu; lalu WhatsApp Official API; lalu `branch_id` multi-cabang.
+Ikut spesifikasi resmi SATUSEHAT saat coding. Hasil: **v2.1+**.
+
+### 3.5 Fase 5 — Advanced (opsional)
+
+AI booking, voice recognition, analitik lanjutan. BUKAN prioritas.
+
+## 4. Role & jobdesk final (dipetakan ke 4 role aktual)
+
+| Modul | manajemen (Owner) | admin (Front Office) | doctor | nurse (Asisten) |
+|---|---|---|---|---|
+| Dashboard | penuh + keuangan | operasional/antrian | workspace klinis (miliknya) | antrian/bantuan |
+| Pasien | CRUD + hapus (soft) | CREATE/VIEW/EDIT, tanpa hapus | VIEW | VIEW + draft anamnesis/vital |
 | Appointment/Queue | CRUD | CRUD + check-in | VIEW | VIEW + kelola antrian |
-| RME (anamnesis s/d plan) | VIEW | VIEW terbatas | **CRUD miliknya + sign** | VIEW + upload lampiran |
-| Billing/Payment | CRUD + approve | VIEW + usul batal | VIEW terbatas | VIEW (kasir: bila ditugaskan) |
+| RME (anamnesis→plan) | VIEW | VIEW terbatas | **CRUD miliknya + sign/final** | VIEW + upload lampiran |
+| Billing/Payment/Cicilan | CRUD + approve batal | VIEW + usul batal | VIEW terbatas (kasusnya) | VIEW (bertindak kasir bila ditugaskan) |
 | Inventory/Expense | CRUD | CRUD inventory | VIEW | VIEW |
-| Reports/Users/Settings | CRUD | operasional/terbatas | terbatas/none | none |
+| Laporan/User/Setting | CRUD | operasional/terbatas | terbatas/none | none |
 | SATUSEHAT/WA | MANAGE | operasi terbatas | - | - |
 
-Aturan keras: **RME final (SIGNED) hanya bisa dikoreksi dengan jejak audit** (old→new + alasan),
-tidak ada hard-delete rekam medis, file medis tidak di public storage.
+Aturan keras: RME status SIGNED hanya dikoreksi beraudit (who/what/when/old/new/why);
+tanpa hard-delete rekam medis; file medis private + signed URL; status medis dan
+status billing kolom terpisah.
 
-## 7. Kebutuhan non-fungsional
+## 5. Kebutuhan non-fungsional
 
-* **Regulasi**: Permenkes 24/2022 (RME wajib, interoperabilitas SATUSEHAT, registrasi sistem,
-  backup, retensi ≥25 thn), UU PDP (persetujuan, minimisasi, keamanan).
-* **Keamanan**: RBAC enforcement server-side (`middleware can:` + `authorize()`),
-  audit log (who/what/when/old/new/why), signed URL file medis, HTTPS, rate limiting.
-* **Kinerja**: halaman pasien & visit < 2 dtk, list paginasi 20.
-* **Skalabilitas**: monolit modular Laravel tetap; `branch_id` disiapkan sejak v2
-  walau single-branch dulu. TIDAK perlu microservices/K8s/GraphQL di tahap ini.
-* **Stack v2**: TETAP Laravel + Livewire + Blade + MySQL/PostgreSQL (menolak usulan
-  rewrite ke Next.js/Prisma di blueprint asli — biaya rewrite > manfaat).
+* **Regulasi**: Permenkes 24/2022 (RME wajib ≤31 Des 2023, interoperabilitas
+  SATUSEHAT, registrasi sistem ke Kemenkes, backup, retensi ≥25 thn, audit mutu),
+  UU PDP (consent, minimisasi, keamanan, hak pasien).
+* **Keamanan**: RBAC server-side, audit log, password hash, session, HTTPS,
+  rate limiting, signed URL, backup di lokasi berbeda (aturan Fase 1–2).
+* **Kinerja**: halaman pasien & visit < 2 dtk; list paginasi 20.
+* **Portabilitas**: kode tetap jalan di SQLite/MySQL/PgSQL (lanjutkan pola
+  `TransactionService::nextSequence`, hindari fungsi spesifik DB).
+* **Skalabilitas**: monolit modular cukup; siapkan `branch_id` sejak Fase 2
+  walau single-branch dulu. Tanpa microservices/K8s/GraphQL.
 
-## 8. Kriteria penerimaan v2 (definisi selesai)
+## 6. Kriteria penerimaan
 
-1. Alur `registrasi → appointment → check-in → queue → visit → odontogram →
-   diagnosis ICD-10 → tindakan ICD-9 → resep → billing → payment → receipt → kontrol`
-   bisa dijalankan end-to-end per role tanpa URL hacking.
-2. `php artisan test` hijau; permission diuji (nurse tidak bisa hapus pasien,
-   admin tidak bisa edit RME, doctor tidak bisa lihat omzet global).
-3. Payload SATUSEHAT Gigi (sandbox) lolos validasi untuk Patient/Encounter/Condition.
-4. Audit log mencatat setiap CREATE/EDIT klinis + finansial.
+1. **v1**: `release/v1` terverifikasi sama dengan versi client kecuali 4 file `docs/`
+   baseline; satu-satunya test merah (`medical-records.index` 500) tercatat sebagai
+   known issue di `ROADMAP-v1-to-v2.md` dan masuk antrean Fase 1.
+2. **Fase 1**: NIK/IHS/consent tersimpan; ada ≥1 ICD-10 per RM; test negatif
+   permission lolos (nurse≠hapus pasien, admin≠edit RME, doctor≠omzet global).
+3. **Fase 2**: alur `registrasi→appointment→check-in→queue→visit→odontogram→
+   diagnosis→tindakan→resep→billing→payment→kontrol` end-to-end per role.
+4. **Fase 4**: payload sandbox Gigi lolos validasi SATUSEHAT (Patient/Encounter/Condition).
 
-## 9. Risiko & keputusan tercatat
+## 7. Risiko tercatat
 
-* Klaim "Terintegrasi SATUSEHAT" DILARANG sebelum bridging production lolos.
-* Link `wa.me` saat ini bukan Official API — jangan dipasarkan sebagai automation.
-* `storage/framework/views/*.php` saat ini untracked & membanjiri `git status`
-  (pre-existing, perbaiki `.gitignore` di v2 — tidak menyentuh v1).
+* Klaim integrasi prematur; link `wa.me` bukan automation; `storage/framework/views`
+  untracked membanjiri `git status` (perbaiki `.gitignore` di Fase 1);
+  `medical_records` tanpa FK rawan orphan sampai Fase 2.
