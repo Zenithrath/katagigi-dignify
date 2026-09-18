@@ -7,6 +7,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -46,9 +47,7 @@ class TransactionFactory extends Factory
             'appointment_id' => $appointment->id,
             'appointment_datetime' => fake()->dateTimeBetween('-1 month', '+1 month')->format('Y-m-d H:i:s'),
             'next_schedule' => fake()->dateTimeBetween('+1 week', '+2 months')->format('Y-m-d'),
-            'services' => json_encode([
-                ['name' => fake()->randomElement(['Scaling', 'Tambal Gigi', 'Cabut Gigi', 'Pembersihan Karang Gigi', 'Orthodonti']), 'price' => $price],
-            ]),
+            'services' => json_encode([$this->serviceItem($price)]),
             'price' => $price,
             'discount' => $discount,
             'billing' => $price - $discount,
@@ -58,6 +57,31 @@ class TransactionFactory extends Factory
             'voucher_code' => null,
             'referenced_installment_id' => null,
             'is_locked' => false,
+        ];
+    }
+
+    /**
+     * Bentuk item services disamakan dengan penulis asli
+     * (TransactionService::insertTransaction -> pricedServices).
+     */
+    private function serviceItem(float $price): array
+    {
+        $svc = DB::table('services')
+            ->leftJoin('categories', 'services.category_id', '=', 'categories.id')
+            ->select('services.id', 'services.code', 'services.name', 'categories.name as category')
+            ->inRandomOrder()
+            ->first();
+
+        return [
+            'id' => $svc->id ?? (string) Str::uuid(),
+            'class' => 'service',
+            'price' => $price,
+            'quantity' => 1,
+            'subtotal' => $price,
+            'discount' => 0,
+            'code' => $svc->code ?? 'SRV-000',
+            'name' => $svc->name ?? fake()->randomElement(['Scaling', 'Tambal Gigi', 'Cabut Gigi', 'Pembersihan Karang Gigi', 'Orthodonti']),
+            'category' => $svc->category ?? 'Umum',
         ];
     }
 }

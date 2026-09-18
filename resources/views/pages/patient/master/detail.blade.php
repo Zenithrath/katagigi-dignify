@@ -174,7 +174,7 @@
                                         {{ __('Medical Record') }} #{{ strtoupper(substr($record->id, 0, 7)) }}
                                     </h3>
                                     <p class="text-xs text-slate-500 mt-1">
-                                        {{ Carbon::parse($record->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
+                                        {{ \Carbon\Carbon::parse($record->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
                                     </p>
                                 </div>
                             </div>
@@ -217,7 +217,7 @@
                                 <div class="preview-container py-2">
                                     <dt class="font-semibold">{{ __('patient.record.detail.data.recomendation') }}</dt>
                                     <dd>
-                                        {{ Carbon::parse($record->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
+                                        {{ \Carbon\Carbon::parse($record->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
                                     </dd>
                                 </div>
 
