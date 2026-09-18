@@ -55,7 +55,7 @@ class Patient extends Model
      */
     public function address(): HasOne
     {
-        return $this->hasOne(PatientAddress::class, 'id', 'patient_id');
+        return $this->hasOne(PatientAddress::class, 'patient_id', 'id');
     }
 
     /**
@@ -63,7 +63,7 @@ class Patient extends Model
      */
     public function appointment(): HasMany
     {
-        return $this->hasMany(Appointment::class, 'id', 'patient_id');
+        return $this->hasMany(Appointment::class, 'patient_id', 'id');
     }
 
     /**
@@ -71,7 +71,7 @@ class Patient extends Model
      */
     public function medical_record(): HasMany
     {
-        return $this->hasMany(MedicalRecord::class, 'id', 'patient_id');
+        return $this->hasMany(MedicalRecord::class, 'patient_id', 'id');
     }
 
     /**
@@ -79,6 +79,6 @@ class Patient extends Model
      */
     public function transaction(): HasMany
     {
-        return $this->hasMany(Transaction::class, 'id', 'patient_id');
+        return $this->hasMany(Transaction::class, 'patient_id', 'id');
     }
 }

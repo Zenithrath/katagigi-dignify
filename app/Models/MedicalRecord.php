@@ -20,28 +20,39 @@ class MedicalRecord extends Model
 
     /**
      * The attributes that are mass assignable.
+     * D-05: selaras dengan migrasi (dulu basi: diagnose/service/date/
+     * blood_tension/cooperative → atribut valid diam-diam dibuang Eloquent).
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'id',
         'patient_id',
+        'patient_code',
         'patient_name',
+        'patient_phone',
+        'patient_address',
         'doctor_id',
         'doctor_name',
+        'doctor_nipp',
+        'doctor_niptk',
         'appointment_id',
-        'date',
+        'appointment_date',
         'time_start',
         'time_end',
-        'service',
-        'diagnose',
+        'services',
+        'anamnesis',
+        'diagnosis',
         'therapy',
         'prescription',
+        'checkup_result',
         'next_schedule',
         'price',
+        'discount',
+        'billing',
         'promat',
-        'blood_tension',
-        'cooperative',
+        'blood_pressure',
+        'cooperativity',
         'image_before',
         'image_after',
     ];
@@ -63,10 +74,10 @@ class MedicalRecord extends Model
     }
 
     /**
-     * Get the medical_record that owns the schedule.
+     * Get the medical_record that owns the appointment.
      */
-    public function schedule(): BelongsTo
+    public function appointment(): BelongsTo
     {
-        return $this->belongsTo(Schedule::class, 'schedule_id', 'id');
+        return $this->belongsTo(Appointment::class, 'appointment_id', 'id');
     }
 }
