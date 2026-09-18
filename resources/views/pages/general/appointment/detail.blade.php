@@ -74,7 +74,7 @@
                     </div>
                     <div class="preview-container py-2">
                         <dt>{{ __('general.appointment.detail.labels.schedule.time') }}</dt>
-                        <dd>{{ Carbon::parse($data->time_start)->format('H:i') . ' - ' . \Carbon\Carbon::parse($data->time_end)->format('H:i') }}
+                        <dd>{{ \Carbon\Carbon::parse($data->time_start)->format('H:i') . ' - ' . \Carbon\Carbon::parse($data->time_end)->format('H:i') }}
                         </dd>
                     </div>
                     <div class="preview-container py-2">

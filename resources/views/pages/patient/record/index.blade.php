@@ -66,8 +66,9 @@
                                 <td class="column">{{ $record->patient_phone }}</td>
                                 <td class="column">
                                     <ul>
-                                        @foreach (json_decode($record->services) as $item)
-                                            <li>{{ $item->code }} - {{ $item->name }}</li>
+                                        {{-- Tahan format lama: record lawas bisa tidak punya code/name --}}
+                                        @foreach (json_decode($record->services) ?? [] as $item)
+                                            <li>{{ $item->code ?? '—' }} - {{ $item->name ?? 'Layanan' }}</li>
                                         @endforeach
                                     </ul>
                                 </td>

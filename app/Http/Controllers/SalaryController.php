@@ -74,6 +74,7 @@ class SalaryController extends Controller
                 foreach ((array) json_decode($row->services) as $svc) {
                     $svc = (array) $svc;
                     $entry = (object) [
+                        'id' => $row->id,
                         'trx_id' => $row->id,
                         'num' => $num,
                         'doctor_id' => $d->user_id,
