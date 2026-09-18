@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\TransactionCancellationRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -139,6 +140,22 @@ class ClinicFlowTest extends TestCase
         $this->assertNotNull($transaction);
         $this->assertGreaterThan(0, (int) $transaction->sequence, 'Sequence nota harus terisi');
 
+        // D-06f: kolom price kini float — string numerik dipaksa jadi REAL
+        // oleh afinitas kolom (dulu TEXT sehingga typeof='text').
+        DB::table('transaction_services')->insert([
+            'id' => (string) Str::uuid(),
+            'service_id' => $service->id,
+            'service_name' => $service->name,
+            'transaction_id' => $transaction->id,
+            'price' => '150000',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $this->assertEquals(
+            'real',
+            DB::selectOne("select typeof(price) as t from transaction_services where transaction_id = ?", [$transaction->id])->t
+        );
+
         // 7. Admin usul batal → terkunci; admin tidak bisa batal langsung
         $this->actingAs($admin)->post(route('transactions.cancel', $transaction->id), [
             'cancel_reason' => 'coba langsung',
@@ -151,6 +168,11 @@ class ClinicFlowTest extends TestCase
             ->where('transaction_id', $transaction->id)->first();
         $this->assertEquals('PROPOSED', $proposal->status);
         $this->assertTrue((bool) DB::table('transactions')->where('id', $transaction->id)->first()->is_locked);
+
+        // D-06a: relasi pengusul (kolom uuid) resolve ke user admin.
+        $proposalModel = TransactionCancellationRequest::find($proposal->id);
+        $this->assertNotNull($proposalModel->proposer);
+        $this->assertEquals('admin@gmail.com', $proposalModel->proposer->email);
 
         // Usulan ganda ditolak
         $this->actingAs($admin)->post(route('transactions.propose-cancel', $transaction->id), [

@@ -46,8 +46,6 @@ Route::middleware('auth')->group(function () {
         ->name('api.medical-records.lookup');
     Route::get('api/medical-records/{id}/lookup_history', [MedicalRecordController::class, 'lookupMedicalHistory'])
         ->name('api.medical-records.lookup.history');
-    Route::get('api/medical-records/get_service', [MedicalRecordController::class, 'getAppointmentService'])
-        ->name('api.medical-records.get_service');
     Route::get('api/appointments/get_patient', [AppointmentController::class, 'getPatientByCode'])
         ->name('api.appointments.get_patient');
     Route::get('api/appointments/lookup', [AppointmentController::class, 'lookup'])
@@ -88,7 +86,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('patients', MasterController::class);
     Route::resource('schedules', ScheduleController::class)->except(['create', 'show', 'edit', 'update']);
     Route::resource('medical-records', MedicalRecordController::class);
-    Route::resource('transactions', TransactionController::class);
+    // D-06c: nota = ledger final; edit/update/destroy dinonaktifkan.
+    // Koreksi lewat alur usul-kunci-approve (CancellationController).
+    Route::resource('transactions', TransactionController::class)->except(['edit', 'update', 'destroy']);
     Route::resource('incomes', IncomeController::class);
     Route::post(
         'schedules/update_status/{schedule}',
@@ -119,7 +119,8 @@ Route::middleware('auth')->group(function () {
     Route::put('profile/change-password/{id}', [ProfileController::class, 'updatePassword'])
         ->name('profile.change-password.update');
 
-    Route::get('salaries', [SalaryController::class, 'index']);
+    // D-06g: route gaji dokter kini bernama agar bisa dipakai redirect/link.
+    Route::get('salaries', [SalaryController::class, 'index'])->name('salaries.index');
     Route::resource('installments', InstallmentController::class);
 });
 

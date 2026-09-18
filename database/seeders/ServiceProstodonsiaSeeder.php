@@ -140,7 +140,7 @@ class ServiceProstodonsiaSeeder extends Seeder
                 'category_id' => $dataPro->id,
                 'description' => null,
                 'lower_price' => 800000,
-                'upper_price' => 1, 600000,
+                'upper_price' => 1600000,
             ],
             [
                 'id' => Uuid::uuid4(),
