@@ -28,6 +28,7 @@ class Doctor extends Model
         'user_id',
         'nipp',
         'niptk',
+        'ihs_id',
         'profile_picture',
         'cover_picture',
     ];
@@ -45,7 +46,7 @@ class Doctor extends Model
      */
     public function schedule(): HasMany
     {
-        return $this->hasMany(Schedule::class, 'id', 'doctor_id');
+        return $this->hasMany(Schedule::class, 'doctor_id', 'user_id');
     }
 
     /**
@@ -53,7 +54,7 @@ class Doctor extends Model
      */
     public function appointment(): HasMany
     {
-        return $this->hasMany(Appointment::class, 'user_id', 'doctor_id');
+        return $this->hasMany(Appointment::class, 'doctor_id', 'user_id');
     }
 
     /**
@@ -61,7 +62,7 @@ class Doctor extends Model
      */
     public function medical_record(): HasMany
     {
-        return $this->hasMany(MedicalRecord::class, 'user_id', 'doctor_id');
+        return $this->hasMany(MedicalRecord::class, 'doctor_id', 'user_id');
     }
 
     /**
@@ -69,6 +70,6 @@ class Doctor extends Model
      */
     public function transaction(): HasMany
     {
-        return $this->hasMany(Transaction::class, 'user_id', 'doctor_id');
+        return $this->hasMany(Transaction::class, 'doctor_id', 'user_id');
     }
 }
