@@ -31,6 +31,7 @@ class UserRequest extends FormRequest
             'password' => ['required', 'confirmed', Password::min(8)],
             'nipp' => ['required', Rule::unique('admins')->ignore($this->admin)],
             'niptk' => 'nullable',
+            'ihs_id' => ['nullable', 'string', 'max:255', Rule::unique('doctors', 'ihs_id')],
             // 'niptk' => [Rule::unique('admins')->ignore($this->admin)],
             // 'zip_code' => ['regex:/^[0-9\-]+$/u'],
             // 'tonarigumi' => ['regex:/^[a-zA-Z0-9,.\- ]+$/u'],
