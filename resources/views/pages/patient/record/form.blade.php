@@ -145,9 +145,21 @@
                             </div>
 
                             <div class="input-group md:col-span-2">
-                                <label>Kode Diagnosis Resmi <span class="text-red-500">*</span></label>
-                                <livewire:diagnosis-search :selected="$diagnosisCodes ?? []" />
-                                <small class="helper">Wajib pilih minimal 1 kode (ICD-10 / ICD-9 / SNOMED). Ketik bahasa awam, mis. "gigi berlubang".</small>
+                                <label>Diagnosis Penyakit (ICD-10) <span class="text-red-500">*</span></label>
+                                <livewire:diagnosis-search system="ICD10" fieldName="diagnosis_codes_icd10" :selected="$diagnosisCodesIcd10 ?? []" />
+                                <small class="helper">Wajib minimal 1 kode ICD-10 (syarat SATUSEHAT). Ketik bahasa awam, mis. "gigi berlubang".</small>
+                                @error('diagnosis_codes_icd10')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label>Tindakan / Prosedur (ICD-9-CM)</label>
+                                <livewire:diagnosis-search system="ICD9" fieldName="procedure_codes_icd9" :selected="$procedureCodesIcd9 ?? []" />
+                                <small class="helper">Opsional. Ketik bahasa awam, mis. "cabut gigi".</small>
+                                @error('procedure_codes_icd9')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
                             </div>
 
                             <div class="input-group md:col-span-2">

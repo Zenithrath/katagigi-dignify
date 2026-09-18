@@ -86,11 +86,13 @@ class ClinicFlowTest extends TestCase
         $this->actingAs($admin)->get(route('appointments.confirm', $appointment->id))->assertRedirect();
         $this->assertNotNull(DB::table('appointments')->where('id', $appointment->id)->first()->confirmed_at);
 
-        // 5. Rekam medis oleh dokter (kode diagnosis resmi wajib)
+        // 5. Rekam medis oleh dokter (diagnosis ICD-10 wajib + tindakan ICD-9)
         $dxCode = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
+        $pxCode = DB::table('diagnosis_codes')->where('code', '23.19')->first();
         $this->actingAs($doctorUser)->post(route('medical-records.store'), [
             'appointment_id' => $appointment->id,
-            'diagnosis_codes' => [$dxCode->id],
+            'diagnosis_codes_icd10' => [$dxCode->id],
+            'procedure_codes_icd9' => [$pxCode->id],
             'service_id' => [$service->id],
             'service_price' => [$service->lower_price],
             'service_quantity' => [1],
@@ -115,6 +117,10 @@ class ClinicFlowTest extends TestCase
         $this->assertDatabaseHas('medical_record_diagnoses', [
             'medical_record_id' => $recordId,
             'diagnosis_code_id' => $dxCode->id,
+        ]);
+        $this->assertDatabaseHas('medical_record_diagnoses', [
+            'medical_record_id' => $recordId,
+            'diagnosis_code_id' => $pxCode->id,
         ]);
 
         // 6. Transaksi oleh admin (kasir)
@@ -162,5 +168,82 @@ class ClinicFlowTest extends TestCase
             'APPROVED',
             DB::table('transaction_cancellation_requests')->where('id', $proposal->id)->first()->status
         );
+    }
+
+    public function test_medical_record_requires_icd10_diagnosis(): void
+    {
+        $admin = User::where('email', 'admin@gmail.com')->first();
+        $doctorUser = User::create([
+            'id' => (string) Str::uuid(),
+            'name' => 'Dr Kode',
+            'email' => 'drkode@mail.com',
+            'password' => 'password',
+        ]);
+        $doctorUser->assignRole('doctor');
+        DB::table('doctors')->insert([
+            'user_id' => $doctorUser->id,
+            'nipp' => 'KODE001',
+            'niptk' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $service = DB::table('services')->where('is_active', true)->first();
+        $date = date('Y-m-d', strtotime('next monday'));
+        $this->actingAs($admin)->post(route('schedules.store'), [
+            'doctor_id' => $doctorUser->id,
+            'day' => 'MONDAY',
+            'start_time' => '08:00',
+            'end_time' => '15:00',
+        ])->assertRedirect();
+        $this->actingAs($admin)->post(route('patients.store'), [
+            'name' => 'Pasien Kode',
+            'phone' => '081234567899',
+            'gender' => 'MALE',
+        ])->assertRedirect();
+        $patient = DB::table('patients')->where('name', 'Pasien Kode')->first();
+        $this->actingAs($admin)->post(route('appointments.store'), [
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctorUser->id,
+            'service_id' => [$service->id],
+            'date' => $date,
+            'start_time' => '09:00',
+            'end_time' => '10:00',
+        ])->assertRedirect();
+        $appointment = DB::table('appointments')->where('patient_id', $patient->id)->first();
+        $this->actingAs($admin)->get(route('appointments.confirm', $appointment->id))->assertRedirect();
+
+        $icd9 = DB::table('diagnosis_codes')->where('code', '23.19')->first();
+        $base = [
+            'appointment_id' => $appointment->id,
+            'service_id' => [$service->id],
+            'service_price' => [$service->lower_price],
+            'service_quantity' => [1],
+            'service_discount' => [0],
+            'checkup_result' => 'Hasil',
+            'anamnesis' => 'Anamnesis',
+            'diagnosis' => 'Catatan',
+            'therapy' => 'Terapi',
+            'promat' => 'NO PROMAT',
+            'blood_pressure' => '120/80',
+            'cooperativity' => 'COOPERATIVE',
+            'price' => $service->lower_price,
+            'discount' => 0,
+            'billing' => $service->lower_price,
+            'image_before' => [UploadedFile::fake()->image('before.jpg')],
+            'image_after' => [UploadedFile::fake()->image('after.jpg')],
+        ];
+
+        // ICD-9 di field diagnosis harus ditolak (wajib ICD-10)
+        $this->actingAs($doctorUser)->post(route('medical-records.store'), [
+            ...$base,
+            'diagnosis_codes_icd10' => [$icd9->id],
+        ])->assertSessionHasErrors('diagnosis_codes_icd10.0');
+
+        // Tanpa diagnosis sama sekali harus ditolak
+        $this->actingAs($doctorUser)->post(route('medical-records.store'), $base)
+            ->assertSessionHasErrors('diagnosis_codes_icd10');
+
+        $this->assertDatabaseMissing('medical_records', ['appointment_id' => $appointment->id]);
     }
 }

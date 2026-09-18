@@ -45,9 +45,9 @@
                         <dd class="font-medium text-slate-900">{{ $data->anamnesis ?? '-' }}</dd>
                     </div>
                     <div class="preview-container py-2">
-                        <dt class="text-sm font-semibold text-slate-600">Kode Diagnosis Resmi</dt>
+                        <dt class="text-sm font-semibold text-slate-600">Diagnosis Penyakit (ICD-10)</dt>
                         <dd class="flex flex-col gap-1">
-                            @forelse ($diagnosisCodes ?? [] as $code)
+                            @forelse ($diagnosisCodesIcd10 ?? [] as $code)
                                 <span class="font-medium text-slate-900 bg-emerald-50 px-2 py-0.5 rounded-lg text-sm inline-flex items-center gap-1">
                                     <span class="text-emerald-600 font-bold">[{{ $code->system }}]</span>
                                     {{ $code->code }} - {{ $code->display }}
@@ -57,6 +57,32 @@
                             @endforelse
                         </dd>
                     </div>
+                    <div class="preview-container py-2">
+                        <dt class="text-sm font-semibold text-slate-600">Tindakan / Prosedur (ICD-9)</dt>
+                        <dd class="flex flex-col gap-1">
+                            @forelse ($procedureCodesIcd9 ?? [] as $code)
+                                <span class="font-medium text-slate-900 bg-teal-50 px-2 py-0.5 rounded-lg text-sm inline-flex items-center gap-1">
+                                    <span class="text-teal-600 font-bold">[{{ $code->system }}]</span>
+                                    {{ $code->code }} - {{ $code->display }}
+                                </span>
+                            @empty
+                                <span class="text-slate-400">-</span>
+                            @endforelse
+                        </dd>
+                    </div>
+                    @if (($otherCodes ?? collect())->isNotEmpty())
+                        <div class="preview-container py-2">
+                            <dt class="text-sm font-semibold text-slate-600">Kode Lainnya</dt>
+                            <dd class="flex flex-col gap-1">
+                                @foreach ($otherCodes as $code)
+                                    <span class="font-medium text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg text-sm inline-flex items-center gap-1">
+                                        <span class="text-slate-500 font-bold">[{{ $code->system }}]</span>
+                                        {{ $code->code }} - {{ $code->display }}
+                                    </span>
+                                @endforeach
+                            </dd>
+                        </div>
+                    @endif
                 </dl>
 
                 <dl class="detail-list">
