@@ -44,15 +44,16 @@ class RolesAndPermissionsSeeder extends Seeder
         $manajemen = Role::firstOrCreate(['name' => 'manajemen', 'guard_name' => 'web']);
         $manajemen->syncPermissions(Permission::all());
 
-        // ADMIN operasional: reservasi + penjadwalan + tarik transaksi + usul batal.
-        // Tanpa: kelola user, hapus master, batal langsung, approve.
+        // ADMIN operasional: reservasi + penjadwalan + kasir (buat nota, reschedule
+        // kontrol) + usul batal. Tanpa: kelola user, hapus master, batal langsung, approve.
+        // D-04: kasir dirangkap admin sesuai praktik klinik (PRD §1 keputusan 3).
         $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin->syncPermissions([
             'create schedule', 'read schedule', 'update schedule',
             'create appointment', 'read appointment', 'update appointment',
             'create patient', 'read patient', 'update patient',
             'read medical record',
-            'read transaction',
+            'create transaction', 'read transaction', 'update transaction',
             'read turnover',
             'read diagnosis code',
             'request cancellation',
@@ -71,15 +72,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'read diagnosis code',
         ]);
 
-        // NURSE: front-office (sama seperti app lama)
+        // NURSE: front-office. D-04: tanpa hapus pasien (hanya manajemen, PRD §4);
+        // kasir (buat nota, reschedule) dirangkap nurse bila ditugaskan (PRD §1).
         $nurse = Role::firstOrCreate(['name' => 'nurse', 'guard_name' => 'web']);
         $nurse->syncPermissions([
-            'read patient', 'create patient', 'update patient', 'delete patient',
+            'read patient', 'create patient', 'update patient',
             'read medical record',
             'read appointment', 'create appointment',
             'update appointment', 'delete appointment',
             'read schedule',
-            'read transaction',
+            'create transaction', 'read transaction', 'update transaction',
             'read turnover',
             'read diagnosis code',
         ]);

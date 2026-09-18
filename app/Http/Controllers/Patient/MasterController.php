@@ -33,6 +33,7 @@ class MasterController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('read patient');
         return view('pages.patient.master.index', [
             'patientList' => $this->service->readAllPatients($request),
         ]);
@@ -40,6 +41,7 @@ class MasterController extends Controller
 
     public function lookup(Request $request)
     {
+        $this->authorize('read patient');
         $total = $this->service->countTotalData($request);
         $limit = $request->limit ?? 20;
         $pagination = (object) [
@@ -119,6 +121,7 @@ class MasterController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read patient');
         $data = $this->service->selectPatientByID($id);
         $data->sosmed = json_decode($data->sosmed);
         $data->records = $this->recordService->readMedicalRecordByPatiendID($id);
@@ -140,6 +143,7 @@ class MasterController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update patient');
         $data = $this->service->selectPatientByID($id);
         $data->sosmed = json_decode($data->sosmed);
 
@@ -159,6 +163,7 @@ class MasterController extends Controller
      */
     public function update(PatientRequest $request, $id)
     {
+        $this->authorize('update patient');
         $patient = $this->service->selectPatientByID($id);
         $updatedPatientPicture = $patient->picture;
         $updateBag = [];
@@ -204,6 +209,7 @@ class MasterController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete patient');
         $deletedPatientPicture = Patient::findOrFail($id)->first()->picture;
         if ($deletedPatientPicture) {
             $this->service->deleteImage($deletedPatientPicture);

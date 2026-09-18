@@ -101,6 +101,7 @@ class DoctorController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update doctor');
         $data = $this->service->selectDoctorByID($id);
 
         return view('pages.master.doctor.form', [
@@ -119,6 +120,7 @@ class DoctorController extends Controller
      */
     public function update(UpdateDoctorRequest $request, $id)
     {
+        $this->authorize('update doctor');
         $updatedDoctor = Doctor::findOrFail($id);
         $validated = $request->validated();
         if ($request->hasFile('cover_image')) {
@@ -162,6 +164,7 @@ class DoctorController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete doctor');
         $deletedDoctor = Doctor::findOrFail($id);
         if ($deletedDoctor->cover_picture) {
             $this->service->deleteCoverImage($deletedDoctor->cover_picture);

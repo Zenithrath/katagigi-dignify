@@ -83,7 +83,7 @@ class ClinicFlowTest extends TestCase
         $appointment = DB::table('appointments')->where('patient_id', $patient->id)->first();
         $this->assertNotNull($appointment);
 
-        $this->actingAs($admin)->get(route('appointments.confirm', $appointment->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('appointments.confirm', $appointment->id))->assertRedirect();
         $this->assertNotNull(DB::table('appointments')->where('id', $appointment->id)->first()->confirmed_at);
 
         // 5. Rekam medis oleh dokter (diagnosis ICD-10 wajib + tindakan ICD-9)
@@ -211,7 +211,7 @@ class ClinicFlowTest extends TestCase
             'end_time' => '10:00',
         ])->assertRedirect();
         $appointment = DB::table('appointments')->where('patient_id', $patient->id)->first();
-        $this->actingAs($admin)->get(route('appointments.confirm', $appointment->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('appointments.confirm', $appointment->id))->assertRedirect();
 
         $icd9 = DB::table('diagnosis_codes')->where('code', '23.19')->first();
         $base = [

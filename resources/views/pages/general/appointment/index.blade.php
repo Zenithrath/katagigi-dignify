@@ -95,10 +95,14 @@
                                         <div class="flex items-center gap-2">
                                             @can('update appointment')
                                                 <template x-if="!appointment.confirmed_at">
-                                                    <a :href="`{{ route('appointments.confirm', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)"
-                                                        class="text-sm text-brand-600 hover:text-brand-700">
-                                                        {{ __('general.appointment.index.action.confirm') }}
-                                                    </a>
+                                                    <form
+                                                        :action="`{{ route('appointments.confirm', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)"
+                                                        method="post">
+                                                        @csrf
+                                                        <button class="text-sm text-brand-600 hover:text-brand-700" type="submit">
+                                                            {{ __('general.appointment.index.action.confirm') }}
+                                                        </button>
+                                                    </form>
                                                 </template>
                                             @endcan
                                             @can('update appointment')
