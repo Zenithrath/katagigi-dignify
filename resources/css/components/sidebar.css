@@ -108,28 +108,31 @@
     position: relative;
 }
 
+/* Kapsul pil hijau di tepi kiri — muncul halus saat hover, instan saat aktif.
+   Style dipakai sama seperti tombol/card shiny emerald (radial gradient + inset). */
 .app-sidebar .nav-item::before {
     content: '';
     position: absolute;
     left: -16px;
     top: 50%;
-    transform: translateY(-50%) scaleY(0);
-    width: 4px;
-    height: 22px;
+    transform: translateY(-50%) scale(0);
+    width: 10px;
+    height: 36px;
     background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 50%, #051d11 100%);
-    box-shadow: inset 1px 1px 1.5px rgba(255, 255, 255, 0.45), inset -1px -1px 2px rgba(0, 0, 0, 0.7), 0 2px 5px rgba(5, 29, 17, 0.35);
-    border-radius: 0 4px 4px 0;
+    box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.55), inset -2px -2px 3px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(5, 29, 17, 0.55);
+    border: 1px solid rgba(0, 0, 0, 0.55);
+    border-radius: 999px;
     opacity: 0;
 }
 
 .app-sidebar .nav-item:hover::before {
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
-    transform: translateY(-50%) scaleY(1);
+    transform: translateY(-50%) scale(1);
     opacity: 1;
 }
 
 .app-sidebar .nav-item.active::before {
-    transform: translateY(-50%) scaleY(1);
+    transform: translateY(-50%) scale(1);
     opacity: 1;
 }
 
@@ -150,15 +153,18 @@
     line-height: 1.4;
     text-align: left;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
 }
 
+/* Hover: putih terangkat ala card, font color tetap */
 .app-sidebar .nav-item:hover a,
 .app-sidebar .nav-item:hover button {
-    transition: background-color 0.2s ease, color 0.2s ease;
-    background-color: var(--dz-green-light-bg);
-    color: var(--dz-green-dark);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #ffffff;
+    color: var(--dz-text-muted);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06), 0 0 0 1px rgb(16 185 129 / 0.25);
 }
 
 .app-sidebar .nav-item.active a,
@@ -166,6 +172,7 @@
     background-color: var(--dz-green-light-bg);
     color: var(--dz-green-dark);
     font-weight: 700;
+    box-shadow: 0 0 0 1px rgb(13 92 62 / 0.18);
 }
 
 .app-sidebar .nav-item svg {

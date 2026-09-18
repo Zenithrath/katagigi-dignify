@@ -75,20 +75,21 @@
         </section>
 
         <section class="mt-4">
-            <nav class="flex items-center justify-between border-t border-slate-200 px-1 py-3">
+            <nav class="flex items-center justify-between bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-3">
                 <div class="flex w-0 flex-1">
                     @if ($pagination->page > 1)
                         <a href="{{ route('installments.index', ['page' => $pagination->page - 1]) }}"
-                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-slate-600 rounded-2xl border border-slate-200 bg-white shadow-sm hover:bg-white hover:text-slate-900 hover:shadow hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200">
                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
                             <span class="hidden md:block">{{ __('Previous') }}</span>
                         </a>
                     @endif
                 </div>
 
-                <div class="hidden md:flex items-center gap-1">
+                <div class="hidden md:flex items-center gap-1.5">
                     @if ($pagination->page - 3 >= 0)
-                        <a href="{{ route('installments.index', ['page' => 1]) }}" class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">{{ 1 }}</a>
+                        <a href="{{ route('installments.index', ['page' => 1]) }}"
+                            class="w-10 h-10 flex items-center justify-center text-sm font-semibold rounded-2xl text-slate-600 border border-slate-200 bg-white shadow-sm hover:bg-white hover:text-slate-900 hover:shadow hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200">{{ 1 }}</a>
                     @endif
                     @if ($pagination->page - 3 > 0)
                         <span class="px-1 text-slate-400">...</span>
@@ -96,7 +97,14 @@
                     @if ($pagination->total > 1)
                         @foreach (range(1, $pagination->last) as $page)
                             @if ($page > $pagination->page - 2 && $page < $pagination->page + 2)
-                                <a href="{{ route('installments.index', ['page' => $page]) }}" class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors {{ $page === $pagination->page ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100' }}">{{ $page }}</a>
+                                @if ($page === $pagination->page)
+                                    <a href="{{ route('installments.index', ['page' => $page]) }}"
+                                        class="min-w-[42px] h-10 flex items-center justify-center text-sm font-bold px-2 text-white cursor-pointer relative overflow-hidden"
+                                        style="background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 40%, #051d11 80%); box-shadow: inset 1.5px 2px 3px rgba(255,255,255,0.5), inset -2px -2.5px 4px rgba(0,0,0,0.8), 0 3px 8px rgba(5,29,17,0.45); border: 1px solid rgba(0,0,0,0.5); border-radius: 16px;">{{ $page }}</a>
+                                @else
+                                    <a href="{{ route('installments.index', ['page' => $page]) }}"
+                                        class="w-10 h-10 flex items-center justify-center text-sm font-semibold rounded-2xl text-slate-600 border border-slate-200 bg-white shadow-sm hover:bg-white hover:text-slate-900 hover:shadow hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200">{{ $page }}</a>
+                                @endif
                             @endif
                         @endforeach
                     @endif
@@ -104,14 +112,15 @@
                         <span class="px-1 text-slate-400">...</span>
                     @endif
                     @if ($pagination->page + 2 <= $pagination->last)
-                        <a href="{{ route('installments.index', ['page' => $pagination->last]) }}" class="px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">{{ $pagination->last }}</a>
+                        <a href="{{ route('installments.index', ['page' => $pagination->last]) }}"
+                            class="w-10 h-10 flex items-center justify-center text-sm font-semibold rounded-2xl text-slate-600 border border-slate-200 bg-white shadow-sm hover:bg-white hover:text-slate-900 hover:shadow hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200">{{ $pagination->last }}</a>
                     @endif
                 </div>
 
                 <div class="flex w-0 flex-1 justify-end">
                     @if ($pagination->page < $pagination->last)
                         <a href="{{ route('installments.index', ['page' => $pagination->page + 1]) }}"
-                            class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
+                            class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-slate-600 rounded-2xl border border-slate-200 bg-white shadow-sm hover:bg-white hover:text-slate-900 hover:shadow hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200">
                             <span class="hidden md:block">{{ __('Next') }}</span>
                             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
                         </a>

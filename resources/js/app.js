@@ -3,9 +3,7 @@ import Alpine from 'alpinejs';
 import select2 from 'select2';
 import jQuery from 'jquery';
 
-window.$ = window.jQuery = jQuery;
 window.Alpine = Alpine;
-select2();
 
 // Global Rupiah formatter — single source of truth for all views.
 // Accepts numbers, numeric strings, or Indonesian-formatted strings.
@@ -23,17 +21,9 @@ window.convertRupiah = function (value) {
     return decimal === '00' ? `Rp. ${sign}${grouped}` : `Rp. ${sign}${grouped},${decimal}`;
 };
 
-// Picture upload state (cover + profile preview) used across admin/doctor/nurse forms
-Alpine.data('pictureState', (hasCover = false, hasProfile = false) => ({
+// Picture upload state (profile preview) used across master & profile forms
+Alpine.data('pictureState', (hasProfile = false) => ({
     isProfilePreviewMode: hasProfile,
-    isCoverPreviewMode: hasCover,
-    showCoverPreview(event, targetID) {
-        if (event.target.files.length <= 0) return;
-        const preview = document.getElementById(targetID);
-        this.isCoverPreviewMode = true;
-        preview.src = URL.createObjectURL(event.target.files[0]);
-        preview.style.display = 'block';
-    },
     showProfilePreview(event, targetID) {
         if (event.target.files.length <= 0) return;
         const preview = document.getElementById(targetID);
@@ -41,18 +31,21 @@ Alpine.data('pictureState', (hasCover = false, hasProfile = false) => ({
         preview.src = URL.createObjectURL(event.target.files[0]);
         preview.style.display = 'block';
     },
-    clearCover(selfElem, inputID, previewID) {
+    clearProfile(selfElem, inputID, previewID) {
         selfElem.preventDefault();
         document.getElementById(inputID).value = '';
         const preview = document.getElementById(previewID);
-        this.isCoverPreviewMode = false;
+        this.isProfilePreviewMode = false;
         preview.src = '';
+        preview.style.display = '';
     },
 }));
 
-// Initialise a Select2 element bound to Alpine
+// Initialise a Select2 element bound to Alpine (guarded: no-op if plugin missing)
 window.initSelectable = function (el) {
-    $(el).select2({ width: '100%' });
+    if (window.$ && window.$.fn && typeof window.$.fn.select2 === 'function') {
+        window.$(el).select2({ width: '100%' });
+    }
 };
 
 // Revenue Chart (Chart.js, gaya TUK) — headline + % badge + toggle dataset + dropdown periode.
@@ -184,3 +177,14 @@ Alpine.data('revenueChartComponent', (analyticsData = {}) => ({
 }));
 
 Alpine.start();
+
+// jQuery + Select2 init — guarded so third-party init can NEVER break Alpine boot.
+// (select2 UMD exports a factory function; call it explicitly with our jQuery copy.)
+try {
+    window.$ = window.jQuery = jQuery;
+    if (typeof select2 === 'function') {
+        select2(window, jQuery);
+    }
+} catch (error) {
+    console.warn('[app] select2 init skipped:', error);
+}

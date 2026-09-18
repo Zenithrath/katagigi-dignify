@@ -1,11 +1,12 @@
 @layer components {
-    /* Picture Action Button */
+    /* Picture Action Button (upload / remove) */
     .picture-action {
-        @apply w-7 h-7 rounded-lg flex items-center justify-center
-            bg-white/90 backdrop-blur-sm border border-slate-200
-            text-slate-600 hover:text-emerald-600 hover:border-emerald-300
+        @apply h-8 px-3 rounded-lg flex items-center gap-1.5
+            text-xs font-semibold
+            bg-white border border-slate-200
+            text-slate-600 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50
             cursor-pointer transition-all duration-200
-            shadow-sm hover:shadow-md;
+            shadow-sm hover:shadow;
     }
 
     /* Hide native file inputs */

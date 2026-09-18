@@ -136,7 +136,7 @@
                     <div class="input-group">
                         <label for="date" class="input-label">{{ __('form.labels.date') }}</label>
                         <input type="date" name="date" id="date" class="input-text"
-                            value="{{ $data->date ?? (old('date') ?? Carbon::now()->format('Y-m-d')) }}" />
+                            value="{{ $data->date ?? (old('date') ?? now()->format('Y-m-d')) }}" />
                         @error('date')
                             <small class="danger">{{ $message }}</small>
                         @enderror
@@ -184,12 +184,22 @@
             serviceIDList: [""],
             isShown: false,
             init() {
-                this.patientID = "{{ $data->patient_id ?? old('patient_id') }}";
-                this.serviceIDList = @json($data->services ?? old('service_id')) ?? [""];
-                if (this.patientID == "" || !this.serviceIDList || typeof this.serviceIDList[0] != "string") return;
-                this.serviceIDList = JSON.parse(this.serviceIDList).map(s => s.id);
-                this.patientKeyword = this.patientID;
-                this.getPatientData();
+                try {
+                    this.patientID = "{{ $data->patient_id ?? old('patient_id') }}";
+                    let raw = @json($data->services ?? old('service_id'));
+                    if (Array.isArray(raw) && raw.length > 0) {
+                        if (typeof raw[0] === 'object' && raw[0] !== null) {
+                            this.serviceIDList = raw.map(s => s.id);
+                        } else if (typeof raw[0] === 'string' || typeof raw[0] === 'number') {
+                            this.serviceIDList = raw;
+                        }
+                    }
+                    if (!this.patientID || this.serviceIDList.length === 0 || this.serviceIDList[0] === "") return;
+                    this.patientKeyword = this.patientID;
+                    this.getPatientData();
+                } catch (e) {
+                    console.warn('[appointment] init error:', e);
+                }
             },
             handleSelectPatient(patientID) {
                 this.patientID = patientID;
@@ -232,8 +242,12 @@
                 this.serviceIDList.splice(index, 1);
             },
             unmountAddService() {
-                const latest = document.querySelector('#service-container *:last-child select');
-                initSelectable(latest);
+                try {
+                    const latest = document.querySelector('#service-container *:last-child select');
+                    if (latest && window.$ && window.$.fn && typeof window.$.fn.select2 === 'function') {
+                        initSelectable(latest);
+                    }
+                } catch (e) {}
             }
         };
     </script>

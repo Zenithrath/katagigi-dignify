@@ -14,6 +14,36 @@ body {
     color: #fff;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+select option {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    background-color: white;
+    border-radius: 12px;
+}
+
+select option:hover,
+select option:focus,
+select option:active,
+select option:checked {
+    background-color: #f0fdf4;
+    color: #065f46;
+}
+
 /* Base warisan app lama — hanya untuk halaman port (layouts.main-layout).
    body flex lama sengaja tidak dibawa agar shell Donezo tidak rusak. */
 @layer base {

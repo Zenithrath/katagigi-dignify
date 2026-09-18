@@ -87,10 +87,11 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const elems = document.getElementsByClassName('selectable');
                 for (let index = 0; index < elems.length; index++) {
-                    initSelectable(elems[index]);
+                    try { initSelectable(elems[index]); } catch (_) {}
                 }
             });
             function initSelectable(element) {
+                if (!window.$ || !window.$.fn || typeof window.$.fn.select2 !== 'function') return;
                 $(element).select2({
                     width: '100%',
                     id: element.getAttribute('id'),

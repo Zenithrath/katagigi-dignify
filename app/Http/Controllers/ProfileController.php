@@ -154,9 +154,8 @@ class ProfileController extends Controller
 
     public function changePassword()
     {
-        return view('pages.profile.change-password', [
-            'action' => route('profile.change-password.update', Auth::user()->id),
-        ]);
+        // Form ganti password kini digabung di halaman profil.
+        return redirect()->route('profile');
     }
 
     public function updatePassword(PasswordRequest $request, $id)
@@ -165,7 +164,7 @@ class ProfileController extends Controller
         $user = User::findOrFail($id);
         $password = Hash::make($validated['password']);
         if ($user->update(['password' => $password])) {
-            return redirect()->route('profile.change-password')->with('success', 'Password updated successfully');
+            return redirect()->route('profile')->with('success', 'Password updated successfully');
         }
     }
 

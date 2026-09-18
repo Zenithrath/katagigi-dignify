@@ -20,8 +20,8 @@ new class extends Component
     <div class="flex-1"></div>
 
     {{-- Profile dropdown --}}
-    <div x-data="{ open: false }" class="relative">
-        <button @click="open = ! open" class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200 py-1.5 pl-1.5 pr-3 hover:bg-slate-50 transition-colors shadow-sm">
+    <div x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false" class="relative">
+        <button @click="open = ! open" type="button" class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200 py-1.5 pl-1.5 pr-3 hover:bg-slate-50 transition-colors shadow-sm">
             <span class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-600 text-xs font-bold text-white">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </span>
@@ -29,17 +29,17 @@ new class extends Component
                 <span class="block text-[13px] font-bold text-slate-900">{{ auth()->user()->name }}</span>
                 <span class="block text-[11px] text-slate-500">{{ auth()->user()->email }}</span>
             </span>
-            <x-lucide-chevron-down class="w-3.5 h-3.5 text-slate-400 hidden md:block transition-transform duration-200" x-bind:class="open ? 'rotate-180' : ''" x-transition />
+            <x-lucide-chevron-down class="w-3.5 h-3.5 text-slate-400 hidden md:block transition-transform duration-200" x-bind:class="open ? 'rotate-180' : ''" />
         </button>
 
-        <div x-show="open" @click.away="open = false"
+        <div x-show="open" x-cloak
             class="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
             x-transition:enter="transition ease-out duration-150"
-            x-transition:enter-start="opacity-0 -translate-y-1"
-            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
             x-transition:leave="transition ease-in duration-100"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-1"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
             style="display: none;">
 
             {{-- User info --}}
@@ -58,14 +58,9 @@ new class extends Component
             {{-- Menu --}}
             <div class="py-1.5">
                 <a href="{{ route('profile') }}" wire:navigate
-                    class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                    class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors">
                     <x-lucide-settings class="w-4 h-4 text-slate-400" />
-                    Profile & Settings
-                </a>
-                <a href="{{ route('profile.change-password') }}" wire:navigate
-                    class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                    <x-lucide-key-round class="w-4 h-4 text-slate-400" />
-                    Change Password
+                    Profile & Password
                 </a>
             </div>
 
