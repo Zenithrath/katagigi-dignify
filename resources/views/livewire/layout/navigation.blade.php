@@ -66,8 +66,8 @@ new class extends Component
 
             {{-- Logout --}}
             <div class="border-t border-slate-100 py-1.5">
-                <button wire:click="logout"
-                    class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                <button wire:click="logout" wire:loading.attr="disabled" wire:loading.class="opacity-50"
+                    class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50">
                     <x-lucide-log-out class="w-4 h-4" />
                     Log Out
                 </button>
