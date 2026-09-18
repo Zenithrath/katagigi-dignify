@@ -101,6 +101,7 @@ class AdminController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update admin');
         $data = $this->service->selectAdminByID($id);
 
         return view('pages.master.admin.form', [
@@ -118,6 +119,7 @@ class AdminController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('update admin');
         $updatedAdmin = Admin::findOrFail($id);
         if ($request->hasFile('cover_image')) {
             if ($updatedAdmin->cover_picture) {
@@ -159,6 +161,7 @@ class AdminController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete admin');
         $deletedAdmin = Admin::findOrFail($id);
         if ($deletedAdmin->cover_picture) {
             $this->service->deleteCoverImage($deletedAdmin->cover_picture);

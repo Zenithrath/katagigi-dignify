@@ -27,6 +27,7 @@ class ScheduleController extends Controller
 
     public function index()
     {
+        $this->authorize('read schedule');
         $doctorList = $this->doctorService->selectAllDoctorOption();
 
         return view('pages.general.schedule.index', [
@@ -36,6 +37,7 @@ class ScheduleController extends Controller
 
     public function lookup(Request $request)
     {
+        $this->authorize('read schedule');
         $total = $this->service->countTotalData($request);
         $limit = $request->limit ?? 20;
         $pagination = (object) [
@@ -53,6 +55,7 @@ class ScheduleController extends Controller
 
     public function lookupDoctor(Request $request)
     {
+        $this->authorize('read schedule');
         $doctorID = auth()->user()->id;
         $total = $this->service->countTotalDataDoctor($doctorID);
         $limit = $request->limit ?? 20;
@@ -71,6 +74,7 @@ class ScheduleController extends Controller
 
     public function store(ScheduleRequest $request)
     {
+        $this->authorize('create schedule');
         $validated = $request->validated();
 
         $schedule = new ScheduleEntity;
@@ -90,6 +94,7 @@ class ScheduleController extends Controller
 
     public function updateStatus($id)
     {
+        $this->authorize('update schedule');
         $updated = $this->service->updateStatusSchedule($id);
         if ($updated instanceof Exception) {
             Log::error($updated->getMessage());
@@ -104,6 +109,7 @@ class ScheduleController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('delete schedule');
         $deleted = $this->service->deleteSchedule($id);
         if ($deleted instanceof Exception) {
             Log::error($deleted->getMessage());

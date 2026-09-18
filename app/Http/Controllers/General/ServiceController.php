@@ -27,6 +27,7 @@ class ServiceController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('read service');
         $rupiahConverter = function (float $value) {
             return GeneralHelper::floatToRupiah($value);
         };
@@ -53,6 +54,7 @@ class ServiceController extends Controller
      */
     public function create()
     {
+        $this->authorize('create service');
         return view('pages.general.service.form', [
             'type' => 'create',
             'data' => new Service,
@@ -69,6 +71,7 @@ class ServiceController extends Controller
      */
     public function store(ServiceRequest $request)
     {
+        $this->authorize('create service');
         $category_code = $this->service->readCategoryByID($request->category_id)->code;
         $service_code = $this->service->generateServiceCode($category_code);
 
@@ -94,6 +97,7 @@ class ServiceController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read service');
         $rupiahConverter = function (float $amount) {
             return GeneralHelper::floatToRupiah($amount);
         };
@@ -112,6 +116,7 @@ class ServiceController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update service');
         return view('pages.general.service.form', [
             'type' => 'update',
             'data' => $this->service->readServiceByID($id),
@@ -128,6 +133,7 @@ class ServiceController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('update service');
         $old_service = $this->service->readServiceByID($id);
         $old_category_id = $old_service->category_id;
         $code = $old_service->code;
@@ -159,6 +165,7 @@ class ServiceController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete service');
         $status = $this->service->deleteService($id);
 
         if ($status instanceof Exception) {

@@ -75,7 +75,8 @@ Route::middleware('auth')->group(function () {
         return redirect()->away($url);
     })->name('api.followup.whatsapp');
 
-    Route::get('appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])
+    // D-04: konfirmasi mengubah status → wajib POST + authorize di controller.
+    Route::post('appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])
         ->name('appointments.confirm');
 
     Route::resource('appointments', AppointmentController::class);

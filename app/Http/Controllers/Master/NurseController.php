@@ -100,6 +100,7 @@ class NurseController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update nurse');
         $data = $this->service->selectNurseByID($id);
 
         return view('pages.master.nurse.form', [
@@ -117,7 +118,7 @@ class NurseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $updatedNurse = Nurse::findOrFail($id);
+        $this->authorize('update nurse');        $updatedNurse = Nurse::findOrFail($id);
         if ($request->hasFile('cover_image')) {
             if ($updatedNurse->cover_picture) {
                 $this->service->deleteCoverImage($updatedNurse->cover_picture);
@@ -159,6 +160,7 @@ class NurseController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete nurse');
         $deletedNurse = Nurse::findOrFail($id);
         if ($deletedNurse->cover_picture) {
             $this->service->deleteCoverImage($deletedNurse->cover_picture);

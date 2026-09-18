@@ -15,6 +15,8 @@ class SalaryController extends Controller
      */
     public function index(Request $request)
     {
+        // D-04: data gaji derived dari omzet → butuh read turnover.
+        $this->authorize('read turnover');
         $doctors = DB::table('doctors')
             ->join('users', 'doctors.user_id', '=', 'users.id')
             ->select('doctors.*', 'users.name')

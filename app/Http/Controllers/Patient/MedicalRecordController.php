@@ -54,6 +54,7 @@ class MedicalRecordController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('read medical record');
         return view('pages.patient.record.index', [
             'medicalRecordList' => $this->service->readAllMedicalRecords($request),
         ]);
@@ -61,6 +62,7 @@ class MedicalRecordController extends Controller
 
     public function lookup(Request $request)
     {
+        $this->authorize('read medical record');
         $total = $this->service->countTotalData($request);
         $limit = $request->limit ?? 20;
         $pagination = (object) [
@@ -78,6 +80,7 @@ class MedicalRecordController extends Controller
 
     public function lookupMedicalHistory(Request $request, string $patient_id)
     {
+        $this->authorize('read patient');
         $request['sort'] = 'asc';
         $total = $this->service->countTotalDataHistory($request, $patient_id);
         $limit = $request->limit ?? 20;
@@ -107,6 +110,7 @@ class MedicalRecordController extends Controller
      */
     public function create()
     {
+        $this->authorize('create medical record');
         $services = $this->optionService->getServiceList();
         if (Auth::user()->hasRole('doctor')) {
             $doctorID = Auth::user()->id;
@@ -133,6 +137,7 @@ class MedicalRecordController extends Controller
      */
     public function store(MedicalRecordRequest $request)
     {
+        $this->authorize('create medical record');
         $validated = $request->validated();
         $appointment = $this->appointmentService->readAppointmentByID($validated['appointment_id']);
         $patient_id = $appointment->patient_id;
@@ -238,6 +243,7 @@ class MedicalRecordController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read medical record');
         $toRupiah = function ($value) {
             return GeneralHelper::floatToRupiah($value);
         };
@@ -265,6 +271,7 @@ class MedicalRecordController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update medical record');
         $services = $this->optionService->getServiceList();
 
         $record = $this->service->readMedicalRecordByID($id);
@@ -309,6 +316,7 @@ class MedicalRecordController extends Controller
      */
     public function update(MedicalRecordRequest $request, $id)
     {
+        $this->authorize('update medical record');
         $beforeImageInput = [];
         foreach ($request->image_before_meta as $index => $image) {
             if (str_contains($image, 'blob:')) {
@@ -445,6 +453,7 @@ class MedicalRecordController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete medical record');
         $medicalRecord = $this->service->readMedicalRecordByID($id);
         $imageBefore = $medicalRecord->image_before;
         $imageAfter = $medicalRecord->image_after;

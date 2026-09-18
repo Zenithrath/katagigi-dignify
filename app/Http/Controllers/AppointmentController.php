@@ -41,6 +41,7 @@ class AppointmentController extends Controller
      */
     public function index()
     {
+        $this->authorize('read appointment');
         $appointmentList = $this->appointmentService->readAllAppointments();
 
         return view('pages.general.appointment.index', [
@@ -55,6 +56,7 @@ class AppointmentController extends Controller
      */
     public function create()
     {
+        $this->authorize('create appointment');
         $doctorList = $this->doctorService->selectAllDoctorOption();
         $serviceList = $this->optionService->getServiceList();
 
@@ -69,6 +71,7 @@ class AppointmentController extends Controller
 
     public function lookup(Request $request)
     {
+        $this->authorize('read appointment');
         $total = $this->appointmentService->countTotalData($request);
         $limit = $request->limit ?? 20;
         $pagination = (object) [
@@ -86,6 +89,7 @@ class AppointmentController extends Controller
 
     public function lookupDoctor(Request $request)
     {
+        $this->authorize('read appointment');
         $doctorID = auth()->user()->id;
         $total = $this->appointmentService->countTotalDataDoctor($doctorID);
         $limit = $request->limit ?? 20;
@@ -104,6 +108,7 @@ class AppointmentController extends Controller
 
     public function getPatientByCode(Request $request)
     {
+        $this->authorize('read appointment');
         $search = $request->search;
         $patient = $this->patientService->getPatientBySearching($search);
 
@@ -124,6 +129,8 @@ class AppointmentController extends Controller
 
     public function confirm(Request $request)
     {
+        // D-04: konfirmasi via POST + gate (dulu GET terbuka).
+        $this->authorize('update appointment');
         $confirmation = $this->appointmentService->patchAppointmentStatus('CONFIRMED', $request->appointment);
 
         if ($confirmation instanceof Exception || ! $confirmation) {
@@ -143,6 +150,7 @@ class AppointmentController extends Controller
      */
     public function store(AppointmentRequest $request)
     {
+        $this->authorize('create appointment');
         $validated = $request->validated();
         $patient = $this->patientService->selectPatientByID($validated['patient_id']);
         $validated['patient_id'] = $patient->id;
@@ -178,6 +186,7 @@ class AppointmentController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read appointment');
         $appointment = $this->appointmentService->readDetailAppointmentByID($id);
         $appointment->services = json_decode($appointment->services);
 
@@ -194,6 +203,7 @@ class AppointmentController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update appointment');
         $doctorList = $this->doctorService->selectAllDoctorOption();
         $serviceList = $this->optionService->getServiceList();
         $appointment = $this->appointmentService->readAppointmentByID($id);
@@ -216,6 +226,7 @@ class AppointmentController extends Controller
      */
     public function update(UpdateAppointmentRequest $request, $id)
     {
+        $this->authorize('update appointment');
         $validated = $request->validated();
         $doctor = $this->doctorService->selectDoctorByID($validated['doctor_id']);
         $validated['doctor_name'] = $doctor->name;
@@ -243,6 +254,7 @@ class AppointmentController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete appointment');
         $status = $this->appointmentService->patchAppointmentStatus('CANCELED', $id);
 
         if ($status instanceof Exception) {
