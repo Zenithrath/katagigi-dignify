@@ -5,7 +5,7 @@
         <section class="heading">
             <div>
                 <h1>{{ __('Medical Record') }} #{{ strtoupper(substr($data->id, 0, 7)) }}</h1>
-                <p>{{ Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}</p>
+                <p>{{ \Carbon\Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}</p>
             </div>
         </section>
 
@@ -29,7 +29,7 @@
                     <div class="preview-container py-2">
                         <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.recomendation') }}</dt>
                         <dd class="font-medium text-slate-900">
-                            {{ Carbon::parse($data->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
+                            {{ \Carbon\Carbon::parse($data->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
                         </dd>
                     </div>
                     <div class="preview-container py-2">
@@ -90,15 +90,15 @@
             <div class="mt-4 pt-4 border-t border-slate-200">
                 <h3 class="text-sm font-semibold text-slate-700 mb-3">{{ __('patient.record.detail.data.service.title') }}</h3>
                 <div class="flex flex-col gap-2">
-                    @foreach ($data->services as $service)
+                    @foreach ($data->services ?? [] as $service)
                         <div class="flex flex-col md:flex-row justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <div class="flex flex-1 flex-col gap-0">
-                                <span class="font-semibold text-slate-900">{{ $service->name }}</span>
-                                <span class="text-sm text-slate-500">{{ $service->code }}: {{ $service->category }}</span>
+                                <span class="font-semibold text-slate-900">{{ $service->name ?? 'Layanan' }}</span>
+                                <span class="text-sm text-slate-500">{{ $service->code ?? '—' }}: {{ $service->category ?? '—' }}</span>
                             </div>
                             <div class="flex flex-col gap-0 text-right">
-                                <span class="font-medium text-slate-900">{{ $service->quantity . ' x ' . $toRupiah($service->price) }}</span>
-                                <span class="text-sm text-slate-500">Discount: {{ $toRupiah($service->discount) }}</span>
+                                <span class="font-medium text-slate-900">{{ ($service->quantity ?? 1) . ' x ' . $toRupiah($service->price ?? 0) }}</span>
+                                <span class="text-sm text-slate-500">Discount: {{ $toRupiah($service->discount ?? 0) }}</span>
                             </div>
                         </div>
                     @endforeach

@@ -29,7 +29,7 @@
                                 @foreach ($appointments as $appointment)
                                     <option value="{{ $appointment->id }}"
                                         {{ $appointment->id == $record->appointment_id ? 'selected' : '' }}>
-                                        {{ sprintf('%s - %s (%s %s-%s)', $appointment->patient_code, $appointment->patient_name, $appointment->date, Carbon::parse($appointment->time_start)->format('H:i'), Carbon::parse($appointment->time_end)->format('H:i')) }}
+                                        {{ sprintf('%s - %s (%s %s-%s)', $appointment->patient_code, $appointment->patient_name, $appointment->date, \Carbon\Carbon::parse($appointment->time_start)->format('H:i'), \Carbon\Carbon::parse($appointment->time_end)->format('H:i')) }}
                                     </option>
                                 @endforeach
                             </select>

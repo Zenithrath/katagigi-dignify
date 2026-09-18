@@ -11,7 +11,7 @@
             <section class="heading w-full">
                 <div class="flex-1">
                     <h1 class="text-xl font-bold text-slate-900">{{ __('report.transaction.index._title') }} {{ 'No. ' . $data->sequence }}</h1>
-                    <p>{{ Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
+                    <p>{{ \Carbon\Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
                     </p>
                 </div>
                 <button class="clickable-primary py-2.5 px-5 rounded-xl" @click="window.print()">
@@ -24,7 +24,7 @@
             @if ($data->canceled_at)
                 <div class="bg-orange-400/30 border border-orange-500 rounded-md py-2 px-4 mb-4">
                     {{ __('report.transaction.detail.helper.canceled') }}
-                    {{ Carbon::parse($data->canceled_at)->locale(Session::get('applocale') ?? 'en')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm') }}
+                    {{ \Carbon\Carbon::parse($data->canceled_at)->locale(Session::get('applocale') ?? 'en')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm') }}
                     {{ __('report.transaction.detail.helper.reason') }} {{ $data->cancel_reason }}
                 </div>
             @endif
@@ -301,7 +301,7 @@
                 <tr class="bg-transparent even:bg-transparent">
                     <td>Date</td>
                     <td>:</td>
-                    <td>{{ Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD-MM-YYYY HH:mm') }}
+                    <td>{{ \Carbon\Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD-MM-YYYY HH:mm') }}
                     </td>
                 </tr>
                 <tr class="bg-transparent even:bg-transparent">
@@ -381,7 +381,7 @@
                         </tr>
                         <tr>
                             <td class="py-1 w-20 pl-4 text-left whitespace-nowrap" colspan="2">
-                                {{ 'Max. ' . Carbon::parse($item->due_date)->format('d M Y') }}
+                                {{ 'Max. ' . \Carbon\Carbon::parse($item->due_date)->format('d M Y') }}
                             </td>
                             <td class="py-1 w-20 text-right whitespace-nowrap">{{ $toRupiah($item->amount) }}</td>
                         </tr>

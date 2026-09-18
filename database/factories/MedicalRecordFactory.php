@@ -7,6 +7,7 @@ use App\Models\Doctor;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -40,9 +41,7 @@ class MedicalRecordFactory extends Factory
             'appointment_date' => fake()->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
             'time_start' => sprintf('%02d:00:00', $startHour),
             'time_end' => sprintf('%02d:00:00', min($endHour, 20)),
-            'services' => json_encode([
-                ['name' => fake()->randomElement(['Scaling', 'Tambal Gigi', 'Cabut Gigi', 'Pembersihan Karang Gigi', 'Root Canal', 'Crown', 'Veneer']), 'price' => fake()->randomFloat(2, 100000, 5000000)],
-            ]),
+            'services' => json_encode([$this->serviceItem()]),
             'anamnesis' => fake()->sentence(4),
             'diagnosis' => fake()->sentence(3),
             'therapy' => fake()->sentence(4),
@@ -57,6 +56,35 @@ class MedicalRecordFactory extends Factory
             'cooperativity' => fake()->randomElement(['COOPERATIVE', 'LESS COOPERATIVE', 'NOT COOPERATIVE']),
             'image_before' => null,
             'image_after' => null,
+        ];
+    }
+
+    /**
+     * Bentuk item services disamakan dengan penulis asli
+     * (MedicalRecordController::store -> pricedServices) agar seed/test
+     * melewati jalur yang sama dengan data produksi: id, price, quantity,
+     * subtotal, discount, code, name, category.
+     */
+    private function serviceItem(): array
+    {
+        $svc = DB::table('services')
+            ->leftJoin('categories', 'services.category_id', '=', 'categories.id')
+            ->select('services.id', 'services.code', 'services.name', 'categories.name as category')
+            ->inRandomOrder()
+            ->first();
+
+        $price = fake()->randomFloat(2, 100000, 5000000);
+        $qty = fake()->numberBetween(1, 2);
+
+        return [
+            'id' => $svc->id ?? (string) Str::uuid(),
+            'price' => $price,
+            'quantity' => $qty,
+            'subtotal' => $price * $qty,
+            'discount' => 0,
+            'code' => $svc->code ?? 'SRV-000',
+            'name' => $svc->name ?? fake()->randomElement(['Scaling', 'Tambal Gigi', 'Cabut Gigi', 'Pembersihan Karang Gigi', 'Root Canal', 'Crown', 'Veneer']),
+            'category' => $svc->category ?? 'Umum',
         ];
     }
 }
