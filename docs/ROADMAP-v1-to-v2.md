@@ -7,10 +7,12 @@
 
 ## 1. Gap yang harus ditutup (prioritas)
 
-> **Known failure v1 (terverifikasi 18 Sep 2026):**
-> `ClinicSmokeTest::test_manajemen_can_open_all_main_pages` gagal —
-> `medical-records.index` me-return 500. Terbukti bug bawaan v1 (gagal juga dengan
-> perubahan docs di-stash), bukan akibat kerja v2. Masuk antrean Fase 1.
+> **Known failure v1 (18 Sep 2026) — SUDAH DIPERBAIKI:**
+> `ClinicSmokeTest::test_manajemen_can_open_all_main_pages` sempat gagal
+> (`medical-records.index` 500, bug bawaan v1). Diperbaiki di commit
+> `2ae1fb5`/`bec6f54`, terverifikasi hijau 19 Sep 2026
+> (`ClinicSmokeTest` 4/4 + `ClinicFlowTest` 1/1 pass). Baris ini dipertahankan
+> sebagai riwayat; tidak lagi masuk antrean Fase 1.
 
 | # | Gap | Dampak jika dibiarkan |
 |---|---|---|
