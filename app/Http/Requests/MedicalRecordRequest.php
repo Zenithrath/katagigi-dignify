@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class MedicalRecordRequest extends FormRequest
 {
@@ -42,9 +43,12 @@ class MedicalRecordRequest extends FormRequest
             'anamnesis' => 'required',
             'diagnosis' => 'required',
             'therapy' => 'required',
-            // V2: kode diagnosis resmi wajib min. 1; teks di atas jadi catatan tambahan.
-            'diagnosis_codes' => 'required|array|min:1',
-            'diagnosis_codes.*' => 'required|string|distinct|exists:diagnosis_codes,id',
+            // D-03: diagnosis (penyakit) WAJIB ≥1 kode ICD-10 — syarat SATUSEHAT
+            // Condition. Tindakan (prosedur) ICD-9-CM opsional dan terpisah.
+            'diagnosis_codes_icd10' => 'required|array|min:1',
+            'diagnosis_codes_icd10.*' => ['required', 'string', 'distinct', Rule::exists('diagnosis_codes', 'id')->where('system', 'ICD10')->where('is_active', true)],
+            'procedure_codes_icd9' => 'nullable|array',
+            'procedure_codes_icd9.*' => ['required', 'string', 'distinct', Rule::exists('diagnosis_codes', 'id')->where('system', 'ICD9')->where('is_active', true)],
             'prescription' => '',
             'promat' => 'required',
             'blood_pressure' => 'required',
