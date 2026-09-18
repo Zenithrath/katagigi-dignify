@@ -69,6 +69,7 @@ class DoctorService
                 'name',
                 'nipp',
                 'niptk',
+                'ihs_id',
                 'village',
                 'street',
                 'zip_code',
@@ -106,6 +107,7 @@ class DoctorService
                 'user_id' => $userID,
                 'nipp' => $doctor->nipp,
                 'niptk' => $doctor->niptk,
+                'ihs_id' => $doctor->ihs_id,
                 'profile_picture' => $doctor->profile_picture,
                 'cover_picture' => $doctor->cover_picture,
             ]);
@@ -157,6 +159,7 @@ class DoctorService
             ->update([
                 'nipp' => $doctor->nipp,
                 'niptk' => $doctor->niptk,
+                'ihs_id' => $doctor->ihs_id,
                 'profile_picture' => $doctor->profile_picture,
                 'cover_picture' => $doctor->cover_picture,
             ]);

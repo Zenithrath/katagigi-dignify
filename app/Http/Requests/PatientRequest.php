@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PatientRequest extends FormRequest
 {
@@ -32,7 +33,11 @@ class PatientRequest extends FormRequest
             'phone' => 'max:255|required|regex:/^08[0-9]{8,13}$/',
             'religion' => 'nullable',
             'gender' => 'nullable',
-            'birthdate' => 'nullable',
+            'birthdate' => 'nullable|date',
+            'birth_place' => 'nullable|string|max:255',
+            'nik' => ['nullable', 'digits:16', Rule::unique('patients', 'nik')->ignore($this->route('patient'), 'id')],
+            'ihs_id' => ['nullable', 'string', 'max:255', Rule::unique('patients', 'ihs_id')->ignore($this->route('patient'), 'id')],
+            'satusehat_consent' => 'nullable|boolean',
             'zip_code' => 'max:255',
             'tonarigumi' => 'max:255',
             'street' => 'max:255',

@@ -117,6 +117,26 @@
                         </div>
 
                         <div class="data-container">
+                            <dt>Tempat Lahir</dt>
+                            <dd>{{ $data->birth_place ?? '-' }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>NIK</dt>
+                            <dd class="font-semibold">{{ $data->nik ?? '-' }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>ID IHS (SATUSEHAT)</dt>
+                            <dd>{{ $data->ihs_id ?? '-' }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>Persetujuan SATUSEHAT</dt>
+                            <dd>{{ !empty($data->satusehat_consent) ? 'Ya' : 'Tidak' }}</dd>
+                        </div>
+
+                        <div class="data-container">
                             <dt>{{ __('patient.master.detail.labels.religion._title') }}</dt>
                             <dd>
                                 @switch($data->religion)

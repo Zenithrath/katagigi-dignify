@@ -52,6 +52,15 @@
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
+
+                        <div class="input-group">
+                            <label for="ihs_id">ID IHS (SATUSEHAT)</label>
+                            <input type="text" name="ihs_id" id="ihs_id" class="custom-input"
+                                placeholder="ID IHS dokter bila sudah ada" value="{{ $data->ihs_id ?? '' }}" />
+                            @error('ihs_id')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="mt-4 pt-4 border-t border-slate-200">

@@ -84,6 +84,46 @@
                         </div>
 
                         <div class="input-group">
+                            <label for="birth_place">Tempat Lahir</label>
+                            <input type="text" name="birth_place" id="birth_place" class="custom-input"
+                                placeholder="Kota tempat lahir" value="{{ $data->birth_place ?? '' }}" />
+                            @error('birth_place')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="nik">NIK (16 digit)</label>
+                            <input type="text" name="nik" id="nik" class="custom-input" inputmode="numeric"
+                                placeholder="16 digit NIK" value="{{ $data->nik ?? '' }}" />
+                            <small class="helper">Wajib untuk bridging SATUSEHAT</small>
+                            @error('nik')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="ihs_id">ID IHS (SATUSEHAT)</label>
+                            <input type="text" name="ihs_id" id="ihs_id" class="custom-input"
+                                placeholder="ID IHS pasien bila sudah ada" value="{{ $data->ihs_id ?? '' }}" />
+                            @error('ihs_id')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" name="satusehat_consent" id="satusehat_consent" value="1"
+                                    class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                    {{ !empty($data->satusehat_consent) ? 'checked' : '' }} />
+                                <span class="text-sm font-medium text-slate-700">Pasien menyetujui pemakaian data untuk SATUSEHAT</span>
+                            </label>
+                            @error('satusehat_consent')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
                             <label for="religion">{{ __('form.labels.religion') }}</label>
                             <select id="religion" name="religion" autocomplete="religion" class="custom-select">
                                 <option {{ !isset($data->religion) || !$data->religion ? 'selected' : '' }} disabled>
