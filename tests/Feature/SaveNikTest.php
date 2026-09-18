@@ -112,4 +112,26 @@ class SaveNikTest extends TestCase
             'ihs_id' => 'D001234567',
         ]);
     }
+
+    public function test_forms_and_detail_expose_satusehat_fields(): void
+    {
+        $admin = User::where('email', 'admin@gmail.com')->first();
+
+        $this->actingAs($admin)->get(route('patients.create'))
+            ->assertOk()
+            ->assertSee('NIK (16 digit)', false)
+            ->assertSee('satusehat_consent', false)
+            ->assertSee('ID IHS (SATUSEHAT)', false);
+
+        $patient = DB::table('patients')->first();
+        $this->actingAs($admin)->get(route('patients.show', $patient->id))
+            ->assertOk()
+            ->assertSee('Kesiapan SATUSEHAT', false);
+
+        $doctor = User::where('email', 'doctor@gmail.com')->first();
+        $this->actingAs($doctor)->get(route('medical-records.create'))
+            ->assertOk()
+            ->assertSee('Diagnosis Penyakit (ICD-10)', false)
+            ->assertSee('Tindakan / Prosedur (ICD-9', false);
+    }
 }
