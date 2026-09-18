@@ -31,6 +31,11 @@ class DatabaseSeeder extends Seeder
             ServiceOrtodonsiaSeeder::class,
             ServicePedodonsiaSeeder::class,
             ServiceProstodonsiaSeeder::class,
+            // D-06e: seeder lab prostodonsia (dulu orphan, tak pernah dipanggil).
+            ServiceProstodonsiaBASSeeder::class,
+            ServiceProstodonsiaKlinikSeeder::class,
+            ServiceProstodonsiaAfifSeeder::class,
+            ServiceProstodonsiaDeltaSeeder::class,
         ]);
 
         DB::transaction(function () {

@@ -106,7 +106,7 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
         $this->authorize('update category');
         $status = $this->service->updateCategory($id, $request->name, $request->code);
