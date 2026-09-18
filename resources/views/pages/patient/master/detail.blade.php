@@ -31,6 +31,34 @@
 
             {{-- Tab 1: Information --}}
             <div x-show="tab === 1" class="p-8">
+                @php
+                    $satusehatChecks = [
+                        ['label' => 'NIK 16 digit terisi', 'ok' => !empty($data->nik) && strlen($data->nik) === 16],
+                        ['label' => 'Tempat + tanggal lahir terisi', 'ok' => !empty($data->birth_place) && !empty($data->birthdate)],
+                        ['label' => 'ID IHS terisi', 'ok' => !empty($data->ihs_id)],
+                        ['label' => 'Persetujuan pasien tercatat', 'ok' => !empty($data->satusehat_consent)],
+                    ];
+                    $satusehatReady = collect($satusehatChecks)->every(fn ($c) => $c['ok']);
+                @endphp
+                <section id="satusehat-readiness" class="mb-6 p-4 rounded-xl border {{ $satusehatReady ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200' }}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-sm font-bold {{ $satusehatReady ? 'text-emerald-700' : 'text-amber-700' }}">
+                            Kesiapan SATUSEHAT: {{ $satusehatReady ? 'Siap bridging' : 'Belum lengkap' }}
+                        </span>
+                    </div>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-1">
+                        @foreach ($satusehatChecks as $check)
+                            <li class="flex items-center gap-2 text-sm {{ $check['ok'] ? 'text-emerald-700' : 'text-slate-500' }}">
+                                <span>{{ $check['ok'] ? '✓' : '○' }}</span>
+                                <span>{{ $check['label'] }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @unless ($satusehatReady)
+                        <p class="mt-2 text-xs text-amber-600">Lengkapi via tombol edit pasien. Bridging Fase 4 menolak data tak lengkap.</p>
+                    @endunless
+                </section>
+
                 <section id="information-title" class="mb-6">
                     <span class="font-bold text-lg text-slate-900">{{ __('patient.master.detail.labels.title.information') }}</span>
                 </section>

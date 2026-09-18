@@ -24,9 +24,11 @@ class ClinicSmokeTest extends TestCase
         $pages = [
             'dashboard',
             'admins.index', 'doctors.index', 'nurses.index',
-            'patients.index', 'schedules.index', 'appointments.index',
-            'services.index', 'categories.index', 'medical-records.index',
-            'transactions.index', 'incomes.index', 'installments.index',
+            'patients.index', 'patients.create', 'schedules.index', 'appointments.index',
+            'appointments.create', 'services.index', 'services.create',
+            'categories.index', 'categories.create', 'medical-records.index',
+            'medical-records.create', 'transactions.index', 'transactions.create',
+            'incomes.index', 'installments.index',
         ];
 
         foreach ($pages as $route) {
