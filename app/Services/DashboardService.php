@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -9,6 +10,9 @@ class DashboardService extends Service
 {
     public function getAdminDataOverview()
     {
+        // Method ini menjalankan ~30 query agregat; hasilnya di-cache 60 detik.
+        // Staleness maksimal 1 menit dapat diterima untuk angka dashboard.
+        return Cache::remember('dashboard:admin-overview', 60, function () {
         try {
             $monthStart = date('Y-m-01 00:00:00');
             $monthEnd = date('Y-m-t 23:59:59');
@@ -236,10 +240,13 @@ class DashboardService extends Service
             $this->writeLog('DashboardService::getAdminDataOverview', $th);
             throw $th;
         }
+        });
     }
 
     public function getDoctorDataOverview($doctorID = null)
     {
+        // Key per dokter (null = semua). TTL 60 detik, alasan sama seperti di atas.
+        return Cache::remember('dashboard:doctor-overview:'.($doctorID ?? 'all'), 60, function () use ($doctorID) {
         try {
             // Antrian minggu berjalan (Senin–Sabtu) yang belum dilayani/batal.
             $weekStart = date('Y-m-d', strtotime('monday this week'));
@@ -277,6 +284,7 @@ class DashboardService extends Service
             $this->writeLog('DashboardService::getDoctorDataOverview', $th);
             throw $th;
         }
+        });
     }
 
     public function getIncomeFromDate(object $filter)
