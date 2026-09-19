@@ -192,6 +192,7 @@ class AppointmentController extends Controller
 
         return view('pages.general.appointment.detail', [
             'data' => $appointment,
+            'visit' => \App\Models\Visit::where('appointment_id', $id)->first(),
         ]);
     }
 

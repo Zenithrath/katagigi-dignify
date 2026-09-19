@@ -12,6 +12,9 @@
         @can('read appointment')
             <x-sidebar-link href="{{ route('appointments.index') }}" :active="request()->routeIs('appointments.*')" icon="calendar-plus" :collapsible="$collapsible">{{ __('navigation.sidenav.general.appointment') }}</x-sidebar-link>
         @endcan
+        @can('read visit')
+            <x-sidebar-link href="{{ route('visits.index') }}" :active="request()->routeIs('visits.*', 'queue.*')" icon="list-ordered" :collapsible="$collapsible">Antrian</x-sidebar-link>
+        @endcan
         @can('read service')
             <x-sidebar-link href="{{ route('services.index') }}" :active="request()->routeIs('services.*', 'categories.*')" icon="briefcase-medical" :collapsible="$collapsible">{{ __('navigation.sidenav.general.service') }}</x-sidebar-link>
         @endcan

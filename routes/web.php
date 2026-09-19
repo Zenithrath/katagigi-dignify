@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DiagnosisCodeController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\CancellationController;
+use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\General\CategoryController;
 use App\Http\Controllers\General\DashboardController;
@@ -76,6 +77,13 @@ Route::middleware('auth')->group(function () {
     // D-04: konfirmasi mengubah status → wajib POST + authorize di controller.
     Route::post('appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])
         ->name('appointments.confirm');
+
+    // Fase 2: kunjungan klinis (check-in → antrian → visit).
+    Route::post('appointments/{appointment}/checkin', [VisitController::class, 'checkin'])
+        ->name('appointments.checkin');
+    Route::post('visits/{visit}/status', [VisitController::class, 'updateStatus'])
+        ->name('visits.status');
+    Route::resource('visits', VisitController::class)->only(['index', 'show']);
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);

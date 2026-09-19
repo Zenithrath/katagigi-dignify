@@ -110,6 +110,21 @@
 
             <section id="action" class="mt-4 flex justify-end w-full">
                 <div class="flex gap-4 items-center">
+                    @if (($visit ?? null))
+                        <a href="{{ route('visits.show', $visit->id) }}"
+                            class="clickable-primary py-2.5 px-5 rounded-xl">
+                            Buka Visit {{ $visit->visit_number }}
+                        </a>
+                    @elseif (($data->confirmed_at ?? null) && ! ($data->canceled_at ?? null))
+                        @can('create visit')
+                            <form action="{{ route('appointments.checkin', ['appointment' => $data->id]) }}" method="post">
+                                @csrf
+                                <button type="submit" class="clickable-primary py-2.5 px-5 rounded-xl">
+                                    Check-in
+                                </button>
+                            </form>
+                        @endcan
+                    @endif
                     @can('update appointment')
                         <a href="{{ route('appointments.edit', ['appointment' => $data->id]) }}"
                             class="clickable-primary py-2.5 px-5 rounded-xl">
