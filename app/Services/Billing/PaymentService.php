@@ -68,6 +68,11 @@ class PaymentService extends Service
                     'status' => $invoice->amountDue() <= 0.009 ? Invoice::STATUS_PAID : Invoice::STATUS_PARTIALLY_PAID,
                 ]);
 
+                // Fase 3 T3: tagihan lunas → posting jasa medis dokter.
+                if ($invoice->status === Invoice::STATUS_PAID) {
+                    (new DoctorFeeService)->postForInvoice($invoice);
+                }
+
                 return $payment;
             });
         } catch (Throwable $th) {

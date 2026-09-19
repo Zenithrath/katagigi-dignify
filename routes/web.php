@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\DiagnosisCodeController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\Billing\DoctorFeeController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
@@ -179,6 +180,11 @@ Route::middleware('auth')->group(function () {
     // Fase 3 T2: pembayaran + kwitansi.
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
     Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+
+    // Fase 3 T3: jasa medis dokter.
+    Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');
+    Route::post('doctor-fees/{fee}/pay', [DoctorFeeController::class, 'pay'])->name('doctor-fees.pay');
+    Route::post('doctors/{doctor}/fee-rule', [DoctorFeeController::class, 'rule'])->name('doctors.fee-rule');
 
     Route::get('export-transactions', [ExportController::class, 'exportTransactions'])
         ->name('export-transactions');

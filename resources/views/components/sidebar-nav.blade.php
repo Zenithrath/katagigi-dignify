@@ -80,6 +80,9 @@
             @can('read turnover')
                 <x-sidebar-link href="{{ route('incomes.index') }}" :active="request()->routeIs('incomes.*')" icon="chart-column" :collapsible="$collapsible">{{ __('navigation.sidenav.report.turnover') }}</x-sidebar-link>
             @endcan
+            @can('read turnover')
+                <x-sidebar-link href="{{ route('doctor-fees.index') }}" :active="request()->routeIs('doctor-fees.*')" icon="wallet" :collapsible="$collapsible">Fee Dokter</x-sidebar-link>
+            @endcan
             @role('manajemen')
                 <x-sidebar-link href="{{ route('transactions.index') }}" :active="false" icon="clipboard-check" badge="via nota" :collapsible="$collapsible">{{ __('navigation.sidenav.report.approval') }}</x-sidebar-link>
             @endrole
