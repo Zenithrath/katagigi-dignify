@@ -6,6 +6,7 @@ use App\Http\Controllers\Billing\DoctorFeeController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
+use App\Http\Controllers\Integration\SatuSehatController;
 use App\Http\Controllers\Inventory\InventoryController;
 use App\Http\Controllers\Operational\BranchController;
 use App\Http\Controllers\Operational\ExpenseController;
@@ -205,6 +206,10 @@ Route::middleware('auth')->group(function () {
     Route::post('branches', [BranchController::class, 'store'])->name('branches.store');
     Route::post('branches/{branch}/toggle', [BranchController::class, 'toggle'])->name('branches.toggle');
     Route::post('branch/switch', [BranchController::class, 'switch'])->name('branch.switch');
+
+    // Fase 4 T2: SATUSEHAT (sandbox dulu; tanpa klaim produksi).
+    Route::get('satusehat', [SatuSehatController::class, 'index'])->name('satusehat.index');
+    Route::post('visits/{visit}/satusehat', [SatuSehatController::class, 'sync'])->name('visits.satusehat.sync');
 
     // Fase 3 T3: jasa medis dokter.
     Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');

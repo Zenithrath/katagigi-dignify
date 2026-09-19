@@ -49,6 +49,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage expense',
             // Fase 4: cabang (manajemen)
             'manage branch',
+            // Fase 4: SATUSEHAT (manajemen; sandbox dulu)
+            'manage satusehat',
         ];
 
         foreach ([...$legacy, ...$fresh] as $name) {

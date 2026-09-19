@@ -91,6 +91,12 @@
                 @endcan
                 @if ($visit->isSigned())
                     <p class="mt-3 text-xs text-slate-500">Ditandatangani oleh {{ $visit->signer->name ?? '-' }} pada {{ $visit->signed_at?->format('d M Y H:i') }}. Visit terkunci.</p>
+                    @can('manage satusehat')
+                        <form action="{{ route('visits.satusehat.sync', $visit->id) }}" method="post" class="mt-2">
+                            @csrf
+                            <button type="submit" class="clickable-ghost px-5 py-2 rounded-xl text-sm">Sinkron SATUSEHAT</button>
+                        </form>
+                    @endcan
                 @elseif ($visit->clinical_status === 'DONE')
                     @can('sign visit')
                         <form action="{{ route('visits.sign', $visit->id) }}" method="post" class="mt-3">
@@ -101,6 +107,13 @@
                             </button>
                         </form>
                     @endcan
+                @endif
+                @if ($visit->satusehatLogs->isNotEmpty())
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        @foreach ($visit->satusehatLogs as $log)
+                            <span class="badge {{ $log->status === 'SUCCESS' ? 'badge-success' : ($log->status === 'FAILED' ? 'badge-danger' : 'badge-neutral') }}">{{ $log->resource_type }}: {{ $log->status }}</span>
+                        @endforeach
+                    </div>
                 @endif
             </div>
 

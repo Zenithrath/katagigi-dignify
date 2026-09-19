@@ -135,6 +135,11 @@ class Visit extends Model
         return $this->hasMany(Invoice::class, 'visit_id', 'id');
     }
 
+    public function satusehatLogs(): HasMany
+    {
+        return $this->hasMany(SatuSehatSyncLog::class, 'visit_id', 'id');
+    }
+
     public function isSigned(): bool
     {
         return $this->clinical_status === self::STATUS_SIGNED;
