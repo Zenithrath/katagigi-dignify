@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Visit extends Model
 {
@@ -86,6 +87,16 @@ class Visit extends Model
     public function signer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'signed_by', 'id');
+    }
+
+    public function anamnesis(): HasOne
+    {
+        return $this->hasOne(Anamnesis::class, 'visit_id', 'id');
+    }
+
+    public function examination(): HasOne
+    {
+        return $this->hasOne(Examination::class, 'visit_id', 'id');
     }
 
     public function isSigned(): bool
