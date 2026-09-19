@@ -41,6 +41,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'sign visit',             // dokter: kunci visit (SIGNED)
             // Fase 3: pencairan jasa medis (manajemen)
             'manage doctor fee',
+            // Fase 3: inventory (admin kelola, nakes baca)
+            'read inventory',
+            'manage inventory',
         ];
 
         foreach ([...$legacy, ...$fresh] as $name) {
@@ -65,6 +68,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'read diagnosis code',
             'request cancellation',
             'read visit', 'create visit', 'update visit',
+            'read inventory', 'manage inventory',
         ]);
 
         // DOCTOR: baca + tulis rekam medis (sama seperti app lama)
@@ -79,6 +83,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'read turnover',
             'read diagnosis code',
             'read visit', 'create visit', 'update visit', 'sign visit',
+            'read inventory',
         ]);
 
         // NURSE: front-office. D-04: tanpa hapus pasien (hanya manajemen, PRD §4);
@@ -94,6 +99,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'read turnover',
             'read diagnosis code',
             'read visit', 'create visit', 'update visit',
+            'read inventory',
         ]);
 
         $demos = [

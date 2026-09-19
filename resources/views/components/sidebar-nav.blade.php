@@ -89,3 +89,12 @@
         </ul>
     </div>
 @endcanany
+
+@can('read inventory')
+    <div class="menu-section">
+        <x-sidebar-section :collapsible="$collapsible">Operasional</x-sidebar-section>
+        <ul class="nav-list">
+            <x-sidebar-link href="{{ route('inventory.index') }}" :active="request()->routeIs('inventory.*')" icon="package" :collapsible="$collapsible">Inventory</x-sidebar-link>
+        </ul>
+    </div>
+@endcan
