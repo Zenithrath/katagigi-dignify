@@ -74,6 +74,9 @@
             @can('read transaction')
                 <x-sidebar-link href="{{ route('transactions.index') }}" :active="request()->routeIs('transactions.*')" icon="arrow-left-right" :collapsible="$collapsible">{{ __('navigation.sidenav.report.transaction') }}</x-sidebar-link>
             @endcan
+            @can('read transaction')
+                <x-sidebar-link href="{{ route('invoices.index') }}" :active="request()->routeIs('invoices.*')" icon="receipt-text" :collapsible="$collapsible">Tagihan</x-sidebar-link>
+            @endcan
             @can('read turnover')
                 <x-sidebar-link href="{{ route('incomes.index') }}" :active="request()->routeIs('incomes.*')" icon="chart-column" :collapsible="$collapsible">{{ __('navigation.sidenav.report.turnover') }}</x-sidebar-link>
             @endcan

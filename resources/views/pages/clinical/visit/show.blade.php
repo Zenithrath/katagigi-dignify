@@ -76,7 +76,11 @@
                 @can('create transaction')
                     @if ($visit->appointment_id && $visit->billing_status === 'UNBILLED')
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <a href="{{ route('transactions.create', ['visit' => $visit->id]) }}" class="clickable-ghost px-5 py-2 rounded-xl">Buat nota dari visit</a>
+                            <form action="{{ route('visits.invoice.store', $visit->id) }}" method="post">
+                                @csrf
+                                <button type="submit" class="clickable-primary px-5 py-2 rounded-xl">Buat tagihan dari visit</button>
+                            </form>
+                            <a href="{{ route('transactions.create', ['visit' => $visit->id]) }}" class="clickable-ghost px-5 py-2 rounded-xl">Nota lama (prefill)</a>
                         </div>
                     @endif
                 @endcan

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\DiagnosisCodeController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
@@ -164,6 +165,15 @@ Route::middleware('auth')->group(function () {
         ->name('cancellations.approve');
     Route::post('cancellations/{id}/reject', [CancellationController::class, 'reject'])
         ->name('cancellations.reject');
+
+    // Fase 3 T1: tagihan (split dari transactions).
+    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::post('visits/{visit}/invoice', [InvoiceController::class, 'fromVisit'])->name('visits.invoice.store');
+    Route::post('invoices/{invoice}/items', [InvoiceController::class, 'storeItem'])->name('invoices.items.store');
+    Route::delete('invoices/{invoice}/items/{item}', [InvoiceController::class, 'destroyItem'])->name('invoices.items.destroy');
+    Route::post('invoices/{invoice}/issue', [InvoiceController::class, 'issue'])->name('invoices.issue');
+    Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->name('invoices.void');
 
     Route::get('export-transactions', [ExportController::class, 'exportTransactions'])
         ->name('export-transactions');
