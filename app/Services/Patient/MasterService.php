@@ -204,6 +204,7 @@ class MasterService extends Service
                 ->insert([
                     'id' => $id,
                     'code' => $code,
+                    'branch_id' => \App\Helpers\BranchContext::currentId() ?? \App\Helpers\BranchContext::defaultId(),
                     'name' => $patient->name,
                     'email' => $patient->email,
                     'payment_email' => $patient->payment_email,

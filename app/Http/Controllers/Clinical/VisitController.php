@@ -39,6 +39,11 @@ class VisitController extends Controller
             ->whereIn('clinical_status', $statuses)
             ->orderBy('created_at');
 
+        // Fase 4: filter cabang aktif (null = semua).
+        if ($branchId = \App\Helpers\BranchContext::currentId()) {
+            $query->where('branch_id', $branchId);
+        }
+
         if (Auth::user()->hasRole('doctor') && ! $request->filled('doctor')) {
             $query->where('doctor_id', Auth::id());
         } elseif ($request->filled('doctor')) {

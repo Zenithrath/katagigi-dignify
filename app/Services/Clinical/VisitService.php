@@ -54,6 +54,6 @@ class VisitService extends Service
 
     public function defaultBranchId(): ?string
     {
-        return DB::table('branches')->where('is_active', true)->orderBy('code')->value('id');
+        return \App\Helpers\BranchContext::currentId() ?? \App\Helpers\BranchContext::defaultId();
     }
 }

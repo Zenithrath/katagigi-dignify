@@ -19,6 +19,18 @@ new class extends Component
 
     <div class="flex-1"></div>
 
+    {{-- Fase 4: switcher cabang aktif --}}
+    <form method="post" action="{{ route('branch.switch') }}" class="hidden md:block">
+        @csrf
+        <select name="branch_id" onchange="this.form.submit()" title="Cabang aktif"
+            class="text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl px-2.5 py-2 hover:bg-slate-50 focus:outline-none focus:ring-emerald-500">
+            <option value="">Semua cabang</option>
+            @foreach (\Illuminate\Support\Facades\DB::table('branches')->where('is_active', true)->orderBy('code')->get() as $branch)
+                <option value="{{ $branch->id }}" @selected(session('branch_id') === $branch->id)>{{ $branch->code }} — {{ $branch->name }}</option>
+            @endforeach
+        </select>
+    </form>
+
     {{-- Profile dropdown --}}
     <div x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false" class="relative">
         <button @click="open = ! open" type="button" class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200 py-1.5 pl-1.5 pr-3 hover:bg-slate-50 transition-colors shadow-sm">

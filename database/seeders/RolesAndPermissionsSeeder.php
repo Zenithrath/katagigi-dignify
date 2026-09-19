@@ -47,6 +47,8 @@ class RolesAndPermissionsSeeder extends Seeder
             // Fase 3: beban operasional (admin kelola, nakes baca)
             'read expense',
             'manage expense',
+            // Fase 4: cabang (manajemen)
+            'manage branch',
         ];
 
         foreach ([...$legacy, ...$fresh] as $name) {

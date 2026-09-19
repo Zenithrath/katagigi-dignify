@@ -7,6 +7,7 @@ use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Inventory\InventoryController;
+use App\Http\Controllers\Operational\BranchController;
 use App\Http\Controllers\Operational\ExpenseController;
 use App\Http\Controllers\Report\FinanceReportController;
 use App\Http\Controllers\Clinical\AnamnesisController;
@@ -198,6 +199,12 @@ Route::middleware('auth')->group(function () {
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('finance-report', [FinanceReportController::class, 'index'])->name('finance-report.index');
+
+    // Fase 4 T1: cabang (CRUD manajemen + switch konteks semua user).
+    Route::get('branches', [BranchController::class, 'index'])->name('branches.index');
+    Route::post('branches', [BranchController::class, 'store'])->name('branches.store');
+    Route::post('branches/{branch}/toggle', [BranchController::class, 'toggle'])->name('branches.toggle');
+    Route::post('branch/switch', [BranchController::class, 'switch'])->name('branch.switch');
 
     // Fase 3 T3: jasa medis dokter.
     Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');

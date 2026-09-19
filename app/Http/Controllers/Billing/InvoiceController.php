@@ -23,6 +23,11 @@ class InvoiceController extends Controller
         $query = Invoice::with(['patient:id,code,name', 'doctor.user:id,name'])
             ->orderBy('created_at', 'desc');
 
+        // Fase 4: filter cabang aktif (null = semua).
+        if ($branchId = \App\Helpers\BranchContext::currentId()) {
+            $query->where('branch_id', $branchId);
+        }
+
         // Dokter: batasi tagihan kasusnya (PRD §4 VIEW terbatas).
         if (Auth::user()->hasRole('doctor')) {
             $query->where('doctor_id', Auth::id());
