@@ -105,6 +105,16 @@ class Visit extends Model
         return $this->hasMany(OdontogramFinding::class, 'visit_id', 'id');
     }
 
+    public function diagnoses(): HasMany
+    {
+        return $this->hasMany(VisitDiagnosis::class, 'visit_id', 'id');
+    }
+
+    public function treatments(): HasMany
+    {
+        return $this->hasMany(VisitTreatment::class, 'visit_id', 'id');
+    }
+
     public function isSigned(): bool
     {
         return $this->clinical_status === self::STATUS_SIGNED;

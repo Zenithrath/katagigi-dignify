@@ -292,7 +292,118 @@
                 @endif
             </div>
 
-            @foreach (['tindakan' => 'Diagnosis & Tindakan', 'resep' => 'Resep', 'rencana' => 'Rencana Perawatan', 'lampiran' => 'Lampiran'] as $key => $label)
+            <div x-show="tab === 'tindakan'" class="p-8 space-y-8">
+                <section>
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Diagnosis Penyakit (ICD-10)</h3>
+                    <p class="text-xs text-slate-500 mb-3">Minimal 1 per visit — syarat SATUSEHAT. Tandai primer/sekunder.</p>
+                    @if ($visit->diagnoses->isNotEmpty())
+                        <ul class="divide-y divide-slate-100 mb-4">
+                            @foreach ($visit->diagnoses->sortBy([['is_primary', 'desc'], ['code', 'asc']]) as $dx)
+                                <li class="py-2 flex items-center justify-between gap-3 text-sm">
+                                    <span>
+                                        @if ($dx->tooth_fdi)<span class="font-bold">{{ $dx->tooth_fdi }}</span>@endif
+                                        <span class="font-semibold">[{{ $dx->code }}]</span> {{ $dx->display }}
+                                        <span class="ml-1 text-xs px-2 py-0.5 rounded-md {{ $dx->is_primary ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ $dx->is_primary ? 'Primer' : 'Sekunder' }}</span>
+                                    </span>
+                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                        <form action="{{ route('visits.diagnoses.destroy', [$visit->id, $dx->id]) }}" method="post"
+                                            @submit.prevent="if(confirm('Hapus diagnosis ini?')) $el.submit()">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                        </form>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                        <form method="post" action="{{ route('visits.diagnoses.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
+                            @csrf
+                            <livewire:diagnosis-search system="ICD10" fieldName="diagnosis_code_ids" :selected="[]" />
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 mt-3">
+                                <div class="input-group">
+                                    <label>Gigi (opsional)</label>
+                                    <select name="tooth_fdi" class="custom-select">
+                                        <option value="">— Tanpa gigi spesifik —</option>
+                                        @foreach (\App\Models\OdontogramFinding::allTeeth() as $fdi)
+                                            <option value="{{ $fdi }}">{{ $fdi }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label class="flex items-center gap-2 cursor-pointer select-none mt-7">
+                                        <input type="checkbox" name="is_primary" value="1" checked class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                                        <span class="text-sm font-medium text-slate-700">Diagnosis primer</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="submit" class="btn-submit !w-auto !px-8">Tambah diagnosis</button>
+                            </div>
+                            @error('diagnosis_code_ids')<small class="danger">{{ $message }}</small>@enderror
+                        </form>
+                    @endif
+                </section>
+
+                <section class="pt-6 border-t border-slate-200">
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Tindakan / Prosedur (ICD-9-CM)</h3>
+                    <p class="text-xs text-slate-500 mb-3">Ditagih pada nota (prefill). Harga satuan dalam rupiah.</p>
+                    @if ($visit->treatments->isNotEmpty())
+                        <ul class="divide-y divide-slate-100 mb-4">
+                            @foreach ($visit->treatments->sortBy('code') as $tx)
+                                <li class="py-2 flex items-center justify-between gap-3 text-sm">
+                                    <span>
+                                        @if ($tx->tooth_fdi)<span class="font-bold">{{ $tx->tooth_fdi }}</span>@endif
+                                        <span class="font-semibold">[{{ $tx->code }}]</span> {{ $tx->procedure }}
+                                        <span class="text-slate-500">{{ $tx->quantity }} × Rp{{ number_format($tx->unit_price, 0, ',', '.') }}</span>
+                                    </span>
+                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                        <form action="{{ route('visits.treatments.destroy', [$visit->id, $tx->id]) }}" method="post"
+                                            @submit.prevent="if(confirm('Hapus tindakan ini?')) $el.submit()">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                        </form>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                        <p class="text-sm font-bold text-slate-900 mb-4">Estimasi: Rp{{ number_format($visit->treatments->sum(fn ($t) => $t->quantity * $t->unit_price), 0, ',', '.') }}</p>
+                    @endif
+                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                        <form method="post" action="{{ route('visits.treatments.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
+                            @csrf
+                            <livewire:diagnosis-search system="ICD9" fieldName="procedure_code_ids" :selected="[]" />
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 mt-3">
+                                <div class="input-group">
+                                    <label>Gigi (opsional)</label>
+                                    <select name="tooth_fdi" class="custom-select">
+                                        <option value="">— Tanpa gigi spesifik —</option>
+                                        @foreach (\App\Models\OdontogramFinding::allTeeth() as $fdi)
+                                            <option value="{{ $fdi }}">{{ $fdi }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="quantity">Jumlah</label>
+                                    <input type="number" name="quantity" id="quantity" class="custom-input" value="1" min="1" />
+                                </div>
+                                <div class="input-group md:col-span-2">
+                                    <label for="unit_price">Harga satuan (Rp)</label>
+                                    <input type="number" name="unit_price" id="unit_price" class="custom-input" value="0" min="0" />
+                                </div>
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="submit" class="btn-submit !w-auto !px-8">Tambah tindakan</button>
+                            </div>
+                            @error('procedure_code_ids')<small class="danger">{{ $message }}</small>@enderror
+                        </form>
+                    @endif
+                </section>
+            </div>
+
+            @foreach (['resep' => 'Resep', 'rencana' => 'Rencana Perawatan', 'lampiran' => 'Lampiran'] as $key => $label)
                 <div x-show="tab === '{{ $key }}'" class="p-8">
                     <h3 class="font-bold text-lg text-slate-900 mb-1">{{ $label }}</h3>
                     <p class="text-sm text-slate-500">Menyusul pada task berikutnya.</p>

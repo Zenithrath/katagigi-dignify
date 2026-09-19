@@ -7,6 +7,8 @@ use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\ExaminationController;
 use App\Http\Controllers\Clinical\OdontogramController;
 use App\Http\Controllers\Clinical\VisitController;
+use App\Http\Controllers\Clinical\VisitDiagnosisController;
+use App\Http\Controllers\Clinical\VisitTreatmentController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\General\CategoryController;
 use App\Http\Controllers\General\DashboardController;
@@ -97,6 +99,12 @@ Route::middleware('auth')->group(function () {
     // Fase 2 Task 4: odontogram per visit.
     Route::post('visits/{visit}/odontogram', [OdontogramController::class, 'store'])->name('visits.odontogram.store');
     Route::delete('visits/{visit}/odontogram/{finding}', [OdontogramController::class, 'destroy'])->name('visits.odontogram.destroy');
+
+    // Fase 2 Task 5: diagnosis ICD-10 + tindakan ICD-9 per visit.
+    Route::post('visits/{visit}/diagnoses', [VisitDiagnosisController::class, 'store'])->name('visits.diagnoses.store');
+    Route::delete('visits/{visit}/diagnoses/{diagnosis}', [VisitDiagnosisController::class, 'destroy'])->name('visits.diagnoses.destroy');
+    Route::post('visits/{visit}/treatments', [VisitTreatmentController::class, 'store'])->name('visits.treatments.store');
+    Route::delete('visits/{visit}/treatments/{treatment}', [VisitTreatmentController::class, 'destroy'])->name('visits.treatments.destroy');
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);
