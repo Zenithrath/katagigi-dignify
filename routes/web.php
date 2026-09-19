@@ -7,6 +7,7 @@ use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Integration\SatuSehatController;
+use App\Http\Controllers\Integration\WhatsappController;
 use App\Http\Controllers\Inventory\InventoryController;
 use App\Http\Controllers\Operational\BranchController;
 use App\Http\Controllers\Operational\ExpenseController;
@@ -210,6 +211,10 @@ Route::middleware('auth')->group(function () {
     // Fase 4 T2: SATUSEHAT (sandbox dulu; tanpa klaim produksi).
     Route::get('satusehat', [SatuSehatController::class, 'index'])->name('satusehat.index');
     Route::post('visits/{visit}/satusehat', [SatuSehatController::class, 'sync'])->name('visits.satusehat.sync');
+
+    // Fase 4 T3: WhatsApp Official (driver log default).
+    Route::get('whatsapp', [WhatsappController::class, 'index'])->name('whatsapp.index');
+    Route::post('whatsapp/send', [WhatsappController::class, 'send'])->name('whatsapp.send');
 
     // Fase 3 T3: jasa medis dokter.
     Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');

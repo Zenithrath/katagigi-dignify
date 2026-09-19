@@ -93,14 +93,19 @@
     </div>
 @endcanany
 
-@can('manage satusehat')
+@canany(['manage satusehat', 'manage whatsapp'])
     <div class="menu-section">
         <x-sidebar-section :collapsible="$collapsible">Integrasi</x-sidebar-section>
         <ul class="nav-list">
-            <x-sidebar-link href="{{ route('satusehat.index') }}" :active="request()->routeIs('satusehat.*')" icon="activity" :collapsible="$collapsible">SATUSEHAT</x-sidebar-link>
+            @can('manage satusehat')
+                <x-sidebar-link href="{{ route('satusehat.index') }}" :active="request()->routeIs('satusehat.*')" icon="activity" :collapsible="$collapsible">SATUSEHAT</x-sidebar-link>
+            @endcan
+            @can('manage whatsapp')
+                <x-sidebar-link href="{{ route('whatsapp.index') }}" :active="request()->routeIs('whatsapp.*')" icon="message-circle" :collapsible="$collapsible">WhatsApp</x-sidebar-link>
+            @endcan
         </ul>
     </div>
-@endcan
+@endcanany
 
 @canany(['read inventory', 'read expense', 'manage branch'])
     <div class="menu-section">
