@@ -99,7 +99,53 @@
 
             <section class="mt-6 pt-6 border-t border-slate-200">
                 <h3 class="font-bold text-slate-900 mb-1">Pembayaran</h3>
-                <p class="text-sm text-slate-500">Menyusul Task T2.</p>
+                <p class="text-sm text-slate-600 mb-3">
+                    Dibayar: <strong>Rp{{ number_format($invoice->amountPaid(), 0, ',', '.') }}</strong>
+                    · Sisa: <strong>Rp{{ number_format($invoice->amountDue(), 0, ',', '.') }}</strong>
+                </p>
+                @if ($invoice->payments->isNotEmpty())
+                    <ul class="divide-y divide-slate-100 mb-4">
+                        @foreach ($invoice->payments as $payment)
+                            <li class="py-2 flex items-center justify-between gap-3 text-sm">
+                                <span>
+                                    <span class="font-semibold">Rp{{ number_format($payment->amount, 0, ',', '.') }}</span>
+                                    <span class="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 ml-1">{{ $payment->method }}</span>
+                                    <span class="text-slate-400 text-xs ml-1">{{ $payment->paid_at?->format('d M Y H:i') }}</span>
+                                </span>
+                                <a href="{{ route('payments.receipt', $payment->id) }}" target="_blank" class="text-sm text-brand-600 hover:text-brand-700">
+                                    Kwitansi {{ $payment->receipt->number ?? '' }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+                @if (in_array($invoice->status, ['ISSUED', 'PARTIALLY_PAID'], true))
+                    @can('create transaction')
+                        <form method="post" action="{{ route('invoices.payments.store', $invoice->id) }}" class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            @csrf
+                            <div class="input-group">
+                                <label for="amount">Nominal (Rp) <span class="text-red-500">*</span></label>
+                                <input type="number" name="amount" id="amount" class="custom-input" min="1" max="{{ (int) $invoice->amountDue() }}" value="{{ (int) $invoice->amountDue() }}" required />
+                                @error('amount')<small class="danger">{{ $message }}</small>@enderror
+                            </div>
+                            <div class="input-group">
+                                <label for="method">Metode <span class="text-red-500">*</span></label>
+                                <select name="method" id="method" class="custom-select">
+                                    @foreach (\App\Models\InvoicePayment::METHODS as $m)
+                                        <option value="{{ $m }}">{{ $m }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="pay_notes">Catatan</label>
+                                <input type="text" name="notes" id="pay_notes" class="custom-input" />
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="btn-submit !w-auto !px-8">Bayar</button>
+                            </div>
+                        </form>
+                    @endcan
+                @endif
             </section>
         </div>
     </main>

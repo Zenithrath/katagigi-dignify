@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\DiagnosisCodeController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Billing\InvoiceController;
+use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
@@ -174,6 +175,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('invoices/{invoice}/items/{item}', [InvoiceController::class, 'destroyItem'])->name('invoices.items.destroy');
     Route::post('invoices/{invoice}/issue', [InvoiceController::class, 'issue'])->name('invoices.issue');
     Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->name('invoices.void');
+
+    // Fase 3 T2: pembayaran + kwitansi.
+    Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
+    Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
 
     Route::get('export-transactions', [ExportController::class, 'exportTransactions'])
         ->name('export-transactions');
