@@ -491,7 +491,74 @@
                 @endif
             </div>
 
-            @foreach (['resep' => 'Resep', 'lampiran' => 'Lampiran'] as $key => $label)
+            <div x-show="tab === 'resep'" class="p-8 space-y-6">
+                <h3 class="font-bold text-lg text-slate-900 mb-1">Resep</h3>
+                @forelse ($visit->prescriptions as $rx)
+                    <section class="rounded-xl border border-slate-200 p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="font-bold text-slate-900">Resep — {{ $rx->prescribed_at?->format('d M Y') }}</p>
+                            @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                <form action="{{ route('visits.prescriptions.destroy', [$visit->id, $rx->id]) }}" method="post"
+                                    @submit.prevent="if(confirm('Hapus resep ini?')) $el.submit()">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                </form>
+                            @endif
+                        </div>
+                        @if ($rx->notes)<p class="text-sm text-slate-600 mt-1">{{ $rx->notes }}</p>@endif
+                        <ul class="divide-y divide-slate-100 mt-2">
+                            @foreach ($rx->items as $item)
+                                <li class="py-2 flex items-center justify-between gap-3 text-sm">
+                                    <span>
+                                        <span class="font-semibold">{{ $item->medicine_name }}</span>
+                                        @if ($item->kfa_code)<span class="text-xs text-slate-400 ml-1">[{{ $item->kfa_code }}]</span>@endif
+                                        <span class="text-slate-500 block text-xs mt-0.5">
+                                            {{ collect([$item->dosage, $item->frequency, $item->duration, $item->quantity . ' pcs', $item->route])->filter()->join(' · ') }}
+                                            @if ($item->instruction)— {{ $item->instruction }}@endif
+                                        </span>
+                                    </span>
+                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                        <form action="{{ route('visits.prescriptions.items.destroy', [$visit->id, $rx->id, $item->id]) }}" method="post"
+                                            @submit.prevent="if(confirm('Hapus obat ini?')) $el.submit()">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                        </form>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                        @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                            <form method="post" action="{{ route('visits.prescriptions.items.store', [$visit->id, $rx->id]) }}" class="mt-3 grid grid-cols-1 md:grid-cols-4 gap-2">
+                                @csrf
+                                <input type="text" name="medicine_name" class="custom-input md:col-span-2" placeholder="Nama obat *" required />
+                                <input type="text" name="kfa_code" class="custom-input" placeholder="Kode KFA" />
+                                <input type="text" name="dosage" class="custom-input" placeholder="Dosis (500 mg)" />
+                                <input type="text" name="frequency" class="custom-input" placeholder="Frekuensi (3× sehari)" />
+                                <input type="text" name="duration" class="custom-input" placeholder="Durasi (5 hari)" />
+                                <input type="number" name="quantity" class="custom-input" placeholder="Jumlah" min="1" value="1" />
+                                <input type="text" name="instruction" class="custom-input md:col-span-3" placeholder="Aturan pakai (sesudah makan)" />
+                                <button type="submit" class="clickable-primary px-4 py-2 rounded-xl text-sm">+ Obat</button>
+                            </form>
+                        @endif
+                    </section>
+                @empty
+                    <p class="text-sm text-slate-500">Belum ada resep.</p>
+                @endforelse
+                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                    <form method="post" action="{{ route('visits.prescriptions.store', $visit->id) }}" class="flex flex-wrap items-end gap-2">
+                        @csrf
+                        <div class="input-group !mb-0">
+                            <label for="prescribed_at">Tanggal</label>
+                            <input type="date" name="prescribed_at" id="prescribed_at" class="custom-input" value="{{ date('Y-m-d') }}" />
+                        </div>
+                        <button type="submit" class="btn-submit !w-auto !px-8">Buat resep</button>
+                    </form>
+                @endif
+            </div>
+
+            @foreach (['lampiran' => 'Lampiran'] as $key => $label)
                 <div x-show="tab === '{{ $key }}'" class="p-8">
                     <h3 class="font-bold text-lg text-slate-900 mb-1">{{ $label }}</h3>
                     <p class="text-sm text-slate-500">Menyusul pada task berikutnya.</p>
