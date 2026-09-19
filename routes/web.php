@@ -8,6 +8,7 @@ use App\Http\Controllers\Clinical\ExaminationController;
 use App\Http\Controllers\Clinical\OdontogramController;
 use App\Http\Controllers\Clinical\PrescriptionController;
 use App\Http\Controllers\Clinical\TreatmentPlanController;
+use App\Http\Controllers\Clinical\VisitAttachmentController;
 use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
 use App\Http\Controllers\Clinical\VisitTreatmentController;
@@ -120,6 +121,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('visits/{visit}/prescriptions/{prescription}', [PrescriptionController::class, 'destroy'])->name('visits.prescriptions.destroy');
     Route::post('visits/{visit}/prescriptions/{prescription}/items', [PrescriptionController::class, 'storeItem'])->name('visits.prescriptions.items.store');
     Route::delete('visits/{visit}/prescriptions/{prescription}/items/{item}', [PrescriptionController::class, 'destroyItem'])->name('visits.prescriptions.items.destroy');
+
+    // Fase 2 Task 8: lampiran visit (private + signed URL).
+    Route::post('visits/{visit}/attachments', [VisitAttachmentController::class, 'store'])->name('visits.attachments.store');
+    Route::delete('visits/{visit}/attachments/{attachment}', [VisitAttachmentController::class, 'destroy'])->name('visits.attachments.destroy');
+    Route::get('attachments/{attachment}/file', [VisitAttachmentController::class, 'file'])
+        ->middleware('signed')->name('attachments.file');
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);

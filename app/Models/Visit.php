@@ -125,6 +125,11 @@ class Visit extends Model
         return $this->hasMany(Prescription::class, 'visit_id', 'id');
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(VisitAttachment::class, 'visit_id', 'id');
+    }
+
     public function isSigned(): bool
     {
         return $this->clinical_status === self::STATUS_SIGNED;

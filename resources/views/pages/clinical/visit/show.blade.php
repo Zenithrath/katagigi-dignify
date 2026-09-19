@@ -558,12 +558,67 @@
                 @endif
             </div>
 
-            @foreach (['lampiran' => 'Lampiran'] as $key => $label)
-                <div x-show="tab === '{{ $key }}'" class="p-8">
-                    <h3 class="font-bold text-lg text-slate-900 mb-1">{{ $label }}</h3>
-                    <p class="text-sm text-slate-500">Menyusul pada task berikutnya.</p>
-                </div>
-            @endforeach
+            <div x-show="tab === 'lampiran'" class="p-8 space-y-6">
+                <h3 class="font-bold text-lg text-slate-900 mb-1">Lampiran</h3>
+                <p class="text-xs text-slate-500">Disimpan privat — hanya bisa dibuka lewat tautan bertanda tangan.</p>
+                @forelse ($visit->attachments as $file)
+                    <section class="rounded-xl border border-slate-200 p-4 flex items-center justify-between gap-3">
+                        <div>
+                            <p class="font-semibold text-slate-900 text-sm">
+                                <span class="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 mr-1">{{ \App\Models\VisitAttachment::TYPES[$file->type] ?? $file->type }}</span>
+                                {{ $file->description ?? basename($file->path) }}
+                            </p>
+                            <p class="text-xs text-slate-400 mt-0.5">oleh {{ $file->uploader->name ?? '-' }} · {{ $file->created_at?->format('d M Y H:i') }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ URL::temporarySignedRoute('attachments.file', now()->addMinutes(30), ['attachment' => $file->id]) }}"
+                                target="_blank" class="text-sm text-brand-600 hover:text-brand-700">Buka</a>
+                            @can('update visit')
+                                @unless ($visit->isSigned())
+                                    <form action="{{ route('visits.attachments.destroy', [$visit->id, $file->id]) }}" method="post"
+                                        @submit.prevent="if(confirm('Hapus lampiran ini?')) $el.submit()">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                    </form>
+                                @endunless
+                            @endcan
+                        </div>
+                    </section>
+                @empty
+                    <p class="text-sm text-slate-500">Belum ada lampiran.</p>
+                @endforelse
+                @can('update visit')
+                    @unless ($visit->isSigned())
+                        <form method="post" action="{{ route('visits.attachments.store', $visit->id) }}" enctype="multipart/form-data" class="rounded-xl border border-slate-200 p-4">
+                            @csrf
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
+                                <div class="input-group">
+                                    <label for="file_type">Jenis <span class="text-red-500">*</span></label>
+                                    <select name="type" id="file_type" class="custom-select">
+                                        @foreach (\App\Models\VisitAttachment::TYPES as $code => $label)
+                                            <option value="{{ $code }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('type')<small class="danger">{{ $message }}</small>@enderror
+                                </div>
+                                <div class="input-group">
+                                    <label for="file">Berkas (jpg/png/webp/pdf, maks 10MB) <span class="text-red-500">*</span></label>
+                                    <input type="file" name="file" id="file" class="custom-input" required />
+                                    @error('file')<small class="danger">{{ $message }}</small>@enderror
+                                </div>
+                                <div class="input-group">
+                                    <label for="file_description">Keterangan</label>
+                                    <input type="text" name="description" id="file_description" class="custom-input" />
+                                </div>
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="submit" class="btn-submit !w-auto !px-8">Unggah</button>
+                            </div>
+                        </form>
+                    @endunless
+                @endcan
+            </div>
         </div>
     </main>
 </x-app-layout>
