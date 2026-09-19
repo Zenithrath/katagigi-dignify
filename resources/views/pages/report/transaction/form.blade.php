@@ -13,6 +13,14 @@
         <x-flash-alerts />
 
         <section class="content-card" x-data="appointmentState" x-init="$watch('isDataShown', unmountChangeAppointment)">
+            @isset($prefillVisit)
+                <div class="m-6 mb-0 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">
+                    Dari visit <strong>{{ $prefillVisit->visit_number }}</strong> ({{ $prefillVisit->patient->name ?? '-' }}):
+                    {{ $prefillVisit->treatments->count() }} tindakan,
+                    estimasi Rp{{ number_format($prefillVisit->treatments->sum(fn ($t) => $t->quantity * $t->unit_price), 0, ',', '.') }}.
+                    Appointment terpilih otomatis — sesuaikan layanan & harga lalu simpan.
+                </div>
+            @endisset
             <form action="{{ route('transactions.store') }}" method="post">
                 @csrf
 
@@ -347,6 +355,20 @@
 
                 if (this.appointment) {
                     this.services = this.appointment.services;
+                }
+
+                // Fase 2 Task 9: prefill appointment dari visit.
+                const prefillID = @json($prefillAppointmentID ?? null);
+                if (prefillID) {
+                    this.selectedAppointmentID = prefillID;
+                    const select = document.querySelector('#appointment_id');
+                    if (select) {
+                        select.value = prefillID;
+                        if (window.jQuery) {
+                            window.jQuery(select).val(prefillID).trigger('change');
+                        }
+                    }
+                    this.findAppointment();
                 }
             },
             setDataFromAppointment(appointment) {

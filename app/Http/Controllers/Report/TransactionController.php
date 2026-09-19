@@ -81,11 +81,23 @@ class TransactionController extends Controller
         $services = $this->optionService->getServiceList();
         $assistants = $this->service->readAssistants();
 
+        // Fase 2 Task 9: prefill dari visit (kasir tinggal sesuaikan harga).
+        $prefillVisit = null;
+        $prefillAppointmentID = null;
+        if (request()->filled('visit')) {
+            $prefillVisit = \App\Models\Visit::with(['patient:id,code,name', 'treatments'])->find(request()->input('visit'));
+            if ($prefillVisit && $prefillVisit->appointment_id) {
+                $prefillAppointmentID = $prefillVisit->appointment_id;
+            }
+        }
+
         return view('pages.report.transaction.form', [
             'type' => 'create',
             'appointments' => $appointments,
             'services' => $services,
             'assistants' => $assistants,
+            'prefillVisit' => $prefillVisit,
+            'prefillAppointmentID' => $prefillAppointmentID,
         ]);
     }
 
