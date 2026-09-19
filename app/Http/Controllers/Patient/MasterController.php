@@ -123,6 +123,7 @@ class MasterController extends Controller
     {
         $this->authorize('read patient');
         $data = $this->service->selectPatientByID($id);
+        abort_if(! $data, 404);
         $data->sosmed = json_decode($data->sosmed);
         $data->records = $this->recordService->readMedicalRecordByPatiendID($id);
         $toRupiah = function ($value) {
@@ -145,6 +146,7 @@ class MasterController extends Controller
     {
         $this->authorize('update patient');
         $data = $this->service->selectPatientByID($id);
+        abort_if(! $data, 404);
         $data->sosmed = json_decode($data->sosmed);
 
         return view('pages.patient.master.form', [
@@ -165,6 +167,7 @@ class MasterController extends Controller
     {
         $this->authorize('update patient');
         $patient = $this->service->selectPatientByID($id);
+        abort_if(! $patient, 404);
         $updatedPatientPicture = $patient->picture;
         $updateBag = [];
 
@@ -210,7 +213,7 @@ class MasterController extends Controller
     public function destroy($id)
     {
         $this->authorize('delete patient');
-        $deletedPatientPicture = Patient::findOrFail($id)->first()->picture;
+        $deletedPatientPicture = Patient::findOrFail($id)->picture;
         if ($deletedPatientPicture) {
             $this->service->deleteImage($deletedPatientPicture);
         }

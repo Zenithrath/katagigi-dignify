@@ -247,15 +247,16 @@
                                 <div class="preview-container py-2">
                                     <dt class="font-semibold">{{ __('patient.record.detail.data.service.title') }}</dt>
                                     <dd class="flex flex-col gap-2">
-                                        @foreach ($record->services as $service)
+                                        {{-- Tahan format lama: record lawas bisa null / skalar / tanpa code/name --}}
+                                        @foreach (is_iterable($record->services) ? $record->services : [] as $service)
                                             <div class="flex flex-col md:flex-row justify-between bg-white p-3 rounded-xl border border-slate-100">
                                                 <div class="flex flex-1 flex-col gap-0">
-                                                    <span class="font-semibold">{{ $service->name }}</span>
-                                                    <span class="text-sm text-slate-500">{{ $service->code }}: {{ $service->category }}</span>
+                                                    <span class="font-semibold">{{ $service->name ?? 'Layanan' }}</span>
+                                                    <span class="text-sm text-slate-500">{{ $service->code ?? '—' }}: {{ $service->category ?? '—' }}</span>
                                                 </div>
                                                 <div class="flex flex-col gap-0 text-right">
-                                                    <span class="font-medium">{{ $service->quantity . ' x ' . $toRupiah($service->price) }}</span>
-                                                    <span class="text-sm text-slate-500">Discount: {{ $toRupiah($service->discount) }}</span>
+                                                    <span class="font-medium">{{ ($service->quantity ?? 1) . ' x ' . $toRupiah($service->price ?? 0) }}</span>
+                                                    <span class="text-sm text-slate-500">Discount: {{ $toRupiah($service->discount ?? 0) }}</span>
                                                 </div>
                                             </div>
                                         @endforeach

@@ -153,6 +153,7 @@ class AppointmentController extends Controller
         $this->authorize('create appointment');
         $validated = $request->validated();
         $patient = $this->patientService->selectPatientByID($validated['patient_id']);
+        abort_if(! $patient, 404, 'Pasien tidak ditemukan.');
         $validated['patient_id'] = $patient->id;
         $validated['patient_name'] = $patient->name;
         $validated['patient_code'] = $patient->code;

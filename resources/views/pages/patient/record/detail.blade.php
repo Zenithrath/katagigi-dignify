@@ -116,7 +116,7 @@
             <div class="mt-4 pt-4 border-t border-slate-200">
                 <h3 class="text-sm font-semibold text-slate-700 mb-3">{{ __('patient.record.detail.data.service.title') }}</h3>
                 <div class="flex flex-col gap-2">
-                    @foreach ($data->services ?? [] as $service)
+                    @foreach (is_iterable($data->services) ? $data->services : [] as $service)
                         <div class="flex flex-col md:flex-row justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <div class="flex flex-1 flex-col gap-0">
                                 <span class="font-semibold text-slate-900">{{ $service->name ?? 'Layanan' }}</span>
