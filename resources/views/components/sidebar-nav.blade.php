@@ -12,14 +12,24 @@
         @can('read appointment')
             <x-sidebar-link href="{{ route('appointments.index') }}" :active="request()->routeIs('appointments.*')" icon="calendar-plus" :collapsible="$collapsible">{{ __('navigation.sidenav.general.appointment') }}</x-sidebar-link>
         @endcan
-        @can('read visit')
-            <x-sidebar-link href="{{ route('visits.index') }}" :active="request()->routeIs('visits.*', 'queue.*')" icon="list-ordered" :collapsible="$collapsible">Antrian</x-sidebar-link>
+        @can('read appointment')
+            <x-sidebar-link href="{{ route('calendar.index') }}" :active="request()->routeIs('calendar.*')" icon="calendar" :collapsible="$collapsible">Kalender</x-sidebar-link>
         @endcan
         @can('read service')
             <x-sidebar-link href="{{ route('services.index') }}" :active="request()->routeIs('services.*', 'categories.*')" icon="briefcase-medical" :collapsible="$collapsible">{{ __('navigation.sidenav.general.service') }}</x-sidebar-link>
         @endcan
     </ul>
 </div>
+
+@can('read visit')
+    <div class="menu-section">
+        <x-sidebar-section :collapsible="$collapsible">Klinis</x-sidebar-section>
+        <ul class="nav-list">
+            <x-sidebar-link href="{{ route('workspace.index') }}" :active="request()->routeIs('workspace.*')" icon="stethoscope" :collapsible="$collapsible">Workspace</x-sidebar-link>
+            <x-sidebar-link href="{{ route('visits.index') }}" :active="request()->routeIs('visits.*')" icon="list-ordered" :collapsible="$collapsible">Antrian</x-sidebar-link>
+        </ul>
+    </div>
+@endcan
 
 @canany(['read patient', 'read medical record'])
     <div class="menu-section">

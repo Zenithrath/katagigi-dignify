@@ -73,6 +73,13 @@
                         </div>
                     @endif
                 @endcan
+                @can('create transaction')
+                    @if ($visit->appointment_id && $visit->billing_status === 'UNBILLED')
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <a href="{{ route('transactions.create', ['visit' => $visit->id]) }}" class="clickable-ghost px-5 py-2 rounded-xl">Buat nota dari visit</a>
+                        </div>
+                    @endif
+                @endcan
             </div>
 
             <div x-show="tab === 'anamnesis'" class="p-8">

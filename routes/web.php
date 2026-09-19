@@ -4,12 +4,14 @@ use App\Http\Controllers\Api\DiagnosisCodeController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
+use App\Http\Controllers\Clinical\CalendarController;
 use App\Http\Controllers\Clinical\ExaminationController;
 use App\Http\Controllers\Clinical\OdontogramController;
 use App\Http\Controllers\Clinical\PrescriptionController;
 use App\Http\Controllers\Clinical\TreatmentPlanController;
 use App\Http\Controllers\Clinical\VisitAttachmentController;
 use App\Http\Controllers\Clinical\VisitController;
+use App\Http\Controllers\Clinical\WorkspaceController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
 use App\Http\Controllers\Clinical\VisitTreatmentController;
 use App\Http\Controllers\ExportController;
@@ -92,6 +94,10 @@ Route::middleware('auth')->group(function () {
     Route::post('visits/{visit}/status', [VisitController::class, 'updateStatus'])
         ->name('visits.status');
     Route::resource('visits', VisitController::class)->only(['index', 'show']);
+
+    // Fase 2 Task 9: workspace dokter + kalender appointment.
+    Route::get('workspace', [WorkspaceController::class, 'index'])->name('workspace.index');
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 
     // Fase 2 Task 3: anamnesis + SOAP per visit.
     Route::post('visits/{visit}/anamnesis', [AnamnesisController::class, 'store'])->name('visits.anamnesis.store');
