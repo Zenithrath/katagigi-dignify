@@ -403,7 +403,95 @@
                 </section>
             </div>
 
-            @foreach (['resep' => 'Resep', 'rencana' => 'Rencana Perawatan', 'lampiran' => 'Lampiran'] as $key => $label)
+            <div x-show="tab === 'rencana'" class="p-8 space-y-6">
+                <h3 class="font-bold text-lg text-slate-900 mb-1">Rencana Perawatan</h3>
+                @forelse ($visit->treatmentPlans as $plan)
+                    <section class="rounded-xl border border-slate-200 p-4">
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <div>
+                                <p class="font-bold text-slate-900">{{ $plan->title }}</p>
+                                <p class="text-xs text-slate-500">Estimasi total: Rp{{ number_format($plan->estimatedTotal(), 0, ',', '.') }}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-info">{{ $plan->status }}</span>
+                                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                    <form action="{{ route('visits.plans.status', [$visit->id, $plan->id]) }}" method="post" class="flex items-center gap-1">
+                                        @csrf
+                                        <select name="status" class="custom-select !py-1 !px-2 !text-xs" onchange="this.form.submit()">
+                                            @foreach (\App\Models\TreatmentPlan::STATUSES as $s)
+                                                <option value="{{ $s }}" @selected($plan->status === $s)>{{ $s }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                    <form action="{{ route('visits.plans.destroy', [$visit->id, $plan->id]) }}" method="post"
+                                        @submit.prevent="if(confirm('Hapus rencana ini?')) $el.submit()">
+                                        @csrf
+                                        @method('delete')
+                                        <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                        @if ($plan->notes)<p class="text-sm text-slate-600 mt-1">{{ $plan->notes }}</p>@endif
+                        <ul class="divide-y divide-slate-100 mt-2">
+                            @foreach ($plan->items as $item)
+                                <li class="py-2 flex items-center justify-between gap-3 text-sm">
+                                    <span>
+                                        <span class="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 mr-1">P{{ $item->priority }}</span>
+                                        @if ($item->tooth_fdi)<span class="font-bold">{{ $item->tooth_fdi }}</span>@endif
+                                        {{ $item->description }}
+                                        <span class="text-slate-500">· Rp{{ number_format($item->estimated_price, 0, ',', '.') }}</span>
+                                    </span>
+                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                        <form action="{{ route('visits.plans.items.destroy', [$visit->id, $plan->id, $item->id]) }}" method="post"
+                                            @submit.prevent="if(confirm('Hapus item ini?')) $el.submit()">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
+                                        </form>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                        @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                            <form method="post" action="{{ route('visits.plans.items.store', [$visit->id, $plan->id]) }}" class="mt-3 grid grid-cols-1 md:grid-cols-5 gap-2">
+                                @csrf
+                                <select name="tooth_fdi" class="custom-select">
+                                    <option value="">Gigi —</option>
+                                    @foreach (\App\Models\OdontogramFinding::allTeeth() as $fdi)
+                                        <option value="{{ $fdi }}">{{ $fdi }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="text" name="description" class="custom-input md:col-span-2" placeholder="Tindakan direncanakan *" required />
+                                <input type="number" name="estimated_price" class="custom-input" placeholder="Estimasi Rp" min="0" value="0" />
+                                <button type="submit" class="clickable-primary px-4 py-2 rounded-xl text-sm">+ Item</button>
+                            </form>
+                        @endif
+                    </section>
+                @empty
+                    <p class="text-sm text-slate-500">Belum ada rencana perawatan.</p>
+                @endforelse
+                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                    <form method="post" action="{{ route('visits.plans.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                            <div class="input-group">
+                                <label for="plan_title">Judul rencana <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" id="plan_title" class="custom-input" placeholder="mis. Rehabilitasi rahang atas tahap 1" required />
+                            </div>
+                            <div class="input-group">
+                                <label for="plan_notes">Catatan</label>
+                                <input type="text" name="notes" id="plan_notes" class="custom-input" />
+                            </div>
+                        </div>
+                        <div class="mt-3 flex justify-end">
+                            <button type="submit" class="btn-submit !w-auto !px-8">Buat rencana</button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+
+            @foreach (['resep' => 'Resep', 'lampiran' => 'Lampiran'] as $key => $label)
                 <div x-show="tab === '{{ $key }}'" class="p-8">
                     <h3 class="font-bold text-lg text-slate-900 mb-1">{{ $label }}</h3>
                     <p class="text-sm text-slate-500">Menyusul pada task berikutnya.</p>

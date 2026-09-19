@@ -59,6 +59,7 @@ class VisitController extends Controller
         $visit = Visit::with([
             'patient', 'doctor.user', 'appointment', 'branch', 'signer:id,name',
             'anamnesis', 'examination', 'odontogramFindings', 'diagnoses', 'treatments',
+            'treatmentPlans.items',
         ])->findOrFail($id);
 
         return view('pages.clinical.visit.show', [

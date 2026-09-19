@@ -6,6 +6,7 @@ use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\ExaminationController;
 use App\Http\Controllers\Clinical\OdontogramController;
+use App\Http\Controllers\Clinical\TreatmentPlanController;
 use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
 use App\Http\Controllers\Clinical\VisitTreatmentController;
@@ -105,6 +106,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('visits/{visit}/diagnoses/{diagnosis}', [VisitDiagnosisController::class, 'destroy'])->name('visits.diagnoses.destroy');
     Route::post('visits/{visit}/treatments', [VisitTreatmentController::class, 'store'])->name('visits.treatments.store');
     Route::delete('visits/{visit}/treatments/{treatment}', [VisitTreatmentController::class, 'destroy'])->name('visits.treatments.destroy');
+
+    // Fase 2 Task 6: rencana perawatan per visit.
+    Route::post('visits/{visit}/plans', [TreatmentPlanController::class, 'store'])->name('visits.plans.store');
+    Route::post('visits/{visit}/plans/{plan}/status', [TreatmentPlanController::class, 'updateStatus'])->name('visits.plans.status');
+    Route::delete('visits/{visit}/plans/{plan}', [TreatmentPlanController::class, 'destroy'])->name('visits.plans.destroy');
+    Route::post('visits/{visit}/plans/{plan}/items', [TreatmentPlanController::class, 'storeItem'])->name('visits.plans.items.store');
+    Route::delete('visits/{visit}/plans/{plan}/items/{item}', [TreatmentPlanController::class, 'destroyItem'])->name('visits.plans.items.destroy');
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);
