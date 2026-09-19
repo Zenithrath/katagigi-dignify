@@ -40,6 +40,7 @@ class InvoiceService extends Service
                 $invoice = Invoice::create([
                     'id' => (string) Str::uuid(),
                     'number' => $this->nextNumber(),
+                    'branch_id' => $visit->branch_id,
                     'patient_id' => $visit->patient_id,
                     'visit_id' => $visit->id,
                     'appointment_id' => $visit->appointment_id,

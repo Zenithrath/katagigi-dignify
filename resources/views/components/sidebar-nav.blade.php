@@ -103,6 +103,9 @@
             @can('read expense')
                 <x-sidebar-link href="{{ route('expenses.index') }}" :active="request()->routeIs('expenses.*')" icon="banknote" :collapsible="$collapsible">Beban</x-sidebar-link>
             @endcan
+            @can('manage branch')
+                <x-sidebar-link href="{{ route('branches.index') }}" :active="request()->routeIs('branches.*')" icon="building-2" :collapsible="$collapsible">Cabang</x-sidebar-link>
+            @endcan
         </ul>
     </div>
 @endcanany

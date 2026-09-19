@@ -33,6 +33,7 @@ class Invoice extends Model
     protected $fillable = [
         'id',
         'number',
+        'branch_id',
         'patient_id',
         'visit_id',
         'appointment_id',

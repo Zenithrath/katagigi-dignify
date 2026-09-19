@@ -252,6 +252,7 @@ class AppointmentService extends Service
         try {
             return DB::table('appointments')->insert([
                 'id' => Uuid::uuid4(),
+                'branch_id' => \App\Helpers\BranchContext::currentId() ?? \App\Helpers\BranchContext::defaultId(),
                 'patient_id' => $valid['patient_id'],
                 'patient_code' => $valid['patient_code'],
                 'patient_name' => $valid['patient_name'],
