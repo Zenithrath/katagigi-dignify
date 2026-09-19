@@ -93,6 +93,8 @@ Route::middleware('auth')->group(function () {
         ->name('appointments.checkin');
     Route::post('visits/{visit}/status', [VisitController::class, 'updateStatus'])
         ->name('visits.status');
+    Route::post('visits/{visit}/sign', [VisitController::class, 'sign'])
+        ->name('visits.sign');
     Route::resource('visits', VisitController::class)->only(['index', 'show']);
 
     // Fase 2 Task 9: workspace dokter + kalender appointment.

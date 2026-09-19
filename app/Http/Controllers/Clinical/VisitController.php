@@ -119,4 +119,37 @@ class VisitController extends Controller
 
         return back()->with('success', 'Status visit: '.$request->status.'.');
     }
+
+    /**
+     * Task 10: tanda tangan elektronik visit (SIGNED = kunci).
+     * Syarat: status DONE + minimal 1 diagnosis ICD-10 (kelengkapan SATUSEHAT).
+     * Menandai appointment tercatat agar konsisten dengan dashboard v1.
+     */
+    public function sign($id)
+    {
+        $this->authorize('sign visit');
+
+        $visit = Visit::findOrFail($id);
+        abort_if($visit->isSigned(), 422, 'Visit sudah SIGNED.');
+        abort_unless($visit->clinical_status === Visit::STATUS_DONE, 422, 'Visit harus DONE sebelum ditandatangani.');
+        abort_unless(
+            $visit->diagnoses()->where('system', 'ICD10')->exists(),
+            422,
+            'Minimal 1 diagnosis ICD-10 sebelum sign (syarat SATUSEHAT).'
+        );
+
+        $visit->update([
+            'clinical_status' => Visit::STATUS_SIGNED,
+            'signed_at' => now(),
+            'signed_by' => Auth::id(),
+        ]);
+
+        if ($visit->appointment_id) {
+            DB::table('appointments')->where('id', $visit->appointment_id)->update([
+                'recorded_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        return back()->with('success', 'Visit '.$visit->visit_number.' ditandatangani dan dikunci.');
+    }
 }

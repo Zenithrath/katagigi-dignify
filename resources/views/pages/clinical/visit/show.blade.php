@@ -80,6 +80,19 @@
                         </div>
                     @endif
                 @endcan
+                @if ($visit->isSigned())
+                    <p class="mt-3 text-xs text-slate-500">Ditandatangani oleh {{ $visit->signer->name ?? '-' }} pada {{ $visit->signed_at?->format('d M Y H:i') }}. Visit terkunci.</p>
+                @elseif ($visit->clinical_status === 'DONE')
+                    @can('sign visit')
+                        <form action="{{ route('visits.sign', $visit->id) }}" method="post" class="mt-3">
+                            @csrf
+                            <button type="submit" class="clickable-primary px-5 py-2.5 rounded-xl"
+                                @click.prevent="if(confirm('Tandatangani dan kunci visit ini?')) $el.closest('form').submit()">
+                                Tandatangani visit
+                            </button>
+                        </form>
+                    @endcan
+                @endif
             </div>
 
             <div x-show="tab === 'anamnesis'" class="p-8">
