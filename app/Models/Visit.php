@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Visit extends Model
@@ -97,6 +98,11 @@ class Visit extends Model
     public function examination(): HasOne
     {
         return $this->hasOne(Examination::class, 'visit_id', 'id');
+    }
+
+    public function odontogramFindings(): HasMany
+    {
+        return $this->hasMany(OdontogramFinding::class, 'visit_id', 'id');
     }
 
     public function isSigned(): bool
