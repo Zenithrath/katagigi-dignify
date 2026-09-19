@@ -41,7 +41,7 @@ class InvoiceController extends Controller
     {
         $this->authorize('read transaction');
 
-        $invoice = Invoice::with(['patient', 'doctor.user', 'visit', 'items', 'payments'])
+        $invoice = Invoice::with(['patient', 'doctor.user', 'visit', 'items', 'payments.receipt', 'payments.receiver:id,name'])
             ->findOrFail($id);
 
         if (Auth::user()->hasRole('doctor')) {
