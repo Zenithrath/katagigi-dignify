@@ -93,7 +93,16 @@
     </div>
 @endcanany
 
-@canany(['read inventory', 'read expense'])
+@can('manage satusehat')
+    <div class="menu-section">
+        <x-sidebar-section :collapsible="$collapsible">Integrasi</x-sidebar-section>
+        <ul class="nav-list">
+            <x-sidebar-link href="{{ route('satusehat.index') }}" :active="request()->routeIs('satusehat.*')" icon="activity" :collapsible="$collapsible">SATUSEHAT</x-sidebar-link>
+        </ul>
+    </div>
+@endcan
+
+@canany(['read inventory', 'read expense', 'manage branch'])
     <div class="menu-section">
         <x-sidebar-section :collapsible="$collapsible">Operasional</x-sidebar-section>
         <ul class="nav-list">

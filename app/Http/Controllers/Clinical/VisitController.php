@@ -65,6 +65,7 @@ class VisitController extends Controller
             'patient', 'doctor.user', 'appointment', 'branch', 'signer:id,name',
             'anamnesis', 'examination', 'odontogramFindings', 'diagnoses', 'treatments',
             'treatmentPlans.items', 'prescriptions.items', 'attachments.uploader', 'invoices',
+            'satusehatLogs' => fn ($q) => $q->orderBy('created_at', 'desc')->limit(5),
         ])->findOrFail($id);
 
         return view('pages.clinical.visit.show', [
