@@ -6,6 +6,7 @@ use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\ExaminationController;
 use App\Http\Controllers\Clinical\OdontogramController;
+use App\Http\Controllers\Clinical\PrescriptionController;
 use App\Http\Controllers\Clinical\TreatmentPlanController;
 use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
@@ -113,6 +114,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('visits/{visit}/plans/{plan}', [TreatmentPlanController::class, 'destroy'])->name('visits.plans.destroy');
     Route::post('visits/{visit}/plans/{plan}/items', [TreatmentPlanController::class, 'storeItem'])->name('visits.plans.items.store');
     Route::delete('visits/{visit}/plans/{plan}/items/{item}', [TreatmentPlanController::class, 'destroyItem'])->name('visits.plans.items.destroy');
+
+    // Fase 2 Task 7: resep terstruktur per visit.
+    Route::post('visits/{visit}/prescriptions', [PrescriptionController::class, 'store'])->name('visits.prescriptions.store');
+    Route::delete('visits/{visit}/prescriptions/{prescription}', [PrescriptionController::class, 'destroy'])->name('visits.prescriptions.destroy');
+    Route::post('visits/{visit}/prescriptions/{prescription}/items', [PrescriptionController::class, 'storeItem'])->name('visits.prescriptions.items.store');
+    Route::delete('visits/{visit}/prescriptions/{prescription}/items/{item}', [PrescriptionController::class, 'destroyItem'])->name('visits.prescriptions.items.destroy');
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);
