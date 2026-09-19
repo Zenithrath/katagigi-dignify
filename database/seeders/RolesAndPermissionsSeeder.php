@@ -39,6 +39,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'create visit',
             'update visit',
             'sign visit',             // dokter: kunci visit (SIGNED)
+            // Fase 3: pencairan jasa medis (manajemen)
+            'manage doctor fee',
         ];
 
         foreach ([...$legacy, ...$fresh] as $name) {
