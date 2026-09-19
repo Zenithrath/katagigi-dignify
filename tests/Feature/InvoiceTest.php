@@ -151,5 +151,7 @@ class InvoiceTest extends TestCase
         $this->assertEquals($count, $invoice->items()->count());
         $this->actingAs($admin)->post(route('invoices.void', $invoice->id))->assertRedirect();
         $this->assertEquals('VOID', $invoice->fresh()->status);
+        // VOID mengembalikan status tagihan visit (tak ada tagihan aktif lain).
+        $this->assertEquals('UNBILLED', $visit->fresh()->billing_status);
     }
 }
