@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Visit extends Model
+{
+    use HasFactory;
+
+    protected $table = 'visits';
+
+    protected $primaryKey = 'id';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
+    public const STATUS_REGISTERED = 'REGISTERED';
+
+    public const STATUS_WAITING = 'WAITING';
+
+    public const STATUS_CALLED = 'CALLED';
+
+    public const STATUS_IN_TREATMENT = 'IN_TREATMENT';
+
+    public const STATUS_DONE = 'DONE';
+
+    public const STATUS_SIGNED = 'SIGNED';
+
+    public const QUEUE_STATUSES = [
+        self::STATUS_WAITING,
+        self::STATUS_CALLED,
+        self::STATUS_IN_TREATMENT,
+    ];
+
+    public const BILLING_UNBILLED = 'UNBILLED';
+
+    public const BILLING_BILLED = 'BILLED';
+
+    protected $fillable = [
+        'id',
+        'visit_number',
+        'branch_id',
+        'patient_id',
+        'appointment_id',
+        'doctor_id',
+        'visit_date',
+        'clinical_status',
+        'billing_status',
+        'notes',
+        'signed_at',
+        'signed_by',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'visit_date' => 'date',
+            'signed_at' => 'datetime',
+        ];
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class, 'branch_id', 'id');
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class, 'patient_id', 'id');
+    }
+
+    public function appointment(): BelongsTo
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id', 'id');
+    }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'user_id');
+    }
+
+    public function signer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'signed_by', 'id');
+    }
+
+    public function isSigned(): bool
+    {
+        return $this->clinical_status === self::STATUS_SIGNED;
+    }
+
+    public function isQueued(): bool
+    {
+        return in_array($this->clinical_status, self::QUEUE_STATUSES, true);
+    }
+}
