@@ -5,6 +5,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\ExaminationController;
+use App\Http\Controllers\Clinical\OdontogramController;
 use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\General\CategoryController;
@@ -92,6 +93,10 @@ Route::middleware('auth')->group(function () {
     Route::put('visits/{visit}/anamnesis', [AnamnesisController::class, 'update'])->name('visits.anamnesis.update');
     Route::post('visits/{visit}/examination', [ExaminationController::class, 'store'])->name('visits.examination.store');
     Route::put('visits/{visit}/examination', [ExaminationController::class, 'update'])->name('visits.examination.update');
+
+    // Fase 2 Task 4: odontogram per visit.
+    Route::post('visits/{visit}/odontogram', [OdontogramController::class, 'store'])->name('visits.odontogram.store');
+    Route::delete('visits/{visit}/odontogram/{finding}', [OdontogramController::class, 'destroy'])->name('visits.odontogram.destroy');
 
     Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServiceController::class);
