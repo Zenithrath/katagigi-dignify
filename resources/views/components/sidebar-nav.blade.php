@@ -83,6 +83,9 @@
             @can('read turnover')
                 <x-sidebar-link href="{{ route('doctor-fees.index') }}" :active="request()->routeIs('doctor-fees.*')" icon="wallet" :collapsible="$collapsible">Fee Dokter</x-sidebar-link>
             @endcan
+            @can('read turnover')
+                <x-sidebar-link href="{{ route('finance-report.index') }}" :active="request()->routeIs('finance-report.*')" icon="file-text" :collapsible="$collapsible">Laporan</x-sidebar-link>
+            @endcan
             @role('manajemen')
                 <x-sidebar-link href="{{ route('transactions.index') }}" :active="false" icon="clipboard-check" badge="via nota" :collapsible="$collapsible">{{ __('navigation.sidenav.report.approval') }}</x-sidebar-link>
             @endrole
@@ -90,11 +93,16 @@
     </div>
 @endcanany
 
-@can('read inventory')
+@canany(['read inventory', 'read expense'])
     <div class="menu-section">
         <x-sidebar-section :collapsible="$collapsible">Operasional</x-sidebar-section>
         <ul class="nav-list">
-            <x-sidebar-link href="{{ route('inventory.index') }}" :active="request()->routeIs('inventory.*')" icon="package" :collapsible="$collapsible">Inventory</x-sidebar-link>
+            @can('read inventory')
+                <x-sidebar-link href="{{ route('inventory.index') }}" :active="request()->routeIs('inventory.*')" icon="package" :collapsible="$collapsible">Inventory</x-sidebar-link>
+            @endcan
+            @can('read expense')
+                <x-sidebar-link href="{{ route('expenses.index') }}" :active="request()->routeIs('expenses.*')" icon="banknote" :collapsible="$collapsible">Beban</x-sidebar-link>
+            @endcan
         </ul>
     </div>
-@endcan
+@endcanany

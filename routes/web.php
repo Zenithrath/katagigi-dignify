@@ -7,6 +7,8 @@ use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Inventory\InventoryController;
+use App\Http\Controllers\Operational\ExpenseController;
+use App\Http\Controllers\Report\FinanceReportController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
 use App\Http\Controllers\Clinical\ExaminationController;
@@ -190,6 +192,12 @@ Route::middleware('auth')->group(function () {
     Route::post('inventory/{item}/receive', [InventoryController::class, 'receive'])->name('inventory.receive');
     Route::post('inventory/{item}/dispense', [InventoryController::class, 'dispense'])->name('inventory.dispense');
     Route::post('inventory/{item}/batches/{batch}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
+
+    // Fase 3 T5: beban operasional + laporan keuangan.
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+    Route::get('finance-report', [FinanceReportController::class, 'index'])->name('finance-report.index');
 
     // Fase 3 T3: jasa medis dokter.
     Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');
