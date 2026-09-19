@@ -51,6 +51,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage branch',
             // Fase 4: SATUSEHAT (manajemen; sandbox dulu)
             'manage satusehat',
+            // Fase 4: WhatsApp Official (manajemen + admin operasi)
+            'manage whatsapp',
         ];
 
         foreach ([...$legacy, ...$fresh] as $name) {
@@ -77,6 +79,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'read visit', 'create visit', 'update visit',
             'read inventory', 'manage inventory',
             'read expense', 'manage expense',
+            'manage whatsapp',
         ]);
 
         // DOCTOR: baca + tulis rekam medis (sama seperti app lama)
