@@ -142,6 +142,7 @@ class MedicalRecordController extends Controller
         $appointment = $this->appointmentService->readAppointmentByID($validated['appointment_id']);
         $patient_id = $appointment->patient_id;
         $patient = $this->patientService->selectPatientByID($patient_id);
+        abort_if(! $patient, 404, 'Pasien tidak ditemukan.');
         $validated['patient_id'] = $patient_id;
         $validated['patient_name'] = $patient->name;
         $validated['patient_code'] = $patient->code;

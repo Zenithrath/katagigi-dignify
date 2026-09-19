@@ -121,7 +121,7 @@ class MasterService extends Service
             ->get();
     }
 
-    public function selectPatientByID(string $id): object
+    public function selectPatientByID(string $id): ?object
     {
         return DB::table('patients')
             ->join('patient_addresses', 'patient_addresses.patient_id', '=', 'patients.id', 'left')
