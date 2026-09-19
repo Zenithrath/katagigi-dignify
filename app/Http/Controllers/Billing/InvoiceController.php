@@ -56,6 +56,13 @@ class InvoiceController extends Controller
         $this->authorize('create transaction');
         $visit = Visit::with('treatments')->findOrFail($visitId);
 
+        // Idempoten: DRAFT yang masih terbuka dipakai ulang (anti klik ganda).
+        $draft = $visit->invoices()->where('status', Invoice::STATUS_DRAFT)->first();
+        if ($draft) {
+            return redirect()->route('invoices.show', $draft->id)
+                ->with('info', 'Tagihan DRAFT '.$draft->number.' sudah ada untuk visit ini.');
+        }
+
         $invoice = $this->invoices->createFromVisit($visit);
         if ($invoice instanceof Exception) {
             return back()->withErrors('error', 'Gagal membuat tagihan.');

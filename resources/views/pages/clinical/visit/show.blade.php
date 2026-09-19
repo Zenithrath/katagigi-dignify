@@ -75,11 +75,16 @@
                 @endcan
                 @can('create transaction')
                     @if ($visit->appointment_id && $visit->billing_status === 'UNBILLED')
+                        @php $openInvoice = $visit->invoices->firstWhere('status', 'DRAFT') ?? $visit->invoices->firstWhere('status', 'ISSUED') ?? $visit->invoices->firstWhere('status', 'PARTIALLY_PAID'); @endphp
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <form action="{{ route('visits.invoice.store', $visit->id) }}" method="post">
-                                @csrf
-                                <button type="submit" class="clickable-primary px-5 py-2 rounded-xl">Buat tagihan dari visit</button>
-                            </form>
+                            @if ($openInvoice)
+                                <a href="{{ route('invoices.show', $openInvoice->id) }}" class="clickable-primary px-5 py-2 rounded-xl">Lanjut tagihan {{ $openInvoice->number }}</a>
+                            @else
+                                <form action="{{ route('visits.invoice.store', $visit->id) }}" method="post">
+                                    @csrf
+                                    <button type="submit" class="clickable-primary px-5 py-2 rounded-xl">Buat tagihan dari visit</button>
+                                </form>
+                            @endif
                             <a href="{{ route('transactions.create', ['visit' => $visit->id]) }}" class="clickable-ghost px-5 py-2 rounded-xl">Nota lama (prefill)</a>
                         </div>
                     @endif

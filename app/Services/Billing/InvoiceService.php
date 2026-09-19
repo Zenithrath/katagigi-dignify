@@ -176,6 +176,16 @@ class InvoiceService extends Service
 
         $invoice->update(['status' => Invoice::STATUS_VOID]);
 
+        // Kembalikan status tagihan visit bila tak ada tagihan aktif lain.
+        if ($invoice->visit_id) {
+            $hasActive = Invoice::where('visit_id', $invoice->visit_id)
+                ->where('status', '!=', Invoice::STATUS_VOID)
+                ->exists();
+            if (! $hasActive) {
+                Visit::where('id', $invoice->visit_id)->update(['billing_status' => Visit::BILLING_UNBILLED]);
+            }
+        }
+
         return $invoice->fresh();
     }
 }
