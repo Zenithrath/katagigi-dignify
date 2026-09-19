@@ -6,6 +6,7 @@ use App\Http\Controllers\Billing\DoctorFeeController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
+use App\Http\Controllers\Inventory\InventoryController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
 use App\Http\Controllers\Clinical\ExaminationController;
@@ -180,6 +181,15 @@ Route::middleware('auth')->group(function () {
     // Fase 3 T2: pembayaran + kwitansi.
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
     Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+
+    // Fase 3 T4: inventory ringan.
+    Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('inventory', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('inventory/{item}', [InventoryController::class, 'show'])->name('inventory.show');
+    Route::post('inventory/{item}/receive', [InventoryController::class, 'receive'])->name('inventory.receive');
+    Route::post('inventory/{item}/dispense', [InventoryController::class, 'dispense'])->name('inventory.dispense');
+    Route::post('inventory/{item}/batches/{batch}/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
 
     // Fase 3 T3: jasa medis dokter.
     Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');
