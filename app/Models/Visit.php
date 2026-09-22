@@ -125,6 +125,26 @@ class Visit extends Model
         return $this->hasMany(Prescription::class, 'visit_id', 'id');
     }
 
+    public function vitalSign(): HasOne
+    {
+        return $this->hasOne(VitalSign::class, 'visit_id', 'id');
+    }
+
+    public function consents(): HasMany
+    {
+        return $this->hasMany(MedicalConsentRecord::class, 'visit_id', 'id');
+    }
+
+    public function radiologyOrders(): HasMany
+    {
+        return $this->hasMany(RadiologyOrder::class, 'visit_id', 'id');
+    }
+
+    public function oralHealthIndex(): HasOne
+    {
+        return $this->hasOne(OralHealthIndex::class, 'visit_id', 'id');
+    }
+
     public function attachments(): HasMany
     {
         return $this->hasMany(VisitAttachment::class, 'visit_id', 'id');

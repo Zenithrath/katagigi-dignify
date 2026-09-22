@@ -140,6 +140,37 @@ class SatuSehatService extends Service
             $this->tally($summary, $this->post('Observation', $payload, $visit, $localId));
         }
 
+        // 5b. Tanda vital lain (pulse / suhu / RR / kehamilan) — tabel vital_signs.
+        $visit->loadMissing('vitalSign');
+        $vitalPayloads = SatuSehatPayload::vitalSignObservations(
+            $visit->vitalSign,
+            $patientIhsId,
+            $encounterResult['external_id'],
+            SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null),
+            (string) $visit->visit_date
+        );
+        foreach ($vitalPayloads as $i => $payload) {
+            $this->tally($summary, $this->post('Observation', $payload, $visit, $visit->vitalSign?->id.'-vs-'.($i + 1)));
+        }
+
+        // 5c. MedicationRequest per resep.
+        $visit->loadMissing('prescriptions.items');
+        foreach ($visit->prescriptions as $prescription) {
+            $payload = SatuSehatPayload::medicationRequest(
+                $prescription,
+                $patientIhsId,
+                $encounterResult['external_id'],
+                SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null)
+            );
+            if (! $payload) {
+                $this->log($visit, 'MedicationRequest', $prescription->id, null, SatuSehatSyncLog::STATUS_SKIPPED, 'Item resep kosong / referensi belum lengkap.');
+                $summary['skipped']++;
+
+                continue;
+            }
+            $this->tally($summary, $this->post('MedicationRequest', $payload, $visit, $prescription->id));
+        }
+
         // 6. Lampirkan daftar diagnosis ke Encounter (diagnosis.condition).
         $this->updateEncounterDiagnoses($visit, $encounterResult['external_id'], $summary);
 

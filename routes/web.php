@@ -121,6 +121,15 @@ Route::middleware('auth')->group(function () {
     Route::post('visits/{visit}/examination', [ExaminationController::class, 'store'])->name('visits.examination.store');
     Route::put('visits/{visit}/examination', [ExaminationController::class, 'update'])->name('visits.examination.update');
 
+    // Tanda vital + informed consent + radiologi + OHI-S/DMF-T (tabel baru).
+    Route::post('visits/{visit}/vitals', [\App\Http\Controllers\Clinical\VitalSignController::class, 'store'])->name('visits.vitals.store');
+    Route::post('visits/{visit}/consents', [\App\Http\Controllers\Clinical\MedicalConsentController::class, 'store'])->name('visits.consents.store');
+    Route::delete('visits/{visit}/consents/{consent}', [\App\Http\Controllers\Clinical\MedicalConsentController::class, 'destroy'])->name('visits.consents.destroy');
+    Route::post('visits/{visit}/radiology', [\App\Http\Controllers\Clinical\RadiologyOrderController::class, 'store'])->name('visits.radiology.store');
+    Route::put('visits/{visit}/radiology/{order}/result', [\App\Http\Controllers\Clinical\RadiologyOrderController::class, 'updateResult'])->name('visits.radiology.result');
+    Route::delete('visits/{visit}/radiology/{order}', [\App\Http\Controllers\Clinical\RadiologyOrderController::class, 'destroy'])->name('visits.radiology.destroy');
+    Route::post('visits/{visit}/oral-health-index', [\App\Http\Controllers\Clinical\OralHealthIndexController::class, 'store'])->name('visits.oral-health.store');
+
     // Fase 2 Task 4: odontogram per visit.
     Route::post('visits/{visit}/odontogram', [OdontogramController::class, 'store'])->name('visits.odontogram.store');
     Route::delete('visits/{visit}/odontogram/{finding}', [OdontogramController::class, 'destroy'])->name('visits.odontogram.destroy');
@@ -259,3 +268,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/integration.php';

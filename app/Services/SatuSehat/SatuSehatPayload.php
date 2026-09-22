@@ -263,6 +263,160 @@ class SatuSehatPayload
     }
 
     /**
+     * Observation tanda vital lain (pulse, temperature, respiratory rate).
+     * LOINC: 8867-4 heart rate, 8310-5 body temperature, 9279-1 respiratory rate.
+     * Pregnancy status LOINC 82810-3 → Observation valueString (opsional).
+     */
+    public static function vitalSignObservations(?object $vitals, string $patientIhsId, string $encounterId, ?string $practitionerRef, string $recordedAt): array
+    {
+        if (! $vitals) {
+            return [];
+        }
+
+        $effective = Carbon::parse($recordedAt)->setTimezone('+07:00')->toIso8601String();
+        $out = [];
+
+        $quantityObservation = function (string $loinc, string $display, float|int $value, string $unit, string $ucum) use ($patientIhsId, $encounterId, $practitionerRef, $effective): array {
+            $obs = [
+                'resourceType' => 'Observation',
+                'status' => 'final',
+                'category' => [['coding' => [[
+                    'system' => 'http://terminology.hl7.org/CodeSystem/observation-category',
+                    'code' => 'vital-signs',
+                    'display' => 'Vital Signs',
+                ]]]],
+                'code' => ['coding' => [[
+                    'system' => self::SYSTEM_LOINC,
+                    'code' => $loinc,
+                    'display' => $display,
+                ]]],
+                'subject' => ['reference' => 'Patient/'.$patientIhsId],
+                'encounter' => ['reference' => 'Encounter/'.$encounterId],
+                'effectiveDateTime' => $effective,
+                'valueQuantity' => [
+                    'value' => $value,
+                    'unit' => $unit,
+                    'system' => 'http://unitsofmeasure.org',
+                    'code' => $ucum,
+                ],
+            ];
+            if ($practitionerRef) {
+                $obs['performer'] = [['reference' => $practitionerRef]];
+            }
+
+            return $obs;
+        };
+
+        if (! empty($vitals->pulse_bpm)) {
+            $out[] = $quantityObservation('8867-4', 'Heart rate', (int) $vitals->pulse_bpm, '/min', '/min');
+        }
+        if (! empty($vitals->temperature_c)) {
+            $out[] = $quantityObservation('8310-5', 'Body temperature', (float) $vitals->temperature_c, 'Cel', 'Cel');
+        }
+        if (! empty($vitals->respiratory_rate)) {
+            $out[] = $quantityObservation('9279-1', 'Respiratory rate', (int) $vitals->respiratory_rate, '/min', '/min');
+        }
+        if (! empty($vitals->pregnancy_status)) {
+            $obs = [
+                'resourceType' => 'Observation',
+                'status' => 'final',
+                'category' => [['coding' => [[
+                    'system' => 'http://terminology.hl7.org/CodeSystem/observation-category',
+                    'code' => 'vital-signs',
+                    'display' => 'Vital Signs',
+                ]]]],
+                'code' => ['coding' => [[
+                    'system' => self::SYSTEM_LOINC,
+                    'code' => '82810-3',
+                    'display' => 'Pregnancy status',
+                ]]],
+                'subject' => ['reference' => 'Patient/'.$patientIhsId],
+                'encounter' => ['reference' => 'Encounter/'.$encounterId],
+                'effectiveDateTime' => $effective,
+                'valueString' => $vitals->pregnancy_status,
+            ];
+            if ($practitionerRef) {
+                $obs['performer'] = [['reference' => $practitionerRef]];
+            }
+            $out[] = $obs;
+        }
+
+        return $out;
+    }
+
+    /**
+     * MedicationRequest dari prescription + items.
+     * status active, intent order, dispenseRequest.quantity = total quantity item.
+     * KFA code → medicationCodeableConcept.identifier (sistem lokal KFA).
+     */
+    public static function medicationRequest(object $prescription, string $patientIhsId, string $encounterId, ?string $practitionerRef): ?array
+    {
+        $items = collect($prescription->items ?? []);
+        if ($items->isEmpty() || empty($patientIhsId) || empty($encounterId)) {
+            return null;
+        }
+
+        $first = $items->first();
+        $medicationText = $first->medicine_name;
+        $kfa = $first->kfa_code;
+
+        $quantityTotal = max(1, (int) $items->sum('quantity'));
+
+        $dosage = [];
+        if ($first->dosage || $first->frequency || $first->duration) {
+            $dosage[] = [
+                'text' => trim(($first->dosage ? 'Dosage: '.$first->dosage : '').' '
+                    .($first->frequency ? 'Frequency: '.$first->frequency : '').' '
+                    .($first->duration ? 'Duration: '.$first->duration : '').' '
+                    .($first->instruction ?: '')),
+                'timing' => $first->frequency ? [['repeat' => ['frequency' => [1], 'period' => 1, 'periodUnit' => 'd']]] : null,
+                'route' => $first->route ? [['coding' => [[
+                    'system' => 'http://terminology.hl7.org/CodeSystem/route-codes',
+                    'code' => $first->route,
+                    'display' => $first->route,
+                ]]]] : null,
+                'doseAndRate' => $first->dosage ? [[
+                    'doseQuantity' => ['value' => (float) preg_replace('/[^0-9.]/', '', $first->dosage) ?: null, 'unit' => preg_replace('/^[0-9.\s]+/', '', $first->dosage) ?: null],
+                ]] : null,
+            ];
+            $dosage = array_map(fn ($d) => array_filter($d, fn ($v) => $v !== null), $dosage);
+        }
+
+        $payload = [
+            'resourceType' => 'MedicationRequest',
+            'status' => 'active',
+            'intent' => 'order',
+            'priority' => 'routine',
+            'medicationCodeableConcept' => [
+                'text' => $medicationText,
+                'coding' => $kfa ? [[
+                    'system' => 'http://terminology.kemkes.go.id/CodeSystem/kfa',
+                    'code' => $kfa,
+                    'display' => $medicationText,
+                ]] : [],
+            ],
+            'subject' => ['reference' => 'Patient/'.$patientIhsId],
+            'encounter' => ['reference' => 'Encounter/'.$encounterId],
+            'authoredOn' => Carbon::parse($prescription->prescribed_at ?? now())->setTimezone('+07:00')->toIso8601String(),
+            'requester' => $practitionerRef ? ['reference' => $practitionerRef] : null,
+            'dispenseRequest' => [
+                'quantity' => [
+                    'value' => $quantityTotal,
+                    'unit' => 'TAB',
+                    'system' => 'http://unitsofmeasure.org',
+                    'code' => 'TAB',
+                ],
+            ],
+        ];
+
+        if ($dosage !== []) {
+            $payload['dosageInstruction'] = $dosage;
+        }
+
+        return array_filter($payload, fn ($v) => $v !== null);
+    }
+
+    /**
      * bodySite gigi: SNOMED CT concept region gigi (F mouth structure) berbasis
      * FDI. Pemetaan konsep gigi tunggal FDI 11-48; nilai lain → Coding FDI
      * generik sebagai fallback (tidak memblokir pengiriman).

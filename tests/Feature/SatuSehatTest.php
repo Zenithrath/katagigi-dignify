@@ -45,6 +45,36 @@ class SatuSehatTest extends TestCase
         $this->assertEquals('Practitioner/D1', SatuSehatPayload::practitionerRef('D1'));
     }
 
+    public function test_vital_sign_and_medication_request_payloads(): void
+    {
+        $vitals = (object) ['pulse_bpm' => 78, 'temperature_c' => 36.8, 'respiratory_rate' => 16, 'pregnancy_status' => 'NOT_PREGNANT'];
+        $obs = SatuSehatPayload::vitalSignObservations($vitals, 'P1', 'E1', 'Practitioner/D1', '2026-09-22 10:00:00');
+        $this->assertCount(4, $obs);
+        $loincs = array_column(array_column(array_column($obs, 'code'), 'coding'), 'code');
+        $this->assertContains('8867-4', $loincs);
+        $this->assertContains('8310-5', $loincs);
+        $this->assertContains('9279-1', $loincs);
+        $this->assertContains('82810-3', $loincs);
+
+        $this->assertSame([], SatuSehatPayload::vitalSignObservations(null, 'P1', 'E1', null, '2026-09-22 10:00:00'));
+
+        $prescription = (object) [
+            'prescribed_at' => '2026-09-22',
+            'items' => [
+                (object) ['medicine_name' => 'Amoxicillin 500mg', 'kfa_code' => 'A01', 'dosage' => '500mg', 'frequency' => '3x sehari', 'duration' => '5 hari', 'quantity' => 15, 'route' => 'ORAL', 'instruction' => 'sesudah makan'],
+            ],
+        ];
+        $med = SatuSehatPayload::medicationRequest($prescription, 'P1', 'E1', 'Practitioner/D1');
+        $this->assertEquals('MedicationRequest', $med['resourceType']);
+        $this->assertEquals('active', $med['status']);
+        $this->assertEquals('order', $med['intent']);
+        $this->assertEquals('Amoxicillin 500mg', $med['medicationCodeableConcept']['text']);
+        $this->assertEquals(15, $med['dispenseRequest']['quantity']['value']);
+        $this->assertEquals('Practitioner/D1', $med['requester']['reference']);
+
+        $this->assertNull(SatuSehatPayload::medicationRequest((object) ['items' => []], 'P1', 'E1', null));
+    }
+
     public function test_sync_disabled_by_default(): void
     {
         $this->assertFalse((new SatuSehatService)->isEnabled());
@@ -98,6 +128,8 @@ class SatuSehatTest extends TestCase
             '*/fhir-r4/v1/Encounter*' => Http::response(['resourceType' => 'Encounter', 'id' => 'E-1'], 200),
             '*/fhir-r4/v1/Condition*' => Http::response(['resourceType' => 'Condition', 'id' => 'C-1'], 201),
             '*/fhir-r4/v1/Procedure*' => Http::response(['resourceType' => 'Procedure', 'id' => 'PR-1'], 201),
+            '*/fhir-r4/v1/Observation*' => Http::response(['resourceType' => 'Observation', 'id' => 'O-1'], 201),
+            '*/fhir-r4/v1/MedicationRequest*' => Http::response(['resourceType' => 'MedicationRequest', 'id' => 'MR-1'], 201),
         ]);
     }
 
@@ -124,6 +156,46 @@ class SatuSehatTest extends TestCase
 
         // MPI: IHS dari server tersimpan ke pasien (P-xxx dari server).
         $this->assertSame('P-1', $visit->patient->fresh()->ihs_id);
+    }
+
+    public function test_sync_sends_vitals_and_medication_request(): void
+    {
+        $this->enableFake();
+        $visit = $this->signedVisit();
+
+        \App\Models\VitalSign::create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'visit_id' => $visit->id,
+            'pulse_bpm' => 80,
+            'temperature_c' => 36.5,
+            'respiratory_rate' => 18,
+            'pregnancy_status' => 'NOT_PREGNANT',
+        ]);
+
+        $rx = \App\Models\Prescription::create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'visit_id' => $visit->id,
+            'prescribed_at' => now()->toDateString(),
+        ]);
+        $rx->items()->create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'medicine_name' => 'Ibuprofen 400mg',
+            'kfa_code' => 'B01',
+            'quantity' => 9,
+        ]);
+
+        $summary = (new SatuSehatService)->syncVisit($visit->fresh());
+
+        $this->assertSame(0, $summary['failed']);
+        $this->assertGreaterThanOrEqual(7, $summary['success']);
+
+        $types = $visit->satusehatLogs()->pluck('resource_type')->unique()->all();
+        $this->assertContains('Observation', $types);
+        $this->assertContains('MedicationRequest', $types);
+
+        Http::assertSent(fn ($req) => str_contains($req->url(), 'MedicationRequest'));
+        Http::assertSent(fn ($req) => str_contains($req->url(), 'Observation')
+            && str_contains(json_encode($req->data()), '8867-4'));
     }
 
     public function test_sync_skips_without_patient_consent(): void
