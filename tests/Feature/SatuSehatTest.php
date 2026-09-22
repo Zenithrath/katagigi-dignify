@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Doctor;
+use App\Models\Patient;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\SatuSehat\SatuSehatPayload;
@@ -54,10 +55,15 @@ class SatuSehatTest extends TestCase
     private function signedVisit(): Visit
     {
         $doctor = Doctor::factory()->create();
+        // Pasien eksplisit lengkap: VisitFactory mengambil pasien acak bila
+        // patient_id kosong, dan pasien incomplete() seeded membuat sync skip.
         $visit = Visit::factory()->create([
+            'patient_id' => Patient::factory()->complete()->create()->id,
             'doctor_id' => $doctor->user_id,
             'clinical_status' => Visit::STATUS_SIGNED,
         ]);
+        // UU PDP: sinkron hanya boleh dengan persetujuan pasien.
+        $visit->patient->update(['satusehat_consent' => true]);
         $icd10 = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
         $icd9 = DB::table('diagnosis_codes')->where('code', '23.2')->first();
         $visit->diagnoses()->create([
@@ -83,14 +89,15 @@ class SatuSehatTest extends TestCase
 
     private function enableFake(): void
     {
-        config(['satusehat.enabled' => true, 'satusehat.client_id' => 'test', 'satusehat.client_secret' => 'test']);
+        config(['satusehat.enabled' => true, 'satusehat.client_id' => 'test', 'satusehat.client_secret' => 'test', 'satusehat.org_id' => 'ORG-1']);
+        // Fake per URL resource (bukan sequence) agar urutan/kontingensi request
+        // tidak membuat test rapuh saat dijalankan dalam suite penuh.
         Http::fake([
             '*/accesstoken' => Http::response(['access_token' => 'tok', 'expires_in' => 3600], 200),
-            '*/fhir-r4/v1/*' => Http::sequence()
-                ->push(['resourceType' => 'Patient', 'id' => 'P-1'], 201)
-                ->push(['resourceType' => 'Encounter', 'id' => 'E-1'], 201)
-                ->push(['resourceType' => 'Condition', 'id' => 'C-1'], 201)
-                ->push(['resourceType' => 'Procedure', 'id' => 'PR-1'], 201),
+            '*/fhir-r4/v1/Patient*' => Http::response(['resourceType' => 'Patient', 'id' => 'P-1'], 201),
+            '*/fhir-r4/v1/Encounter*' => Http::response(['resourceType' => 'Encounter', 'id' => 'E-1'], 200),
+            '*/fhir-r4/v1/Condition*' => Http::response(['resourceType' => 'Condition', 'id' => 'C-1'], 201),
+            '*/fhir-r4/v1/Procedure*' => Http::response(['resourceType' => 'Procedure', 'id' => 'PR-1'], 201),
         ]);
     }
 
@@ -100,19 +107,38 @@ class SatuSehatTest extends TestCase
         $visit = $this->signedVisit();
 
         $summary = (new SatuSehatService)->syncVisit($visit);
-        $this->assertEquals(['success' => 4, 'failed' => 0, 'skipped' => 0], $summary);
+        // Patient + Encounter + Condition + Procedure + update Encounter (diagnosis).
+        $this->assertEquals(['success' => 5, 'failed' => 0, 'skipped' => 0], $summary);
 
         $logs = $visit->satusehatLogs()->orderBy('created_at')->get();
         $this->assertEqualsCanonicalizing(
-            ['Patient', 'Encounter', 'Condition', 'Procedure'],
+            ['Patient', 'Encounter', 'Condition', 'Procedure', 'Encounter'],
             $logs->pluck('resource_type')->all()
         );
-        $byResource = $logs->keyBy('resource_type');
+        $byResource = $logs->whereNotNull('external_id')->keyBy('resource_type');
         $this->assertEquals(
             ['Patient' => 'P-1', 'Encounter' => 'E-1', 'Condition' => 'C-1', 'Procedure' => 'PR-1'],
             $byResource->map->external_id->all()
         );
         $this->assertTrue($logs->every(fn ($l) => $l->status === 'SUCCESS'));
+
+        // MPI: IHS dari server tersimpan ke pasien (P-xxx dari server).
+        $this->assertSame('P-1', $visit->patient->fresh()->ihs_id);
+    }
+
+    public function test_sync_skips_without_patient_consent(): void
+    {
+        $this->enableFake();
+        $visit = $this->signedVisit();
+        $visit->patient->update(['satusehat_consent' => false]);
+
+        $summary = (new SatuSehatService)->syncVisit($visit->fresh());
+        $this->assertEquals(1, $summary['skipped']);
+        $this->assertEquals(0, $summary['success']);
+        Http::assertNothingSent();
+
+        $log = $visit->satusehatLogs()->first();
+        $this->assertStringContainsString('persetujuan', $log->error);
     }
 
     public function test_incomplete_patient_skips_without_http(): void

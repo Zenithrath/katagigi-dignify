@@ -6,12 +6,6 @@ use App\Http\Controllers\Billing\DoctorFeeController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\CancellationController;
-use App\Http\Controllers\Integration\SatuSehatController;
-use App\Http\Controllers\Integration\WhatsappController;
-use App\Http\Controllers\Inventory\InventoryController;
-use App\Http\Controllers\Operational\BranchController;
-use App\Http\Controllers\Operational\ExpenseController;
-use App\Http\Controllers\Report\FinanceReportController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
 use App\Http\Controllers\Clinical\ExaminationController;
@@ -20,22 +14,33 @@ use App\Http\Controllers\Clinical\PrescriptionController;
 use App\Http\Controllers\Clinical\TreatmentPlanController;
 use App\Http\Controllers\Clinical\VisitAttachmentController;
 use App\Http\Controllers\Clinical\VisitController;
-use App\Http\Controllers\Clinical\WorkspaceController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
 use App\Http\Controllers\Clinical\VisitTreatmentController;
+use App\Http\Controllers\Clinical\WorkspaceController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\General\AuditLogController;
 use App\Http\Controllers\General\CategoryController;
 use App\Http\Controllers\General\DashboardController;
 use App\Http\Controllers\General\ScheduleController;
 use App\Http\Controllers\General\ServiceController;
 use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\Integration\SatuSehatController;
+use App\Http\Controllers\Integration\WhatsappController;
+use App\Http\Controllers\Inventory\InventoryController;
 use App\Http\Controllers\Master\AdminController;
 use App\Http\Controllers\Master\DoctorController;
 use App\Http\Controllers\Master\NurseController;
+use App\Http\Controllers\Operational\BranchController;
+use App\Http\Controllers\Operational\ExpenseController;
+use App\Http\Controllers\Operational\HolidayController;
+use App\Http\Controllers\Operational\NurseAttendanceController;
 use App\Http\Controllers\Patient\MasterController;
 use App\Http\Controllers\Patient\MedicalRecordController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Report\AssistantPayrollController;
+use App\Http\Controllers\Report\FinanceReportController;
 use App\Http\Controllers\Report\IncomeController;
+use App\Http\Controllers\Report\RevenueReportController;
 use App\Http\Controllers\Report\TransactionController;
 use App\Http\Controllers\SalaryController;
 use Illuminate\Support\Facades\Route;
@@ -236,6 +241,20 @@ Route::middleware('auth')->group(function () {
 
     // D-06g: route gaji dokter kini bernama agar bisa dipakai redirect/link.
     Route::get('salaries', [SalaryController::class, 'index'])->name('salaries.index');
+
+    // Payroll asisten + YoY pendapatan + tanggal merah (tabel baru saja).
+    Route::get('revenue-report', [RevenueReportController::class, 'index'])->name('revenue-report.index');
+    Route::get('assistant-payroll', [AssistantPayrollController::class, 'index'])->name('assistant-payroll.index');
+    Route::get('holidays', [HolidayController::class, 'index'])->name('holidays.index');
+    Route::post('holidays', [HolidayController::class, 'store'])->name('holidays.store');
+    Route::delete('holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
+    Route::get('attendances', [NurseAttendanceController::class, 'index'])->name('attendances.index');
+    Route::post('attendances', [NurseAttendanceController::class, 'store'])->name('attendances.store');
+    Route::put('attendances/{attendance}', [NurseAttendanceController::class, 'update'])->name('attendances.update');
+    Route::delete('attendances/{attendance}', [NurseAttendanceController::class, 'destroy'])->name('attendances.destroy');
+
+    // Fase 4: jejak audit (Permenkes 24/2022) — baca saja, khusus manajemen.
+    Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::resource('installments', InstallmentController::class);
 });
 

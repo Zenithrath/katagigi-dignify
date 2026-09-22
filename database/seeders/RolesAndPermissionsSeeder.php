@@ -53,6 +53,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage satusehat',
             // Fase 4: WhatsApp Official (manajemen + admin operasi)
             'manage whatsapp',
+            // Fase 4: jejak audit formal (Permenkes 24/2022) — manajemen saja
+            'read audit log',
+            // Payroll asisten: tanggal merah + absensi + rekap lembur
+            'manage holiday',
+            'manage attendance',
+            'read assistant payroll',
         ];
 
         foreach ([...$legacy, ...$fresh] as $name) {
@@ -80,6 +86,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'read inventory', 'manage inventory',
             'read expense', 'manage expense',
             'manage whatsapp',
+            'manage holiday', 'manage attendance', 'read assistant payroll',
         ]);
 
         // DOCTOR: baca + tulis rekam medis (sama seperti app lama)
