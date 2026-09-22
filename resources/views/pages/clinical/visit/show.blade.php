@@ -4,6 +4,7 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
+                <x-back-button href="{{ route('visits.index') }}" />
                 <h1>Visit {{ $visit->visit_number }}</h1>
                 <p>{{ $visit->patient->name ?? '-' }} — {{ $visit->doctor->user->name ?? '-' }} — {{ $visit->visit_date?->format('d M Y') }}</p>
             </div>
@@ -200,76 +201,16 @@
                 </form>
             </div>
 
-            <div x-show="tab === 'odontogram'" class="p-8" x-data="{ tooth: '{{ request('tooth', '') }}' }">
+            <div x-show="tab === 'odontogram'" class="p-8" x-data="{ tooth: '{{ request('tooth', '') }}', surface: 'whole' }">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Odontogram (FDI)</h3>
-                <p class="text-xs text-slate-500 mb-4">Klik gigi untuk mencatat temuan. Warna mengikuti kondisi terakhir.</p>
+                <p class="text-xs text-slate-500 mb-4">Klik zona gigi untuk memilih permukaan, atau klik nomor gigi untuk seluruh gigi. Warna mengikuti kondisi terakhir.</p>
 
-                @php
-                    $findingByTooth = [];
-                    foreach ($visit->odontogramFindings->sortBy('created_at') as $f) {
-                        if (($f->surface ?? 'whole') === 'whole' || ! isset($findingByTooth[$f->fdi])) {
-                            $findingByTooth[$f->fdi] = $f;
-                        }
-                    }
-                    $toothClass = fn ($fdi) => \App\Models\OdontogramFinding::CHART_COLORS[$findingByTooth[$fdi]->condition ?? ''] ?? 'bg-white border-slate-300 text-slate-700';
-                @endphp
-
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 mb-1">Rahang atas</p>
-                        <div class="flex flex-wrap gap-1.5">
-                            @foreach (array_merge(\App\Models\OdontogramFinding::PERMANENT['upper_right'], \App\Models\OdontogramFinding::PERMANENT['upper_left']) as $fdi)
-                                <button type="button" x-on:click="tooth = '{{ $fdi }}'"
-                                    :class="tooth === '{{ $fdi }}' ? 'ring-2 ring-emerald-500' : ''"
-                                    class="w-11 h-14 rounded-lg border-2 text-sm font-bold flex flex-col items-center justify-center {{ $toothClass($fdi) }}">
-                                    {{ $fdi }}
-                                    <span class="text-[10px] font-normal">{{ $findingByTooth[$fdi]->condition ?? '' ? \App\Models\OdontogramFinding::CONDITIONS[$findingByTooth[$fdi]->condition] : '' }}</span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 mb-1">Rahang bawah</p>
-                        <div class="flex flex-wrap gap-1.5">
-                            @foreach (array_merge(\App\Models\OdontogramFinding::PERMANENT['lower_right'], \App\Models\OdontogramFinding::PERMANENT['lower_left']) as $fdi)
-                                <button type="button" x-on:click="tooth = '{{ $fdi }}'"
-                                    :class="tooth === '{{ $fdi }}' ? 'ring-2 ring-emerald-500' : ''"
-                                    class="w-11 h-14 rounded-lg border-2 text-sm font-bold flex flex-col items-center justify-center {{ $toothClass($fdi) }}">
-                                    {{ $fdi }}
-                                    <span class="text-[10px] font-normal">{{ $findingByTooth[$fdi]->condition ?? '' ? \App\Models\OdontogramFinding::CONDITIONS[$findingByTooth[$fdi]->condition] : '' }}</span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                    <details class="rounded-xl border border-slate-200">
-                        <summary class="cursor-pointer px-4 py-2 text-sm font-semibold text-slate-600">Gigi sulung (51–85)</summary>
-                        <div class="p-4 pt-1 space-y-3">
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach (array_merge(\App\Models\OdontogramFinding::DECIDUOUS['upper_right'], \App\Models\OdontogramFinding::DECIDUOUS['upper_left']) as $fdi)
-                                    <button type="button" x-on:click="tooth = '{{ $fdi }}'"
-                                        :class="tooth === '{{ $fdi }}' ? 'ring-2 ring-emerald-500' : ''"
-                                        class="w-10 h-12 rounded-lg border-2 text-xs font-bold flex flex-col items-center justify-center {{ $toothClass($fdi) }}">
-                                        {{ $fdi }}
-                                    </button>
-                                @endforeach
-                            </div>
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach (array_merge(\App\Models\OdontogramFinding::DECIDUOUS['lower_right'], \App\Models\OdontogramFinding::DECIDUOUS['lower_left']) as $fdi)
-                                    <button type="button" x-on:click="tooth = '{{ $fdi }}'"
-                                        :class="tooth === '{{ $fdi }}' ? 'ring-2 ring-emerald-500' : ''"
-                                        class="w-10 h-12 rounded-lg border-2 text-xs font-bold flex flex-col items-center justify-center {{ $toothClass($fdi) }}">
-                                        {{ $fdi }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    </details>
-                </div>
+                @include('pages.clinical.visit.partials.odontogram-chart')
 
                 @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
                     <form method="post" action="{{ route('visits.odontogram.store', $visit->id) }}" class="mt-6 pt-6 border-t border-slate-200">
                         @csrf
-                        <h4 class="text-sm font-bold text-slate-700 mb-3">Catat temuan <span x-text="tooth ? 'gigi ' + tooth : '(pilih gigi di chart)'" class="text-emerald-600"></span></h4>
+                        <h4 class="text-sm font-bold text-slate-700 mb-3">Catat temuan <span x-text="tooth ? 'gigi ' + tooth + ' (' + surface + ')' : '(pilih gigi di chart)'" class="text-emerald-600"></span></h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1">
                             <input type="hidden" name="fdi" :value="tooth" />
                             <div class="input-group">
@@ -283,7 +224,7 @@
                             </div>
                             <div class="input-group">
                                 <label for="surface">Permukaan</label>
-                                <select name="surface" id="surface" class="custom-select">
+                                <select name="surface" id="surface" class="custom-select" x-model="surface">
                                     @foreach (\App\Models\OdontogramFinding::SURFACES as $code => $label)
                                         <option value="{{ $code }}">{{ $label }}</option>
                                     @endforeach
