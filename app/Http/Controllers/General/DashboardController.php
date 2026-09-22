@@ -88,6 +88,8 @@ class DashboardController extends Controller
     private function kpiRow(array $o, string $role): object
     {
         return (object) [
+            // Perawat fokus operasional: tanpa kartu finansial.
+            'show_revenue' => in_array($role, ['admin', 'doctor'], true),
             'revenue' => GeneralHelper::floatToRupiah((float) ($o['revenue'] ?? 0)),
             'transactions' => (int) ($o['transactions'] ?? 0),
             'patients' => isset($o['patients']) ? (int) $o['patients'] : null,

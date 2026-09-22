@@ -116,4 +116,22 @@ class DashboardTest extends TestCase
         $overviewAll = app(DashboardService::class)->getDoctorDataOverview(null);
         $this->assertGreaterThan(150000.0, $overviewAll['revenue']);
     }
+
+    public function test_nurse_dashboard_hides_financial_widgets(): void
+    {
+        config(['cache.default' => 'database']);
+        Cache::forget('dashboard:doctor-overview:all');
+
+        $response = $this->actingAs($this->verifiedUser('nurse@gmail.com'))
+            ->get(route('dashboard'));
+        $response->assertOk();
+
+        // Perawat fokus operasional: kpi-row tetap ada (pasien/kunjungan),
+        // tapi tanpa kartu & widget finansial apa pun.
+        $this->assertStringContainsString('data-widget="kpi-row"', $response->getContent());
+        $this->assertStringNotContainsString('Total Pendapatan', $response->getContent());
+        $this->assertStringNotContainsString('data-widget="billing-methods"', $response->getContent());
+        $this->assertStringNotContainsString('data-widget="chart-trend"', $response->getContent());
+        $this->assertStringContainsString('data-widget="queue-today"', $response->getContent());
+    }
 }

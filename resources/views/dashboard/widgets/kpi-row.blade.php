@@ -1,5 +1,7 @@
 <section data-widget="kpi-row" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-    {{-- Kartu 1: Pendapatan (emerald 3D) — klinik untuk admin, pribadi untuk dokter --}}
+    {{-- Kartu 1: Pendapatan (emerald 3D) — klinik untuk admin, pribadi untuk dokter;
+         tidak dirender untuk perawat (fokus operasional, tanpa angka finansial) --}}
+    @if ($widget->show_revenue)
     <div class="card-shiny-emerald rounded-[22px] p-6 cursor-default">
         <div class="flex items-center justify-between">
             <span class="text-xs font-semibold uppercase tracking-wider text-emerald-100">
@@ -17,6 +19,7 @@
             </span>
         </div>
     </div>
+    @endif
 
     @if ($widget->patients !== null)
         {{-- Kartu 2: Total pasien terdaftar (admin) --}}
