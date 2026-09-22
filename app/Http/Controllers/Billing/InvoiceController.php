@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Billing;
 
+use App\Helpers\BranchContext;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -24,7 +25,7 @@ class InvoiceController extends Controller
             ->orderBy('created_at', 'desc');
 
         // Fase 4: filter cabang aktif (null = semua).
-        if ($branchId = \App\Helpers\BranchContext::currentId()) {
+        if ($branchId = BranchContext::currentId()) {
             $query->where('branch_id', $branchId);
         }
 
@@ -70,7 +71,7 @@ class InvoiceController extends Controller
 
         $invoice = $this->invoices->createFromVisit($visit);
         if ($invoice instanceof Exception) {
-            return back()->withErrors('error', 'Gagal membuat tagihan.');
+            return back()->withErrors(['error' => 'Gagal membuat tagihan.']);
         }
 
         return redirect()->route('invoices.show', $invoice->id)
@@ -91,7 +92,7 @@ class InvoiceController extends Controller
 
         $item = $this->invoices->addItem($invoice, $validated);
         if ($item instanceof Exception) {
-            return back()->withErrors('error', $item->getMessage());
+            return back()->withErrors(['error' => $item->getMessage()]);
         }
 
         return back()->with('success', 'Item ditambahkan.');
@@ -104,7 +105,7 @@ class InvoiceController extends Controller
 
         $status = $this->invoices->removeItem($invoice, $itemId);
         if ($status instanceof Exception) {
-            return back()->withErrors('error', $status->getMessage());
+            return back()->withErrors(['error' => $status->getMessage()]);
         }
 
         return back()->with('success', 'Item dihapus.');
@@ -123,7 +124,7 @@ class InvoiceController extends Controller
 
         $result = $this->invoices->issue($invoice, $validated);
         if ($result instanceof Exception) {
-            return back()->withErrors('error', $result->getMessage());
+            return back()->withErrors(['error' => $result->getMessage()]);
         }
 
         return back()->with('success', 'Tagihan '.$result->number.' diterbitkan.');
@@ -136,7 +137,7 @@ class InvoiceController extends Controller
 
         $result = $this->invoices->void($invoice);
         if ($result instanceof Exception) {
-            return back()->withErrors('error', $result->getMessage());
+            return back()->withErrors(['error' => $result->getMessage()]);
         }
 
         return back()->with('success', 'Tagihan dibatalkan (VOID).');

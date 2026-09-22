@@ -85,7 +85,7 @@ class NurseController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.nurse.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.nurse.error.oncreate')])->withInput();
         }
 
         return redirect()->route('nurses.index')
@@ -118,7 +118,8 @@ class NurseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->authorize('update nurse');        $updatedNurse = Nurse::findOrFail($id);
+        $this->authorize('update nurse');
+        $updatedNurse = Nurse::findOrFail($id);
         if ($request->hasFile('cover_image')) {
             if ($updatedNurse->cover_picture) {
                 $this->service->deleteCoverImage($updatedNurse->cover_picture);
@@ -145,7 +146,7 @@ class NurseController extends Controller
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.nurse.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.nurse.error.onupdate')])->withInput();
         }
 
         return redirect()->route('nurses.index')
@@ -174,7 +175,7 @@ class NurseController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.nurse.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.nurse.error.ondelete')])->withInput();
         }
 
         return redirect()->route('nurses.index')

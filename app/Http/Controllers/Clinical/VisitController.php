@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Clinical;
 
+use App\Helpers\Audit;
+use App\Helpers\BranchContext;
 use App\Http\Controllers\Controller;
 use App\Models\Visit;
 use App\Services\Clinical\VisitService;
@@ -40,7 +42,7 @@ class VisitController extends Controller
             ->orderBy('created_at');
 
         // Fase 4: filter cabang aktif (null = semua).
-        if ($branchId = \App\Helpers\BranchContext::currentId()) {
+        if ($branchId = BranchContext::currentId()) {
             $query->where('branch_id', $branchId);
         }
 
@@ -100,7 +102,7 @@ class VisitController extends Controller
         ]);
 
         if ($visit instanceof Exception) {
-            return back()->withErrors('error', 'Check-in gagal, coba lagi.');
+            return back()->withErrors(['error' => 'Check-in gagal, coba lagi.']);
         }
 
         return redirect()->route('visits.show', $visit->id)
@@ -155,6 +157,9 @@ class VisitController extends Controller
                 'recorded_at' => date('Y-m-d H:i:s'),
             ]);
         }
+
+        // Permenkes 24/2022: e-sign dokter tercatat (who/when).
+        Audit::log('sign-visit', 'visit', $visit->id, ['clinical_status' => Visit::STATUS_DONE], ['clinical_status' => Visit::STATUS_SIGNED]);
 
         return back()->with('success', 'Visit '.$visit->visit_number.' ditandatangani dan dikunci.');
     }

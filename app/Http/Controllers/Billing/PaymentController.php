@@ -28,7 +28,7 @@ class PaymentController extends Controller
 
         $payment = $this->payments->pay($invoice, $validated);
         if ($payment instanceof Exception) {
-            return back()->withErrors('error', $payment->getMessage());
+            return back()->withErrors(['error' => $payment->getMessage()]);
         }
 
         return back()->with('success', 'Pembayaran Rp'.number_format($payment->amount, 0, ',', '.').' tercatat.');

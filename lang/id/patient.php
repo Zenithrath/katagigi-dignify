@@ -19,12 +19,21 @@ return [
                 'active' => 'Aktif',
                 'inactive' => 'Nonaktif',
                 'empty' => 'Tidak ada pasien terdaftar.',
+                'completeness' => 'Kelengkapan',
+                'complete' => 'Lengkap',
+                'incomplete' => 'Belum Lengkap',
+                'all' => 'Semua',
+                'completeness_hint' => 'Data lengkap = NIK 16 digit, no. HP, tanggal lahir, alamat, dan persetujuan SATUSEHAT (consent) terisi — syarat bridging SATUSEHAT.',
             ],
         ],
         'form' => [
             'title' => [
                 'add' => 'Tambah Pasien',
                 'edit' => 'Edit Pasien',
+            ],
+            'subtitle' => [
+                'create' => 'Registrasi pasien baru',
+                'update' => 'Perbarui informasi pasien',
             ],
             'labels' => [
                 'name' => 'Nama',
@@ -40,6 +49,10 @@ return [
                 'same_email' => 'Gunakan email yang sama dengan email pembayaran',
                 'phone' => 'Nomor Telepon',
                 'birthdate' => 'Tanggal Lahir',
+                'birth_place' => 'Tempat Lahir',
+                'nik' => 'NIK (16 digit)',
+                'ihs_id' => 'ID IHS (SATUSEHAT)',
+                'satusehat_consent' => 'Pasien menyetujui pemakaian data untuk SATUSEHAT',
                 'religion' => [
                     '_title' => 'Agama',
                     'default' => 'Pilih salah satu agama berikut...',
@@ -68,12 +81,18 @@ return [
                 ],
                 'needed_sosmed' => 'Tambahkan Media Sosial',
             ],
+            'helpers' => [
+                'satusehat_nik' => 'Wajib untuk bridging SATUSEHAT',
+            ],
             'placeholders' => [
                 'name' => 'Tulis nama pasien di sini...',
                 'email' => 'Tulis email pasien di sini...',
                 'payment_email' => 'Tulis email pembayaran pasien di sini...',
                 'phone' => 'Tulis nomor telepon pasien di sini...',
                 'birthdate' => 'Tulis tanggal lahir pasien di sini...',
+                'birth_place' => 'Kota tempat lahir',
+                'nik' => '16 digit NIK',
+                'ihs_id' => 'ID IHS pasien bila sudah ada',
                 'religion' => 'Pilih agama pasien di sini...',
                 'gender' => 'Pilih jenis kelamin pasien di sini...',
                 'address' => [
@@ -94,6 +113,19 @@ return [
         ],
         'detail' => [
             'title' => 'Detail Pasien',
+            'satusehat' => [
+                'title' => 'Kesiapan SATUSEHAT',
+                'ready' => 'Siap bridging',
+                'not_ready' => 'Belum lengkap',
+                'hint' => 'Lengkapi via tombol edit pasien. Bridging Fase 4 menolak data tak lengkap.',
+                'checks' => [
+                    'nik' => 'NIK 16 digit terisi',
+                    'birth' => 'Tempat + tanggal lahir terisi',
+                    'ihs' => 'ID IHS terisi',
+                    'consent' => 'Persetujuan pasien tercatat',
+                ],
+            ],
+            'history_empty' => 'Tidak ada rekam medis ditemukan.',
             'labels' => [
                 'title' => [
                     'information' => 'Informasi Pasien',
@@ -105,6 +137,13 @@ return [
                 'email' => 'Email',
                 'phone' => 'Nomor Telepon',
                 'birthdate' => 'Tanggal Lahir',
+                'birth_place' => 'Tempat Lahir',
+                'nik' => 'NIK',
+                'ihs_id' => 'ID IHS (SATUSEHAT)',
+                'satusehat_consent' => 'Persetujuan SATUSEHAT',
+                'yes' => 'Ya',
+                'no' => 'Tidak',
+                'medical_record' => 'Rekam Medis',
                 'religion' => [
                     '_title' => 'Agama',
                     'islam' => 'Islam',
@@ -164,8 +203,14 @@ return [
                 'add' => 'Tambah Rekam Medis',
                 'edit' => 'Edit Rekam Medis',
             ],
+            'subtitle' => [
+                'create' => 'Buat rekam medis baru',
+                'update' => 'Perbarui rekam medis',
+            ],
             'labels' => [
                 'appointment_id' => 'Janji',
+                'diagnosis_icd10' => 'Diagnosis Penyakit (ICD-10)',
+                'procedure_icd9' => 'Tindakan / Prosedur (ICD-9-CM)',
                 'patient' => 'Pasien',
                 'patient_address' => 'Alamat Pasien',
                 'doctor_nipp' => 'NIPP Dokter',
@@ -201,6 +246,8 @@ return [
                 ],
             ],
             'helpers' => [
+                'diagnosis_icd10' => 'Wajib minimal 1 kode ICD-10 (syarat SATUSEHAT). Ketik bahasa awam, mis. "gigi berlubang".',
+                'procedure_icd9' => 'Opsional. Ketik bahasa awam, mis. "cabut gigi".',
                 'images' => 'Unggah dengan ukuran maksimal 1024KB',
                 'integer' => 'Tulis hanya angka atau pecahan dengan menggunakan tanda .',
                 'pricing' => 'Rentang harga antara :lower hingga :higher',
@@ -232,6 +279,9 @@ return [
                 ],
                 'recomendation' => 'Rekomendasi Jadwal Berikutnya',
                 'total' => 'Total',
+                'note' => 'catatan',
+                'other_codes' => 'Kode Lainnya',
+                'discount' => 'Diskon',
                 'anamnesis' => 'Anamnesis',
                 'diagnosis' => 'Diagnosis',
                 'therapy' => 'Terapi',

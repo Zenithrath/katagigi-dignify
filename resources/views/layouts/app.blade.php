@@ -16,6 +16,15 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
+        <script>
+            // Anti-FOUC: terapkan tema + bahasa tersimpan sebelum render.
+            (function () {
+                var theme = localStorage.getItem('theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                }
+            })();
+        </script>
     </head>
     <body class="antialiased">
         <div class="app-shell" x-data="{ sidebarOpen: false, sidebarCollapsed: false }" x-on:open-sidebar.window="sidebarOpen = true">
@@ -84,6 +93,19 @@
 
         @stack('scripts')
         <script type="text/javascript">
+            // Sidebar: ingat posisi scroll saat pindah halaman (full reload me-reset scroll).
+            (function () {
+                var KEY = 'sidebar-scroll-top';
+                document.addEventListener('DOMContentLoaded', function () {
+                    var top = parseInt(sessionStorage.getItem(KEY) || '0', 10);
+                    document.querySelectorAll('.sidebar-scroll').forEach(function (el) {
+                        el.addEventListener('click', function (e) {
+                            if (e.target.closest('a')) sessionStorage.setItem(KEY, String(el.scrollTop));
+                        });
+                        el.scrollTop = top;
+                    });
+                });
+            })();
             document.addEventListener('DOMContentLoaded', () => {
                 const elems = document.getElementsByClassName('selectable');
                 for (let index = 0; index < elems.length; index++) {

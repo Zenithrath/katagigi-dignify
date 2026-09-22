@@ -2,6 +2,7 @@
 
 namespace App\Services\Patient;
 
+use App\Helpers\BranchContext;
 use App\Helpers\FileHelper;
 use App\Services\Service;
 use App\Types\FileMetadata;
@@ -41,17 +42,91 @@ class MasterService extends Service
         return $query;
     }
 
+    /**
+     * Kriteria pasien "data lengkap" (siap bridging SATUSEHAT): NIK 16 digit,
+     * no. HP, tanggal lahir, alamat, dan consent. Dipakai bersama master
+     * pasien + dashboard agar definisi kelengkapan konsisten.
+     */
+    public static function applyCompleteCriteria(Builder $query): void
+    {
+        $query
+            ->whereNotNull('patients.nik')
+            ->where('patients.nik', '!=', '')
+            ->whereRaw('length(patients.nik) = 16')
+            ->whereNotNull('patients.phone')
+            ->where('patients.phone', '!=', '')
+            ->whereNotNull('patients.birthdate')
+            ->where(function ($q) {
+                $q->where(function ($a) {
+                    $a->whereNotNull('patient_addresses.street')->where('patient_addresses.street', '!=', '');
+                })->orWhere(function ($a) {
+                    $a->whereNotNull('patient_addresses.village')->where('patient_addresses.village', '!=', '');
+                });
+            })
+            ->where('patients.satusehat_consent', true);
+    }
+
+    /**
+     * Daftar field yang belum diisi untuk satu baris pasien (badge UI).
+     */
+    public static function missingFields(object $patient): array
+    {
+        $missing = [];
+        if (empty($patient->nik) || strlen((string) $patient->nik) !== 16) {
+            $missing[] = 'NIK';
+        }
+        if (empty($patient->phone)) {
+            $missing[] = 'No. HP';
+        }
+        if (empty($patient->birthdate)) {
+            $missing[] = 'Tgl Lahir';
+        }
+        if (empty($patient->street) && empty($patient->village)) {
+            $missing[] = 'Alamat';
+        }
+        if (empty($patient->satusehat_consent)) {
+            $missing[] = 'Consent';
+        }
+
+        return $missing;
+    }
+
     public function readAllPatients(?object $filter = null): LengthAwarePaginator|Exception
     {
         try {
-            return $this->initSelect($filter)
-                ->paginate(20)
-                ->withQueryString();
+            $query = $this->initSelect($filter)
+                ->orderByDesc('patients.created_at');
+
+            if (isset($filter->completeness)) {
+                if ($filter->completeness === 'complete') {
+                    $query->where(fn ($q) => static::applyCompleteCriteria($q));
+                } elseif ($filter->completeness === 'incomplete') {
+                    $query->whereNot(fn ($q) => static::applyCompleteCriteria($q));
+                }
+            }
+
+            return $query->paginate(20)->withQueryString();
         } catch (Exception $err) {
             $this->writeLog('MasterService::readAllPatients', $err);
 
             return new Exception($err->getMessage(), 500);
         }
+    }
+
+    /**
+     * Jumlah pasien per kelompok kelengkapan (untuk tab master pasien).
+     */
+    public function countByCompleteness(?object $filter = null): array
+    {
+        $base = $this->initSelect($filter ?? (object) []);
+        $complete = (clone $base)
+            ->where(fn ($q) => static::applyCompleteCriteria($q))
+            ->count();
+        $incomplete = (clone $base)
+            ->whereNot(fn ($q) => static::applyCompleteCriteria($q))
+            ->count();
+
+        return ['complete' => $complete, 'incomplete' => $incomplete];
     }
 
     public function countData(?object $filter = null): int
@@ -204,7 +279,7 @@ class MasterService extends Service
                 ->insert([
                     'id' => $id,
                     'code' => $code,
-                    'branch_id' => \App\Helpers\BranchContext::currentId() ?? \App\Helpers\BranchContext::defaultId(),
+                    'branch_id' => BranchContext::currentId() ?? BranchContext::defaultId(),
                     'name' => $patient->name,
                     'email' => $patient->email,
                     'payment_email' => $patient->payment_email,

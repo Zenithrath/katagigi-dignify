@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
-use App\Models\PatientAddress;
 use App\Models\Schedule;
 use App\Models\Transaction;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -41,7 +40,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::transaction(function () {
-            $patients = Patient::factory()->count(15)->create();
+            // Kelengkapan data pasien dibuat beragam: ±1/3 lengkap (siap
+            // SATUSEHAT), sisanya bervariasi — untuk mendemokan tab
+            // "Data Lengkap" vs "Belum Lengkap" di master pasien.
+            $patients = Patient::factory()->count(5)->complete()->create()
+                ->concat(Patient::factory()->count(5)->incomplete()->create())
+                ->concat(Patient::factory()->count(5)->create());
 
             foreach ($patients as $patient) {
                 DB::table('patient_addresses')->insert([
@@ -62,6 +66,10 @@ class DatabaseSeeder extends Seeder
             Appointment::factory()->count(15)->create();
             Transaction::factory()->count(12)->create();
             MedicalRecord::factory()->count(12)->create();
+
+            // Data demo siap-review (visit klinis + kode ICD + invoice) di-run
+            // terpisah agar tidak tercampur test suite:
+            //   php artisan db:seed --class=DemoDataSeeder
         });
     }
 }

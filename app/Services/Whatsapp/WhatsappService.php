@@ -33,19 +33,28 @@ class WhatsappService extends Service
 
     public function send(string $phone, string $body, ?string $templateId = null, ?string $patientId = null): WhatsappMessage
     {
-        $normalized = self::normalizePhone($phone);
-        if (! $normalized) {
-            throw new Exception('Nomor WhatsApp tidak valid.', 422);
+        if (! config('whatsapp.enabled')) {
+            throw new Exception('Fitur WhatsApp sedang dinonaktifkan.', 422);
         }
 
+        $normalized = self::normalizePhone($phone);
+
+        // Catat dulu setiap percobaan ke outbox — termasuk nomor invalid — agar
+        // staff bisa lihat penyebab kegagalan dan job reminder tidak spam retry.
         $message = WhatsappMessage::create([
             'id' => (string) Str::uuid(),
             'template_id' => $templateId,
             'patient_id' => $patientId,
-            'phone' => $normalized,
+            'phone' => $normalized ?? mb_substr($phone, 0, 32),
             'body' => $body,
             'status' => WhatsappMessage::STATUS_QUEUED,
+            'error' => $normalized ? null : 'Nomor WhatsApp tidak valid.',
         ]);
+
+        if (! $normalized) {
+            $message->update(['status' => WhatsappMessage::STATUS_FAILED]);
+            throw new Exception('Nomor WhatsApp tidak valid.', 422);
+        }
 
         try {
             if (config('whatsapp.driver') === 'cloud') {
@@ -64,6 +73,10 @@ class WhatsappService extends Service
                 'status' => WhatsappMessage::STATUS_FAILED,
                 'error' => $th->getMessage(),
             ]);
+
+            // Lempar ulang agar pemanggil (controller/command) tahu pengiriman gagal
+            // — status pesan tetap tercatat FAILED di outbox.
+            throw $th;
         }
 
         return $message->fresh();
@@ -88,6 +101,9 @@ class WhatsappService extends Service
             throw new Exception('WhatsApp Cloud menolak: HTTP '.$response->status(), 500);
         }
 
-        $message->update(['external_id' => $response->json('messages.0.id')]);
+        $externalId = $response->json('messages.0.id');
+        if ($externalId) {
+            $message->update(['external_id' => $externalId]);
+        }
     }
 }

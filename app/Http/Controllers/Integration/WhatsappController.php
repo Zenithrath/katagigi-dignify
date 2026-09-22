@@ -42,12 +42,16 @@ class WhatsappController extends Controller
         try {
             $message = $this->wa->send($validated['phone'], $validated['body']);
         } catch (Throwable $th) {
-            return back()->withErrors('error', $th->getMessage())->withInput();
+            report($th);
+
+            return back()->withErrors(['phone' => $th->getMessage()])->withInput();
         }
 
         return back()->with(
-            'success',
-            $message->status === WhatsappMessage::STATUS_SENT ? 'Pesan tercatat terkirim.' : 'Pesan gagal, cek log.'
+            $message->status === WhatsappMessage::STATUS_SENT ? 'success' : 'error',
+            $message->status === WhatsappMessage::STATUS_SENT
+                ? 'Pesan tercatat terkirim.'
+                : 'Pesan gagal dikirim: '.$message->error
         );
     }
 }

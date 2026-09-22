@@ -34,8 +34,10 @@ class MasterController extends Controller
     public function index(Request $request)
     {
         $this->authorize('read patient');
+
         return view('pages.patient.master.index', [
             'patientList' => $this->service->readAllPatients($request),
+            'completeness' => $this->service->countByCompleteness($request),
         ]);
     }
 
@@ -105,7 +107,7 @@ class MasterController extends Controller
         $inserted = $this->service->insertPatient($request);
 
         if ($inserted instanceof Throwable) {
-            return back()->withErrors('error', __('messages.patient.error.oncreate'))
+            return back()->withErrors(['error' => __('messages.patient.error.oncreate')])
                 ->withInput();
         }
 
@@ -197,7 +199,7 @@ class MasterController extends Controller
 
         if ($updated instanceof Exception) {
             return back()
-                ->withErrors('error', __('messages.patient.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.patient.error.onupdate')])->withInput();
         }
 
         return redirect()->route('patients.index')
@@ -223,7 +225,7 @@ class MasterController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.patient.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.patient.error.ondelete')])->withInput();
         }
 
         return redirect()->route('patients.index')

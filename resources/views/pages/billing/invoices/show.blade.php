@@ -4,6 +4,7 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
+                <x-back-button href="{{ route('invoices.index') }}" />
                 <h1>Tagihan {{ $invoice->number }}</h1>
                 <p>{{ $invoice->patient->name ?? '-' }} — {{ $invoice->doctor->user->name ?? '-' }}</p>
             </div>

@@ -88,7 +88,7 @@ class InventoryController extends Controller
 
         $result = $this->stock->receive($item, $validated);
         if ($result instanceof Exception) {
-            return back()->withErrors('error', $result->getMessage());
+            return back()->withErrors(['error' => $result->getMessage()]);
         }
 
         return back()->with('success', 'Stok masuk tercatat.');
@@ -107,7 +107,7 @@ class InventoryController extends Controller
 
         $result = $this->stock->dispense($item, (float) $validated['quantity'], $validated['reference'] ?? null, $validated['notes'] ?? null);
         if ($result instanceof Exception) {
-            return back()->withErrors('error', $result->getMessage());
+            return back()->withErrors(['error' => $result->getMessage()]);
         }
 
         return back()->with('success', 'Stok keluar tercatat (FIFO).');
@@ -126,7 +126,7 @@ class InventoryController extends Controller
 
         $result = $this->stock->adjust($batch, (float) $validated['quantity'], $validated['notes'] ?? null);
         if ($result instanceof Exception) {
-            return back()->withErrors('error', $result->getMessage());
+            return back()->withErrors(['error' => $result->getMessage()]);
         }
 
         return back()->with('success', 'Opname tersimpan.');

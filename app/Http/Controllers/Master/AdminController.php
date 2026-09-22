@@ -86,7 +86,7 @@ class AdminController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.admin.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.admin.error.oncreate')])->withInput();
         }
 
         return redirect()->route('admins.index')
@@ -146,7 +146,7 @@ class AdminController extends Controller
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.admin.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.admin.error.onupdate')])->withInput();
         }
 
         return redirect()->route('admins.index')
@@ -175,7 +175,7 @@ class AdminController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.admin.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.admin.error.ondelete')])->withInput();
         }
 
         return redirect()->route('admins.index')

@@ -58,6 +58,13 @@ class SatuSehatService extends Service
         $summary = ['success' => 0, 'failed' => 0, 'skipped' => 0];
 
         // 1. Patient (butuh IHS dulu untuk referensi resource lain).
+        // Consent: UU PDP — tanpa persetujuan pasien data tidak boleh dikirim.
+        if (empty($visit->patient->satusehat_consent)) {
+            $this->log($visit, 'Patient', $visit->patient_id, null, SatuSehatSyncLog::STATUS_SKIPPED, 'Pasien belum memberikan persetujuan SATUSEHAT (consent).');
+            $summary['skipped']++;
+
+            return $summary;
+        }
         $patientPayload = SatuSehatPayload::patient($visit->patient);
         $patientIhsId = $visit->patient->ihs_id;
         if (! $patientPayload) {
@@ -71,6 +78,11 @@ class SatuSehatService extends Service
         $patientIhsId = $patientResult['external_id'] ?? $patientIhsId;
         if (! $patientIhsId) {
             return $summary;
+        }
+        // MPI: simpan IHS yang dikembalikan server agar sinkron berikutnya
+        // merujuk ID nasional yang sama (bukan buat pasien baru).
+        if ($patientResult['status'] === SatuSehatSyncLog::STATUS_SUCCESS && $visit->patient->ihs_id !== $patientIhsId) {
+            $visit->patient->update(['ihs_id' => $patientIhsId]);
         }
 
         // 2. Encounter.
@@ -115,7 +127,71 @@ class SatuSehatService extends Service
             $this->tally($summary, $this->post('Procedure', $payload, $visit, $treatment->id));
         }
 
+        // 5. Observation tekanan darah (LOINC 8480-6 / 8462-4).
+        $bpPayloads = SatuSehatPayload::bloodPressureObservations(
+            $visit->examination?->blood_pressure,
+            $patientIhsId,
+            $encounterResult['external_id'],
+            SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null),
+            (string) $visit->visit_date
+        );
+        foreach ($bpPayloads ?? [] as $i => $payload) {
+            $localId = $visit->examination?->id.'-bp-'.($i + 1);
+            $this->tally($summary, $this->post('Observation', $payload, $visit, $localId));
+        }
+
+        // 6. Lampirkan daftar diagnosis ke Encounter (diagnosis.condition).
+        $this->updateEncounterDiagnoses($visit, $encounterResult['external_id'], $summary);
+
         return $summary;
+    }
+
+    /**
+     * Update Encounter dengan daftar Condition yang sudah terbit.
+     * Gagal update tidak menggagalkan sinkron utama — hanya tercatat FAILED.
+     */
+    private function updateEncounterDiagnoses(Visit $visit, string $encounterId, array &$summary): void
+    {
+        $conditionIds = SatuSehatSyncLog::query()
+            ->where('visit_id', $visit->id)
+            ->where('resource_type', 'Condition')
+            ->where('status', SatuSehatSyncLog::STATUS_SUCCESS)
+            ->orderBy('created_at')
+            ->pluck('external_id')
+            ->filter()
+            ->values();
+
+        if ($conditionIds->isEmpty()) {
+            return;
+        }
+
+        $log = $this->log($visit, 'Encounter', $visit->id, null, SatuSehatSyncLog::STATUS_PENDING, null);
+        try {
+            $response = Http::withToken($this->token())
+                ->timeout(30)
+                ->put(config('satusehat.base_url').'/fhir-r4/v1/Encounter/'.$encounterId, [
+                    'diagnosis' => $conditionIds
+                        ->map(fn ($id) => ['condition' => ['reference' => 'Condition/'.$id], 'use' => ['coding' => [[
+                            'system' => 'http://terminology.hl7.org/CodeSystem/diagnosis-role',
+                            'code' => 'AD',
+                            'display' => 'Admission diagnosis',
+                        ]]]])
+                        ->all(),
+                ]);
+
+            $log->increment('attempts');
+            if ($response->successful()) {
+                $log->update(['status' => SatuSehatSyncLog::STATUS_SUCCESS, 'response' => $response->json()]);
+                $summary['success']++;
+            } else {
+                $log->update(['status' => SatuSehatSyncLog::STATUS_FAILED, 'response' => $response->json(), 'error' => 'HTTP '.$response->status()]);
+                $summary['failed']++;
+            }
+        } catch (Throwable $th) {
+            $this->writeLog('SatuSehatService::updateEncounterDiagnoses', $th);
+            $log->update(['status' => SatuSehatSyncLog::STATUS_FAILED, 'error' => $th->getMessage()]);
+            $summary['failed']++;
+        }
     }
 
     private function tally(array &$summary, array $result): void

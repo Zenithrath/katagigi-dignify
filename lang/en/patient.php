@@ -19,12 +19,21 @@ return [
                 'active' => 'Active',
                 'inactive' => 'Inactive',
                 'empty' => 'There is no patient registered.',
+                'completeness' => 'Completeness',
+                'complete' => 'Complete',
+                'incomplete' => 'Incomplete',
+                'all' => 'All',
+                'completeness_hint' => 'Complete data = 16-digit NIK, phone, birthdate, address, and SATUSEHAT consent — required for SATUSEHAT bridging.',
             ],
         ],
         'form' => [
             'title' => [
                 'add' => 'Add Patient',
                 'edit' => 'Edit Patient',
+            ],
+            'subtitle' => [
+                'create' => 'Register a new patient',
+                'update' => 'Update patient information',
             ],
             'labels' => [
                 'name' => 'Name',
@@ -33,6 +42,10 @@ return [
                 'same_email' => 'Use same email as payment email',
                 'phone' => 'Phone Number',
                 'birthdate' => 'Birthdate',
+                'birth_place' => 'Place of Birth',
+                'nik' => 'NIK (16 digits)',
+                'ihs_id' => 'IHS ID (SATUSEHAT)',
+                'satusehat_consent' => 'Patient consents to data use for SATUSEHAT',
                 'religion' => [
                     '_title' => 'Religion',
                     'default' => 'Choose one of the following religion...',
@@ -61,12 +74,18 @@ return [
                 ],
                 'needed_sosmed' => 'Adding Social Media',
             ],
+            'helpers' => [
+                'satusehat_nik' => 'Required for SATUSEHAT bridging',
+            ],
             'placeholders' => [
                 'name' => 'Write patient name here...',
                 'email' => 'Write patient email here...',
                 'payment_email' => 'Write patient payment email here...',
                 'phone' => 'Write patient phone number here...',
                 'birthdate' => 'Write patient birthdate here...',
+                'birth_place' => 'City of birth',
+                'nik' => '16-digit NIK',
+                'ihs_id' => 'Patient IHS ID if already assigned',
                 'religion' => 'Choose patient religion here...',
                 'gender' => 'Choose patient gender here...',
                 'address' => [
@@ -87,6 +106,19 @@ return [
         ],
         'detail' => [
             'title' => 'Patient Details',
+            'satusehat' => [
+                'title' => 'SATUSEHAT readiness',
+                'ready' => 'Ready for bridging',
+                'not_ready' => 'Incomplete',
+                'hint' => 'Complete it via the patient edit button. Phase 4 bridging rejects incomplete data.',
+                'checks' => [
+                    'nik' => '16-digit NIK filled',
+                    'birth' => 'Place + date of birth filled',
+                    'ihs' => 'IHS ID filled',
+                    'consent' => 'Patient consent recorded',
+                ],
+            ],
+            'history_empty' => 'No medical records found.',
             'labels' => [
                 'title' => [
                     'information' => 'Patient Information',
@@ -105,6 +137,13 @@ return [
                 ],
                 'phone' => 'Phone Number',
                 'birthdate' => 'Birthdate',
+                'birth_place' => 'Place of Birth',
+                'nik' => 'NIK',
+                'ihs_id' => 'IHS ID (SATUSEHAT)',
+                'satusehat_consent' => 'SATUSEHAT Consent',
+                'yes' => 'Yes',
+                'no' => 'No',
+                'medical_record' => 'Medical Record',
                 'religion' => [
                     '_title' => 'Religion',
                     'islam' => 'Islam',
@@ -164,8 +203,14 @@ return [
                 'add' => 'Add Medical Record',
                 'edit' => 'Edit Medical Record',
             ],
+            'subtitle' => [
+                'create' => 'Create a new medical record',
+                'update' => 'Update medical record',
+            ],
             'labels' => [
                 'appointment_id' => 'Appointment',
+                'diagnosis_icd10' => 'Disease Diagnosis (ICD-10)',
+                'procedure_icd9' => 'Procedure (ICD-9-CM)',
                 'patient' => 'Patient',
                 'patient_address' => 'Patient Address',
                 'doctor_nipp' => 'Doctor NIPP',
@@ -201,6 +246,8 @@ return [
                 ],
             ],
             'helpers' => [
+                'diagnosis_icd10' => 'At least one ICD-10 code is required (SATUSEHAT). Type in plain language, e.g. "tooth cavity".',
+                'procedure_icd9' => 'Optional. Type in plain language, e.g. "tooth extraction".',
                 'images' => 'Upload size maximal 1024KB',
                 'integer' => 'Write number only or decimal using . character.',
                 'pricing' => 'Prices range between :lower to :higher',
@@ -232,6 +279,9 @@ return [
                 ],
                 'recomendation' => 'Next Schedule Recommendation',
                 'total' => 'Total',
+                'note' => 'notes',
+                'other_codes' => 'Other Codes',
+                'discount' => 'Discount',
                 'anamnesis' => 'Anamnesis',
                 'diagnosis' => 'Diagnosis',
                 'therapy' => 'Therapy',

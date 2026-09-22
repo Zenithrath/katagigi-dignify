@@ -4,6 +4,7 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
+                <x-back-button href="{{ route('inventory.index') }}" />
                 <h1>{{ $item->name }}</h1>
                 <p>{{ $item->code }} — stok {{ rtrim(rtrim(number_format($item->currentStock(), 2), '0'), '.') }} {{ $item->unit }}</p>
             </div>

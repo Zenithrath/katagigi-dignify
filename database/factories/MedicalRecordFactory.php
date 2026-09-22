@@ -17,6 +17,40 @@ class MedicalRecordFactory extends Factory
 {
     protected $model = MedicalRecord::class;
 
+    public function configure(): static
+    {
+        // Data demo/test wajib punya kode resmi seperti produksi: pasang 1 kode
+        // ICD-10 (wajib) + 1 ICD-9 (bila tersedia) ke pivot medical_record_diagnoses
+        // — jalur yang sama dengan MedicalRecordController::syncDiagnosisCodes.
+        return $this->afterCreating(function (MedicalRecord $record) {
+            $now = now();
+            $rows = [];
+            foreach (['ICD10', 'ICD9'] as $system) {
+                $code = DB::table('diagnosis_codes')
+                    ->where('system', $system)
+                    ->where('is_active', true)
+                    ->inRandomOrder()
+                    ->first();
+                if ($code) {
+                    $rows[] = [
+                        'id' => (string) Str::uuid(),
+                        'medical_record_id' => $record->id,
+                        'diagnosis_code_id' => $code->id,
+                        'system' => $code->system,
+                        'code' => $code->code,
+                        'display' => $code->display_id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+
+            if ($rows !== []) {
+                DB::table('medical_record_diagnoses')->insert($rows);
+            }
+        });
+    }
+
     public function definition(): array
     {
         $patient = Patient::inRandomOrder()->first() ?? Patient::factory()->create();

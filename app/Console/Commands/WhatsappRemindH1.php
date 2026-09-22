@@ -58,6 +58,7 @@ class WhatsappRemindH1 extends Command
                 );
                 $sent++;
             } catch (Throwable) {
+                // Service melempar ulang saat gagal; status FAILED sudah tercatat di outbox.
                 $failed++;
             }
         }

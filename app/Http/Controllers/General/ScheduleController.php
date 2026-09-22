@@ -4,14 +4,13 @@ namespace App\Http\Controllers\General;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ScheduleRequest;
-use App\Models\Schedule;
 use App\Services\General\ScheduleService;
 use App\Services\Master\DoctorService;
 use App\Types\Entities\ScheduleEntity;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ScheduleController extends Controller
 {
@@ -85,7 +84,7 @@ class ScheduleController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.schedule.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.schedule.error.oncreate')])->withInput();
         }
 
         return redirect()->route('schedules.index')
@@ -100,7 +99,7 @@ class ScheduleController extends Controller
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.schedule.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.schedule.error.onupdate')])->withInput();
         }
 
         return redirect()->route('schedules.index')
@@ -115,7 +114,7 @@ class ScheduleController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.schedule.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.schedule.error.ondelete')])->withInput();
         }
 
         return redirect()->route('schedules.index')

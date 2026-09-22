@@ -3,15 +3,14 @@
 use App\Livewire\Forms\LoginForm;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
+new #[Layout('layouts.guest')] #[Title('Masuk — KataGigi Dignify')]
+class extends Component
 {
     public LoginForm $form;
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function login(): void
     {
         $this->validate();
@@ -20,53 +19,54 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
+        // Auto redirect ke dashboard (atau halaman tujuan sebelumnya) setelah login.
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 }; ?>
 
 <div>
-    <!-- Session Status -->
+    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-zinc-100 tracking-tight">Selamat datang kembali 👋</h1>
+    <p class="text-sm text-slate-500 dark:text-zinc-400 mt-1 mb-6">Masuk untuk mengelola klinik Anda.</p>
+
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
+    <form wire:submit="login" class="space-y-4">
+        <div class="input-group">
+            <label for="email">Email</label>
+            <x-text-input wire:model="form.email" id="email" class="custom-input block w-full" type="email" name="email" required autofocus autocomplete="username" placeholder="nama@klinik.com" />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
+        <div class="input-group">
+            <label for="password">Password</label>
+            <x-text-input wire:model="form.password" id="password" class="custom-input block w-full"
                             type="password"
                             name="password"
-                            required autocomplete="current-password" />
+                            required autocomplete="current-password" placeholder="••••••••" />
 
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="flex items-center justify-between">
+            <label for="remember" class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300 cursor-pointer">
+                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" name="remember">
+                Ingat saya
             </label>
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
+                <a class="text-sm font-medium text-emerald-600 hover:text-emerald-700" href="{{ route('password.request') }}" wire:navigate>
+                    Lupa password?
                 </a>
             @endif
-
-            <x-primary-button class="ms-3" wire:loading.attr="disabled" wire:loading.class="opacity-50">
-                <span wire:loading.remove>{{ __('Log in') }}</span>
-                <span wire:loading>{{ __('Logging in…') }}</span>
-            </x-primary-button>
         </div>
+
+        <button type="submit" class="btn-submit w-full !py-2.5" wire:loading.attr="disabled" wire:loading.class="opacity-50">
+            <span wire:loading.remove>Masuk</span>
+            <span wire:loading>Memproses…</span>
+        </button>
     </form>
+
+    <p class="text-xs text-slate-400 dark:text-zinc-500 text-center mt-6">
+        Registrasi mandiri dinonaktifkan. Akun dibuat oleh manajemen klinik.
+    </p>
 </div>

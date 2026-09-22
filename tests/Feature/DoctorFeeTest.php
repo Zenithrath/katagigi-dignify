@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -31,20 +32,35 @@ class DoctorFeeTest extends TestCase
             'clinical_status' => Visit::STATUS_SIGNED,
         ]);
         foreach ($items as $code => $amount) {
-            DB::table('diagnosis_codes')->updateOrInsert(
-                ['system' => 'ICD9', 'code' => $code],
-                [
-                    'id' => (string) \Illuminate\Support\Str::uuid(),
+            // Jangan regenerasi id untuk baris yang sudah ada — kode bisa sudah
+            // terpakai pivot medical_record_diagnoses (FK akan menolak).
+            $existing = DB::table('diagnosis_codes')->where('system', 'ICD9')->where('code', $code)->first();
+            if ($existing) {
+                DB::table('diagnosis_codes')->where('id', $existing->id)->update([
                     'display_id' => 'Tes '.$code,
                     'display_en' => 'Test '.$code,
                     'is_active' => true,
+                    'updated_at' => now(),
+                ]);
+                $codeRow = $existing;
+            } else {
+                $newId = (string) Str::uuid();
+                DB::table('diagnosis_codes')->insert([
+                    'id' => $newId,
+                    'system' => 'ICD9',
+                    'code' => $code,
+                    'display_id' => 'Tes '.$code,
+                    'display_en' => 'Test '.$code,
+                    'category' => 'bedah-mulut',
+                    'keywords' => json_encode([]),
+                    'is_active' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]
-            );
-            $codeRow = DB::table('diagnosis_codes')->where('code', $code)->first();
+                ]);
+                $codeRow = DB::table('diagnosis_codes')->where('id', $newId)->first();
+            }
             $visit->treatments()->create([
-                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'id' => (string) Str::uuid(),
                 'procedure_code_id' => $codeRow->id,
                 'system' => 'ICD9',
                 'code' => $code,
@@ -79,7 +95,7 @@ class DoctorFeeTest extends TestCase
 
         // Pembayaran kedua tak membuat posting ganda — uji via invoice lain + aturan khusus.
         DB::table('doctor_fee_rules')->insert([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'doctor_id' => $doctorId,
             'percentage' => 40,
             'xray_percentage' => 10,

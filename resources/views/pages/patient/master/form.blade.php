@@ -4,8 +4,9 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
-                <h1>{{ $type == 'update' ? __('form.title.update.patient') : __('form.title.create.patient') }}</h1>
-                <p>{{ $type == 'update' ? 'Update patient information' : 'Register a new patient' }}</p>
+                <x-back-button href="{{ $type == 'update' ? route('patients.show', $data->id) : route('patients.index') }}" />
+                <h1>{{ $type == 'update' ? __('patient.master.form.title.edit') : __('patient.master.form.title.add') }}</h1>
+                <p>{{ $type == 'update' ? __('patient.master.form.subtitle.update') : __('patient.master.form.subtitle.create') }}</p>
             </div>
         </section>
 
@@ -84,28 +85,28 @@
                         </div>
 
                         <div class="input-group">
-                            <label for="birth_place">Tempat Lahir</label>
+                            <label for="birth_place">{{ __('patient.master.form.labels.birth_place') }}</label>
                             <input type="text" name="birth_place" id="birth_place" class="custom-input"
-                                placeholder="Kota tempat lahir" value="{{ $data->birth_place ?? '' }}" />
+                                placeholder="{{ __('patient.master.form.placeholders.birth_place') }}" value="{{ $data->birth_place ?? '' }}" />
                             @error('birth_place')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
 
                         <div class="input-group">
-                            <label for="nik">NIK (16 digit)</label>
+                            <label for="nik">{{ __('patient.master.form.labels.nik') }}</label>
                             <input type="text" name="nik" id="nik" class="custom-input" inputmode="numeric"
-                                placeholder="16 digit NIK" value="{{ $data->nik ?? '' }}" />
-                            <small class="helper">Wajib untuk bridging SATUSEHAT</small>
+                                placeholder="{{ __('patient.master.form.placeholders.nik') }}" value="{{ $data->nik ?? '' }}" />
+                            <small class="helper">{{ __('patient.master.form.helpers.satusehat_nik') }}</small>
                             @error('nik')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
 
                         <div class="input-group">
-                            <label for="ihs_id">ID IHS (SATUSEHAT)</label>
+                            <label for="ihs_id">{{ __('patient.master.form.labels.ihs_id') }}</label>
                             <input type="text" name="ihs_id" id="ihs_id" class="custom-input"
-                                placeholder="ID IHS pasien bila sudah ada" value="{{ $data->ihs_id ?? '' }}" />
+                                placeholder="{{ __('patient.master.form.placeholders.ihs_id') }}" value="{{ $data->ihs_id ?? '' }}" />
                             @error('ihs_id')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
@@ -116,7 +117,7 @@
                                 <input type="checkbox" name="satusehat_consent" id="satusehat_consent" value="1"
                                     class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                                     {{ !empty($data->satusehat_consent) ? 'checked' : '' }} />
-                                <span class="text-sm font-medium text-slate-700">Pasien menyetujui pemakaian data untuk SATUSEHAT</span>
+                                <span class="text-sm font-medium text-slate-700">{{ __('patient.master.form.labels.satusehat_consent') }}</span>
                             </label>
                             @error('satusehat_consent')
                                 <small class="danger">{{ $message }}</small>

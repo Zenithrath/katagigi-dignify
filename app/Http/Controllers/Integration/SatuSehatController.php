@@ -47,7 +47,7 @@ class SatuSehatController extends Controller
                 "Sinkron selesai: {$summary['success']} sukses, {$summary['failed']} gagal, {$summary['skipped']} dilewati."
             );
         } catch (Throwable $th) {
-            return back()->withErrors('error', $th->getMessage());
+            return back()->withErrors(['error' => $th->getMessage()]);
         }
     }
 }

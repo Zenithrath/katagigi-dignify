@@ -19,6 +19,29 @@ new class extends Component
 
     <div class="flex-1"></div>
 
+    {{-- Switcher bahasa (ID/EN) + mode terang/gelap --}}
+    <div class="flex items-center gap-1.5">
+        <div class="flex items-center rounded-xl bg-white border border-slate-200 overflow-hidden" role="group" aria-label="Bahasa">
+            @foreach (['id' => 'ID', 'en' => 'EN'] as $code => $label)
+                <a href="{{ route('switch-language', $code) }}"
+                    class="px-2.5 py-2 text-xs font-bold transition-colors {{ app()->getLocale() === $code ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:bg-slate-50' }}"
+                    @if(app()->getLocale() === $code) aria-current="true" @endif>{{ $label }}</a>
+            @endforeach
+        </div>
+
+        <button type="button" x-data @click="
+                const root = document.documentElement;
+                const dark = root.classList.toggle('dark');
+                localStorage.setItem('theme', dark ? 'dark' : 'light');
+            "
+            class="dark-toggle grid h-9 w-9 place-items-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
+            title="Mode terang/gelap" aria-label="Ganti mode terang/gelap">
+            {{-- Ikon mengikuti state .dark pada <html> via CSS --}}
+            <x-lucide-moon class="h-4 w-4 dark:hidden" />
+            <x-lucide-sun class="h-4 w-4 hidden dark:block" />
+        </button>
+    </div>
+
     {{-- Fase 4: switcher cabang aktif --}}
     <form method="post" action="{{ route('branch.switch') }}" class="hidden md:block">
         @csrf
@@ -76,13 +99,15 @@ new class extends Component
                 </a>
             </div>
 
-            {{-- Logout --}}
+            {{-- Logout: form POST native (tanpa JS), paling tahan banting --}}
             <div class="border-t border-slate-100 py-1.5">
-                <button wire:click="logout" wire:loading.attr="disabled" wire:loading.class="opacity-50"
-                    class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50">
-                    <x-lucide-log-out class="w-4 h-4" />
-                    Log Out
-                </button>
+                <form method="post" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                        <x-lucide-log-out class="w-4 h-4" />
+                        Log Out
+                    </button>
+                </form>
             </div>
         </div>
     </div>

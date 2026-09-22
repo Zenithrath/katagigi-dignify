@@ -108,4 +108,52 @@ class WhatsappTest extends TestCase
         ])->assertRedirect();
         $this->assertDatabaseHas('whatsapp_messages', ['phone' => '6281234567891']);
     }
+
+    public function test_manual_send_failure_shows_error_to_user(): void
+    {
+        $admin = User::where('email', 'admin@gmail.com')->first();
+
+        $this->actingAs($admin)
+            ->from(route('whatsapp.index'))
+            ->post(route('whatsapp.send'), ['phone' => 'abc', 'body' => 'Tes.'])
+            ->assertRedirect(route('whatsapp.index'))
+            ->assertSessionHasErrors('phone');
+
+        // Percobaan dengan nomor invalid tetap tercatat FAILED di outbox.
+        $this->assertDatabaseHas('whatsapp_messages', ['status' => 'FAILED']);
+    }
+
+    public function test_remind_h1_counts_invalid_phone_as_failed_and_stays_idempotent(): void
+    {
+        $patient = Patient::factory()->create();
+        $doctor = Doctor::factory()->create();
+        // Snapshot phone di appointment invalid (factory default menyalin phone pasien).
+        Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->user_id,
+            'date' => date('Y-m-d', strtotime('+1 day')),
+            'confirmed_at' => now(),
+            'patient_phone' => '123',
+        ]);
+
+        $this->artisan('wa:remind-h1')
+            ->expectsOutputToContain('0 terkirim, 1 gagal')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('whatsapp_messages', [
+            'patient_id' => $patient->id,
+            'status' => 'FAILED',
+        ]);
+
+        // Jalan kedua tetap tidak menggandakan (dedup juga untuk yang gagal).
+        $this->artisan('wa:remind-h1')->assertSuccessful();
+        $this->assertEquals(1, DB::table('whatsapp_messages')->count());
+    }
+
+    public function test_remind_h1_is_scheduled(): void
+    {
+        $this->artisan('schedule:list')
+            ->expectsOutputToContain('wa:remind-h1')
+            ->assertSuccessful();
+    }
 }

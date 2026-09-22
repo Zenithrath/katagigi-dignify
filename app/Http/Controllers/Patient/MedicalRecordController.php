@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Patient;
 
+use App\Helpers\Audit;
 use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MedicalRecordRequest;
@@ -19,8 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 class MedicalRecordController extends Controller
@@ -55,6 +56,7 @@ class MedicalRecordController extends Controller
     public function index(Request $request)
     {
         $this->authorize('read medical record');
+
         return view('pages.patient.record.index', [
             'medicalRecordList' => $this->service->readAllMedicalRecords($request),
         ]);
@@ -224,6 +226,8 @@ class MedicalRecordController extends Controller
                 ->with('error', __('messages.medical-record.error.oncreate'))
                 ->withInput();
         }
+
+        Audit::log('create-medical-record', 'medical_record', $inserted, null, ['patient_id' => $patient_id, 'appointment_id' => $validated['appointment_id']]);
 
         // D-03: gabung diagnosis ICD-10 + tindakan ICD-9 ke pivot (satu sumber
         // riwayat). Kode sistem lain yang sudah tersimpan dipertahankan sync.
@@ -410,6 +414,9 @@ class MedicalRecordController extends Controller
             $request->input('diagnosis_codes_icd10', []),
             $request->input('procedure_codes_icd9', [])
         ));
+
+        // Permenkes 24/2022: koreksi RME SIGNED wajib teraudit (old/new).
+        Audit::log('update-medical-record', 'medical_record', $id, $this->service->readMedicalRecordByID($id)?->diagnosis ? ['diagnosis' => $this->service->readMedicalRecordByID($id)->diagnosis] : null, ['diagnosis' => $request->input('diagnosis')], $request->input('audit_reason'));
 
         return redirect()->route('medical-records.show', ['medical_record' => $id])
             ->with('success', __('messages.medical-record.success.onupdate'));

@@ -86,7 +86,7 @@ class DoctorController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.doctor.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.doctor.error.oncreate')])->withInput();
         }
 
         return redirect()->route('doctors.index')
@@ -149,7 +149,7 @@ class DoctorController extends Controller
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.doctor.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.doctor.error.onupdate')])->withInput();
         }
 
         return redirect()->route('doctors.index')
@@ -178,7 +178,7 @@ class DoctorController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.doctor.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.doctor.error.ondelete')])->withInput();
         }
 
         return redirect()->route('doctors.index')
