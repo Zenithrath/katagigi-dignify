@@ -18,59 +18,148 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $data = (object) [];
         $roles = auth()->user()->getRoleNames();
         // manajemen = admin lama: lihat dashboard admin.
         $role = $roles->contains('manajemen') ? 'admin' : ($roles->first() ?? 'guest');
 
-        if ($role == 'admin') {
-            $overview = $this->service->getAdminDataOverview();
-            $data = (object) [
-                'role' => 'admin',
-                'revenue' => GeneralHelper::floatToRupiah((float) ($overview->revenue ?? 0)),
-                'revenue_raw' => (float) ($overview->revenue ?? 0),
-                'transactions' => $overview->transactions,
-                'patients' => $overview->patients,
-                'new_patients' => $overview->new_patients,
-                'avg_ticket' => GeneralHelper::floatToRupiah((float) ($overview->avg_ticket ?? 0)),
-                'revenue_analytics' => $overview->revenue_analytics ?? [],
-                'monthly_trend' => $overview->monthly_trend,
-                'payment_methods' => $overview->payment_methods,
-                'incomplete_count' => $overview->incomplete_count,
-                'incomplete_patients' => $overview->incomplete_patients,
-                'recent_transactions' => $overview->recent_transactions,
-            ];
-        }
+        // Overview array bersih dari cache (serialize-safe) — lihat DashboardService.
+        $overview = match ($role) {
+            'admin' => $this->service->getAdminDataOverview(),
+            'doctor' => $this->service->getDoctorDataOverview(auth()->user()->id),
+            'nurse' => $this->service->getDoctorDataOverview($request->doctor),
+            default => null,
+        };
 
-        if ($role == 'doctor') {
-            $doctorID = auth()->user()->id;
-            $data = $this->service->getDoctorDataOverview($doctorID);
-            $data = (object) [
-                'transactions' => $data->transactions,
-                'medical_records' => $data->medical_records,
-                'appointments' => $data->appointments,
-                'schedules' => $data->schedules,
-            ];
-        }
-
-        if ($role == 'nurse') {
-            $data = $this->service->getDoctorDataOverview($request->doctor);
-            $data = (object) [
-                'transactions' => $data->transactions,
-                'medical_records' => $data->medical_records,
-                'appointments' => $data->appointments,
-            ];
-        }
-
-        if ($role == 'guest') {
-            $data = (object) [
-                'transactions' => 0,
-                'revenue' => GeneralHelper::floatToRupiah(0),
-                'patients' => 0,
-                'appointments' => collect(),
-            ];
-        }
+        $data = (object) [
+            'role' => $role,
+            'roleLabel' => __('dashboard.role.'.$role),
+            'widgets' => $this->buildWidgets($role, $overview),
+        ];
 
         return view('dashboard', ['data' => $data]);
+    }
+
+    /**
+     * Kumpulkan payload hanya untuk widget yang boleh & layak dirender
+     * untuk role terkait. Payload tanpa data tidak dirender (kecuali
+     * kosong-nya bermakna operasional, mis. antrian hari ini).
+     *
+     * @return \Illuminate\Support\Collection<int, object{view: string, payload: object}>
+     */
+    private function buildWidgets(string $role, ?array $overview): \Illuminate\Support\Collection
+    {
+        if ($overview === null) {
+            return collect(); // guest: hanya header
+        }
+
+        $widgets = collect();
+        foreach ($this->widgetMap() as $view => [$allowed, $provider]) {
+            if (! in_array($role, $allowed, true)) {
+                continue;
+            }
+
+            $payload = $this->{$provider}($overview, $role);
+            if ($payload === null) {
+                continue;
+            }
+
+            $widgets->push((object) ['view' => $view, 'payload' => $payload]);
+        }
+
+        return $widgets;
+    }
+
+    /**
+     * Registry widget: nama partial => [role yang boleh lihat, provider payload].
+     * Menambah widget/role baru cukup di sini + partial-nya.
+     */
+    private function widgetMap(): array
+    {
+        return [
+            'kpi-row' => [['admin', 'doctor', 'nurse'], 'kpiRow'],
+            'chart-trend' => [['admin', 'doctor'], 'chartTrend'],
+            'queue-today' => [['admin', 'doctor', 'nurse'], 'queueToday'],
+            'billing-methods' => [['admin'], 'billingMethods'],
+            'patients-incomplete' => [['admin'], 'patientsIncomplete'],
+            'recent-activities' => [['admin', 'doctor'], 'recentActivities'],
+        ];
+    }
+
+    private function kpiRow(array $o, string $role): object
+    {
+        return (object) [
+            'revenue' => GeneralHelper::floatToRupiah((float) ($o['revenue'] ?? 0)),
+            'transactions' => (int) ($o['transactions'] ?? 0),
+            'patients' => isset($o['patients']) ? (int) $o['patients'] : null,
+            'new_patients' => isset($o['new_patients']) ? (int) $o['new_patients'] : null,
+            'medical_records' => isset($o['medical_records']) ? (int) $o['medical_records'] : null,
+            // true = angka milik dokter sendiri, bukan seluruh klinik.
+            'scoped' => $role !== 'admin',
+        ];
+    }
+
+    private function chartTrend(array $o, string $role): ?object
+    {
+        if (empty($o['revenue_analytics'])) {
+            return null;
+        }
+
+        return (object) ['analytics' => $o['revenue_analytics']];
+    }
+
+    private function queueToday(array $o, string $role): object
+    {
+        // Selalu dirender: antrian kosong adalah info operasional yang berarti.
+        return (object) [
+            'appointments' => $this->toObjects($o['today_appointments'] ?? []),
+        ];
+    }
+
+    private function billingMethods(array $o, string $role): ?object
+    {
+        if (empty($o['payment_methods'])) {
+            return null;
+        }
+
+        return (object) ['methods' => $this->toObjects($o['payment_methods'])];
+    }
+
+    private function patientsIncomplete(array $o, string $role): ?object
+    {
+        if ((int) ($o['incomplete_count'] ?? 0) === 0) {
+            return null;
+        }
+
+        return (object) [
+            'count' => (int) $o['incomplete_count'],
+            'patients' => $this->toObjects($o['incomplete_patients'] ?? []),
+        ];
+    }
+
+    private function recentActivities(array $o, string $role): ?object
+    {
+        if ($role === 'doctor') {
+            if (empty($o['recent_records'])) {
+                return null;
+            }
+
+            return (object) ['type' => 'records', 'rows' => $this->toObjects($o['recent_records'])];
+        }
+
+        if (empty($o['recent_transactions'])) {
+            return null;
+        }
+
+        return (object) ['type' => 'transactions', 'rows' => $this->toObjects($o['recent_transactions'])];
+    }
+
+    /**
+     * Hydrate array asosiatif hasil cache menjadi Collection of stdClass
+     * agar akses properti (->name, ->code, dst.) di view tetap bekerja.
+     * stdClass aman dipakai runtime; yang dilarang hanyalah masuk cache.
+     */
+    private function toObjects(array $rows): \Illuminate\Support\Collection
+    {
+        return collect($rows)->map(fn ($row) => is_object($row) ? $row : (object) $row);
     }
 }

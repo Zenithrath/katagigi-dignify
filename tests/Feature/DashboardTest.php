@@ -72,6 +72,18 @@ class DashboardTest extends TestCase
             ->assertOk();
     }
 
+    public function test_admin_dashboard_renders_widget_partials(): void
+    {
+        config(['cache.default' => 'database']);
+        Cache::forget('dashboard:admin-overview');
+
+        $response = $this->actingAs($this->verifiedUser('manajemen@gmail.com'))
+            ->get(route('dashboard'));
+        $response->assertOk();
+        $this->assertStringContainsString('data-widget="kpi-row"', $response->getContent());
+        $this->assertStringContainsString('data-widget="patients-incomplete"', $response->getContent());
+    }
+
     public function test_doctor_overview_scopes_revenue_to_own_transactions(): void
     {
         config(['cache.default' => 'database']);
