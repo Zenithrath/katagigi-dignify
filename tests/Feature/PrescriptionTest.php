@@ -33,7 +33,8 @@ class PrescriptionTest extends TestCase
 
         $this->actingAs($doctor)->post(route('visits.prescriptions.items.store', [$visit->id, $prescription->id]), [
             'medicine_name' => 'Amoxicillin',
-            'kfa_code' => 'KFA001',
+            // Fase 4.2: kfa_code divalidasi terhadap master_kfa (seeder DatabaseSeeder).
+            'kfa_code' => 'J01CA04',
             'dosage' => '500 mg',
             'frequency' => '3x sehari',
             'duration' => '5 hari',

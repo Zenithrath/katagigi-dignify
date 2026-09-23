@@ -9,13 +9,18 @@ use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
 use App\Http\Controllers\Clinical\ExaminationController;
+use App\Http\Controllers\Clinical\MedicalConsentController;
 use App\Http\Controllers\Clinical\OdontogramController;
+use App\Http\Controllers\Clinical\OralHealthIndexController;
 use App\Http\Controllers\Clinical\PrescriptionController;
+use App\Http\Controllers\Clinical\RadiologyOrderController;
 use App\Http\Controllers\Clinical\TreatmentPlanController;
+use App\Http\Controllers\Clinical\LetterController;
 use App\Http\Controllers\Clinical\VisitAttachmentController;
 use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
 use App\Http\Controllers\Clinical\VisitTreatmentController;
+use App\Http\Controllers\Clinical\VitalSignController;
 use App\Http\Controllers\Clinical\WorkspaceController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\General\AuditLogController;
@@ -122,13 +127,21 @@ Route::middleware('auth')->group(function () {
     Route::put('visits/{visit}/examination', [ExaminationController::class, 'update'])->name('visits.examination.update');
 
     // Tanda vital + informed consent + radiologi + OHI-S/DMF-T (tabel baru).
-    Route::post('visits/{visit}/vitals', [\App\Http\Controllers\Clinical\VitalSignController::class, 'store'])->name('visits.vitals.store');
-    Route::post('visits/{visit}/consents', [\App\Http\Controllers\Clinical\MedicalConsentController::class, 'store'])->name('visits.consents.store');
-    Route::delete('visits/{visit}/consents/{consent}', [\App\Http\Controllers\Clinical\MedicalConsentController::class, 'destroy'])->name('visits.consents.destroy');
-    Route::post('visits/{visit}/radiology', [\App\Http\Controllers\Clinical\RadiologyOrderController::class, 'store'])->name('visits.radiology.store');
-    Route::put('visits/{visit}/radiology/{order}/result', [\App\Http\Controllers\Clinical\RadiologyOrderController::class, 'updateResult'])->name('visits.radiology.result');
-    Route::delete('visits/{visit}/radiology/{order}', [\App\Http\Controllers\Clinical\RadiologyOrderController::class, 'destroy'])->name('visits.radiology.destroy');
-    Route::post('visits/{visit}/oral-health-index', [\App\Http\Controllers\Clinical\OralHealthIndexController::class, 'store'])->name('visits.oral-health.store');
+    Route::post('visits/{visit}/vitals', [VitalSignController::class, 'store'])->name('visits.vitals.store');
+    Route::post('visits/{visit}/consents', [MedicalConsentController::class, 'store'])->name('visits.consents.store');
+    Route::delete('visits/{visit}/consents/{consent}', [MedicalConsentController::class, 'destroy'])->name('visits.consents.destroy');
+    Route::get('consents/{consent}/signature', [MedicalConsentController::class, 'signature'])
+        ->middleware('signed')->name('consents.signature');
+    Route::get('consents/{consent}/print', [MedicalConsentController::class, 'print'])->name('consents.print');
+    Route::post('visits/{visit}/radiology', [RadiologyOrderController::class, 'store'])->name('visits.radiology.store');
+    Route::put('visits/{visit}/radiology/{order}/result', [RadiologyOrderController::class, 'updateResult'])->name('visits.radiology.result');
+    Route::delete('visits/{visit}/radiology/{order}', [RadiologyOrderController::class, 'destroy'])->name('visits.radiology.destroy');
+    Route::get('radiology/{order}/result-file', [RadiologyOrderController::class, 'resultFile'])
+        ->middleware('signed')->name('radiology.result.file');
+    Route::post('visits/{visit}/oral-health-index', [OralHealthIndexController::class, 'store'])->name('visits.oral-health.store');
+
+    // Fase 4.3: surat sakit / berobat / rujukan (print).
+    Route::get('visits/{visit}/letters/print', [LetterController::class, 'print'])->name('visits.letters.print');
 
     // Fase 2 Task 4: odontogram per visit.
     Route::post('visits/{visit}/odontogram', [OdontogramController::class, 'store'])->name('visits.odontogram.store');
@@ -225,6 +238,7 @@ Route::middleware('auth')->group(function () {
     // Fase 4 T2: SATUSEHAT (sandbox dulu; tanpa klaim produksi).
     Route::get('satusehat', [SatuSehatController::class, 'index'])->name('satusehat.index');
     Route::post('visits/{visit}/satusehat', [SatuSehatController::class, 'sync'])->name('visits.satusehat.sync');
+    Route::post('visits/{visit}/satusehat/retry', [SatuSehatController::class, 'retry'])->name('visits.satusehat.retry');
 
     // Fase 4 T3: WhatsApp Official (driver log default).
     Route::get('whatsapp', [WhatsappController::class, 'index'])->name('whatsapp.index');

@@ -47,6 +47,18 @@ class NewFeaturesTest extends TestCase
             'is_primary' => true,
         ]);
 
+        // Gate consent (Permenkes 24/2022): sign tanpa consent disetujui ditolak.
+        $this->actingAs($doctor)->post(route('visits.sign', $visit->id))->assertStatus(422);
+        $visit->consents()->create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'patient_id' => $visit->patient_id,
+            'consent_type' => 'treatment',
+            'consent_text' => \App\Models\MedicalConsentRecord::DEFAULT_TEXT,
+            'granted' => true,
+            'granted_by_name' => 'Pasien',
+            'granted_at' => now(),
+        ]);
+
         $this->actingAs($doctor)->post(route('visits.sign', $visit->id))->assertRedirect();
 
         $this->assertDatabaseHas('audit_logs', [

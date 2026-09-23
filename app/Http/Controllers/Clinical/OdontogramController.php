@@ -6,28 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\OdontogramFinding;
 use App\Models\Visit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class OdontogramController extends Controller
 {
-    /**
-     * Odontogram = pekerjaan klinis dokter (manajemen boleh mengoreksi).
-     */
-    private function ensureClinician(): void
-    {
-        abort_unless(
-            Auth::user()->hasRole(['doctor', 'manajemen']),
-            403,
-            'Odontogram hanya boleh ditulis dokter.'
-        );
-    }
-
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write odontogram');
         $visit = Visit::findOrFail($visitId);
         abort_if($visit->isSigned(), 422, 'Visit SIGNED tidak bisa diubah.');
 
@@ -59,13 +45,13 @@ class OdontogramController extends Controller
 
     public function destroy($visitId, $id)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write odontogram');
         $visit = Visit::findOrFail($visitId);
         abort_if($visit->isSigned(), 422, 'Visit SIGNED tidak bisa diubah.');
 
-        OdontogramFinding::where('visit_id', $visit->id)->where('id', $id)->firstOrFail()->delete();
+        $finding = OdontogramFinding::where('visit_id', $visit->id)->where('id', $id)->firstOrFail();
+        $finding->delete();
 
-        return back()->with('success', 'Temuan dihapus.');
+        return back()->with('success', 'Temuan diarsipkan (soft delete).');
     }
 }

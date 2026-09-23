@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Integration;
 
-use App\Http\Controllers\Controller;
 use App\Helpers\Audit;
+use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Services\SatuSehat\SatuSehatService;
 use Exception;
@@ -16,9 +16,7 @@ use Illuminate\Support\Facades\Http;
  */
 class PractitionerOnboardingController extends Controller
 {
-    public function __construct(private SatuSehatService $satusehat)
-    {
-    }
+    public function __construct(private SatuSehatService $satusehat) {}
 
     public function index()
     {
@@ -158,7 +156,7 @@ class PractitionerOnboardingController extends Controller
                 ->post(config('satusehat.base_url').'/fhir-r4/v1/'.$resource, $payload);
 
             if ($response->successful()) {
-                Audit::record('satusehat.onboarding.'.$resource, $resource, $response->json('id'), [
+                Audit::log('satusehat.onboarding.'.$resource, $resource, $response->json('id'), null, [
                     'branch_id' => $branchId,
                 ]);
 

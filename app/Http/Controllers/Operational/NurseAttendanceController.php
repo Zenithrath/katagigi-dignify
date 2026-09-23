@@ -15,11 +15,12 @@ class NurseAttendanceController extends Controller
     /**
      * Asisten menginput jam masuk/pulang harian.
      * - Pemegang 'manage attendance' (manajemen/admin): kelola semua perawat.
-     * - Perawat: hanya boleh catat milik sendiri.
+     * - Pemegang 'record own attendance' (perawat): hanya boleh catat milik sendiri.
      */
     public function index(Request $request)
     {
         $user = Auth::user();
+        abort_unless($user->canAny(['manage attendance', 'record own attendance']), 403);
         $canManage = $user->can('manage attendance');
 
         $month = $request->input('month', date('Y-m'));
@@ -53,6 +54,7 @@ class NurseAttendanceController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        abort_unless($user->canAny(['manage attendance', 'record own attendance']), 403);
         $canManage = $user->can('manage attendance');
 
         $validated = $request->validate([
@@ -110,7 +112,8 @@ class NurseAttendanceController extends Controller
     private function ensureAccess(NurseAttendance $row): void
     {
         $user = Auth::user();
-        if (! $user->can('manage attendance') && ($row->user_id !== $user->id || ! $user->hasRole('nurse'))) {
+        if (! $user->can('manage attendance')
+            && ($row->user_id !== $user->id || ! $user->can('record own attendance'))) {
             abort(403);
         }
     }

@@ -3,25 +3,16 @@
 namespace App\Http\Controllers\Clinical;
 
 use App\Http\Controllers\Controller;
+use App\Models\OdontogramFinding;
 use App\Models\TreatmentPlan;
 use App\Models\TreatmentPlanItem;
 use App\Models\Visit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class TreatmentPlanController extends Controller
 {
-    private function ensureClinician(): void
-    {
-        abort_unless(
-            Auth::user()->hasRole(['doctor', 'manajemen']),
-            403,
-            'Rencana perawatan hanya boleh ditulis dokter.'
-        );
-    }
-
     private function visit($visitId): Visit
     {
         $visit = Visit::findOrFail($visitId);
@@ -32,8 +23,7 @@ class TreatmentPlanController extends Controller
 
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write treatment plan');
         $visit = $this->visit($visitId);
 
         $validated = $request->validate([
@@ -53,8 +43,7 @@ class TreatmentPlanController extends Controller
 
     public function updateStatus(Request $request, $visitId, $id)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write treatment plan');
         $visit = $this->visit($visitId);
 
         $validated = $request->validate([
@@ -69,8 +58,7 @@ class TreatmentPlanController extends Controller
 
     public function destroy($visitId, $id)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write treatment plan');
         $visit = $this->visit($visitId);
 
         TreatmentPlan::where('visit_id', $visit->id)->where('id', $id)->firstOrFail()->delete();
@@ -80,13 +68,12 @@ class TreatmentPlanController extends Controller
 
     public function storeItem(Request $request, $visitId, $planId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write treatment plan');
         $visit = $this->visit($visitId);
         $plan = TreatmentPlan::where('visit_id', $visit->id)->where('id', $planId)->firstOrFail();
 
         $validated = $request->validate([
-            'tooth_fdi' => ['nullable', 'string', Rule::in(\App\Models\OdontogramFinding::allTeeth())],
+            'tooth_fdi' => ['nullable', 'string', Rule::in(OdontogramFinding::allTeeth())],
             'description' => 'required|string|max:255',
             'estimated_price' => 'nullable|numeric|min:0',
             'priority' => 'nullable|integer|min:1|max:3',
@@ -107,8 +94,7 @@ class TreatmentPlanController extends Controller
 
     public function destroyItem($visitId, $planId, $itemId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write treatment plan');
         $visit = $this->visit($visitId);
         $plan = TreatmentPlan::where('visit_id', $visit->id)->where('id', $planId)->firstOrFail();
 

@@ -22,12 +22,12 @@ class VisitAttachmentController extends Controller
     }
 
     /**
-     * Upload boleh oleh "update visit" (dokter, nurse pendamping, admin).
+     * Upload boleh dokter & asisten pendamping (izin `upload visit attachment`).
      * Disimpan di disk private (local), diakses hanya via signed URL.
      */
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
+        $this->authorize('upload visit attachment');
         $visit = $this->visit($visitId);
 
         $validated = $request->validate([
@@ -68,7 +68,7 @@ class VisitAttachmentController extends Controller
 
     public function destroy($visitId, $id)
     {
-        $this->authorize('update visit');
+        $this->authorize('upload visit attachment');
         $visit = $this->visit($visitId);
 
         $attachment = VisitAttachment::where('visit_id', $visit->id)->where('id', $id)->firstOrFail();

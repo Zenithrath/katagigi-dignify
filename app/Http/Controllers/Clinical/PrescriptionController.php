@@ -7,20 +7,11 @@ use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\Visit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class PrescriptionController extends Controller
 {
-    private function ensureClinician(): void
-    {
-        abort_unless(
-            Auth::user()->hasRole(['doctor', 'manajemen']),
-            403,
-            'Resep hanya boleh ditulis dokter.'
-        );
-    }
-
     private function visit($visitId): Visit
     {
         $visit = Visit::findOrFail($visitId);
@@ -31,8 +22,7 @@ class PrescriptionController extends Controller
 
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write prescription');
         $visit = $this->visit($visitId);
 
         $validated = $request->validate([
@@ -52,8 +42,7 @@ class PrescriptionController extends Controller
 
     public function destroy($visitId, $id)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write prescription');
         $visit = $this->visit($visitId);
 
         Prescription::where('visit_id', $visit->id)->where('id', $id)->firstOrFail()->delete();
@@ -63,14 +52,14 @@ class PrescriptionController extends Controller
 
     public function storeItem(Request $request, $visitId, $prescriptionId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write prescription');
         $visit = $this->visit($visitId);
         $prescription = Prescription::where('visit_id', $visit->id)->where('id', $prescriptionId)->firstOrFail();
 
         $validated = $request->validate([
             'medicine_name' => 'required|string|max:255',
-            'kfa_code' => 'nullable|string|max:64',
+            // Fase 4.2: kode KFA divalidasi terhadap kamus lokal bila diisi.
+            'kfa_code' => ['nullable', 'string', 'max:64', Rule::exists('master_kfa', 'code')->where('is_active', true)],
             'dosage' => 'nullable|string|max:64',
             'frequency' => 'nullable|string|max:64',
             'duration' => 'nullable|string|max:64',
@@ -97,8 +86,7 @@ class PrescriptionController extends Controller
 
     public function destroyItem($visitId, $prescriptionId, $itemId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write prescription');
         $visit = $this->visit($visitId);
         $prescription = Prescription::where('visit_id', $visit->id)->where('id', $prescriptionId)->firstOrFail();
 

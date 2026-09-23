@@ -12,6 +12,10 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
 
+/**
+ * Fase 2.2: sinkronisasi SATUSEHAT berjalan di queue (b blokir request HTTP
+ * controller), dengan retry berjenjang. Backoff menyesuaikan rate-limit SSP.
+ */
 class SyncVisitToSatuSehat implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

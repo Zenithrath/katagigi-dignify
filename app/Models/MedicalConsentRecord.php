@@ -33,6 +33,27 @@ class MedicalConsentRecord extends Model
         'notes',
     ];
 
+    public const TYPES = [
+        'treatment' => 'Tindakan Kedokteran Gigi',
+        'surgery' => 'Tindakan Bedah / Ekstraksi',
+        'anesthesia' => 'Anestesi',
+        'radiology' => 'Pemeriksaan Radiologi',
+        'data_release' => 'Pelepasan Data Medis',
+        'general' => 'Persetujuan Umum',
+    ];
+
+    public const RELATIONS = [
+        'self' => 'Pasien Sendiri',
+        'parent' => 'Orang Tua',
+        'spouse' => 'Suami/Istri',
+        'child' => 'Anak',
+        'guardian' => 'Wali',
+        'other' => 'Lainnya',
+    ];
+
+    /** Teks baku informed consent; dokter boleh menyunting sebelum dicatat. */
+    public const DEFAULT_TEXT = 'Saya menyatakan telah menerima penjelasan yang jelas mengenai diagnosis, rencana tindakan kedokteran gigi, manfaat, risiko, komplikasi yang mungkin terjadi, serta alternatif tindakan. Saya memahami bahwa hasil tindakan tidak dapat dijamin dan saya diberi kesempatan untuk bertanya. Dengan ini saya memberikan persetujuan secara sadar dan tanpa paksaan.';
+
     protected function casts(): array
     {
         return [

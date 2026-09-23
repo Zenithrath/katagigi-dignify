@@ -6,19 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Visit;
 use App\Models\VitalSign;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class VitalSignController extends Controller
 {
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
-        abort_unless(
-            Auth::user()->hasRole(['doctor', 'nurse', 'manajemen']),
-            403,
-            'Tanda vital hanya boleh diisi nakes/manajemen.'
-        );
+        $this->authorize('write vital sign');
 
         $visit = Visit::findOrFail($visitId);
         abort_if($visit->isSigned(), 422, 'Visit SIGNED tidak bisa diubah.');

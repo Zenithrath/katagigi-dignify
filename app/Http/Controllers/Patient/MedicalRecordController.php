@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MedicalRecordRequest;
 use App\Models\DiagnosisCode;
 use App\Models\MedicalRecord;
+use App\Models\MedicalRecordAddendum;
 use App\Services\General\AppointmentService;
 use App\Services\General\ServiceService;
 use App\Services\Master\DoctorService;
@@ -265,6 +266,10 @@ class MedicalRecordController extends Controller
             'diagnosisCodesIcd10' => $allCodes->where('system', 'ICD10')->values(),
             'procedureCodesIcd9' => $allCodes->where('system', 'ICD9')->values(),
             'otherCodes' => $allCodes->whereNotIn('system', ['ICD10', 'ICD9'])->values(),
+            'addendums' => MedicalRecordAddendum::where('model_type', 'MedicalRecord')
+                ->where('model_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get(),
         ]);
     }
 
@@ -474,15 +479,18 @@ class MedicalRecordController extends Controller
             $this->service->deleteImageAfter($image);
         }
 
-        $status = $this->service->deleteMedicalRecord($id);
-        if ($status instanceof Exception) {
-            Log::error($status->getMessage());
-
-            return redirect()->back()
-                ->with('error', __('messages.medical-record.success.ondelete'));
+        // Permenkes 24/2022: rekam medis tidak boleh hard delete.
+        // Gunakan soft delete + addendum.
+        $record = MedicalRecord::find($id);
+        if (! $record) {
+            return redirect()->route('medical-records.index')
+                ->with('error', 'Rekam medis tidak ditemukan.');
         }
 
+        $record->delete();
+        Audit::log('soft-delete-medical-record', 'medical_record', $id, null, ['deleted' => true], request()->input('audit_reason'));
+
         return redirect()->route('medical-records.index')
-            ->with('success', __('messages.medical-record.success.ondelete'));
+            ->with('success', 'Rekam medis diarsipkan (soft delete). Data tetap tersimpan untuk audit.');
     }
 }

@@ -3,14 +3,19 @@
 namespace Tests\Feature;
 
 use App\Models\Doctor;
+use App\Models\OralHealthIndex;
 use App\Models\Patient;
+use App\Models\Prescription;
+use App\Models\SatuSehatSyncLog;
 use App\Models\User;
 use App\Models\Visit;
+use App\Models\VitalSign;
 use App\Services\SatuSehat\SatuSehatPayload;
 use App\Services\SatuSehat\SatuSehatService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -50,7 +55,7 @@ class SatuSehatTest extends TestCase
         $vitals = (object) ['pulse_bpm' => 78, 'temperature_c' => 36.8, 'respiratory_rate' => 16, 'pregnancy_status' => 'NOT_PREGNANT'];
         $obs = SatuSehatPayload::vitalSignObservations($vitals, 'P1', 'E1', 'Practitioner/D1', '2026-09-22 10:00:00');
         $this->assertCount(4, $obs);
-        $loincs = array_column(array_column(array_column($obs, 'code'), 'coding'), 'code');
+        $loincs = array_map(fn (array $code) => $code['coding'][0]['code'], array_column($obs, 'code'));
         $this->assertContains('8867-4', $loincs);
         $this->assertContains('8310-5', $loincs);
         $this->assertContains('9279-1', $loincs);
@@ -97,7 +102,7 @@ class SatuSehatTest extends TestCase
         $icd10 = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
         $icd9 = DB::table('diagnosis_codes')->where('code', '23.2')->first();
         $visit->diagnoses()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'diagnosis_code_id' => $icd10->id,
             'system' => 'ICD10',
             'code' => 'K02.1',
@@ -105,7 +110,7 @@ class SatuSehatTest extends TestCase
             'is_primary' => true,
         ]);
         $visit->treatments()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'procedure_code_id' => $icd9->id,
             'system' => 'ICD9',
             'code' => '23.2',
@@ -163,8 +168,8 @@ class SatuSehatTest extends TestCase
         $this->enableFake();
         $visit = $this->signedVisit();
 
-        \App\Models\VitalSign::create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+        VitalSign::create([
+            'id' => (string) Str::uuid(),
             'visit_id' => $visit->id,
             'pulse_bpm' => 80,
             'temperature_c' => 36.5,
@@ -172,13 +177,13 @@ class SatuSehatTest extends TestCase
             'pregnancy_status' => 'NOT_PREGNANT',
         ]);
 
-        $rx = \App\Models\Prescription::create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+        $rx = Prescription::create([
+            'id' => (string) Str::uuid(),
             'visit_id' => $visit->id,
             'prescribed_at' => now()->toDateString(),
         ]);
         $rx->items()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'medicine_name' => 'Ibuprofen 400mg',
             'kfa_code' => 'B01',
             'quantity' => 9,
@@ -225,6 +230,42 @@ class SatuSehatTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_sync_sends_odontogram_and_ohis_observations(): void
+    {
+        $this->enableFake();
+        $visit = $this->signedVisit();
+
+        $visit->odontogramFindings()->create([
+            'id' => (string) Str::uuid(),
+            'fdi' => '36',
+            'surface' => 'occlusal',
+            'condition' => 'caries',
+        ]);
+        OralHealthIndex::create([
+            'id' => (string) Str::uuid(),
+            'visit_id' => $visit->id,
+            'patient_id' => $visit->patient_id,
+            'ohis_debris' => 1.5,
+            'ohis_calculus' => 1.0,
+            'ohis_total' => 2.5,
+            'd_count' => 1,
+            'm_count' => 0,
+            'f_count' => 0,
+            'dmt_index' => 1.0,
+        ]);
+
+        $summary = (new SatuSehatService)->syncVisit($visit->fresh());
+        $this->assertSame(0, $summary['failed']);
+
+        // Odontogram: satu Observation per gigi dengan bodySite FDI 36.
+        Http::assertSent(fn ($req) => str_contains(json_encode($req->data()), 'OC000061')
+            && str_contains(json_encode($req->data()), '866006002'));
+        // OHI-S: total debris, kalkulus, dan skor total OHIS terkirim terpisah.
+        foreach (['OC000056', 'OC000057', 'OC000058', '251319000'] as $code) {
+            Http::assertSent(fn ($req) => str_contains(json_encode($req->data()), $code));
+        }
+    }
+
     public function test_monitoring_and_sync_routes_gated(): void
     {
         $manajemen = User::where('email', 'manajemen@gmail.com')->first();
@@ -239,5 +280,113 @@ class SatuSehatTest extends TestCase
         // Tanpa kredensial → redirect error terkendali, tanpa log terkirim.
         $this->actingAs($manajemen)->post(route('visits.satusehat.sync', $visit->id))->assertRedirect();
         $this->assertEquals(0, $visit->satusehatLogs()->count());
+    }
+
+    public function test_resync_is_idempotent(): void
+    {
+        $this->enableFake();
+        $visit = $this->signedVisit();
+        $service = new SatuSehatService;
+
+        $first = $service->syncVisit($visit);
+        $this->assertSame(5, $first['success']);
+
+        // Sinkron ulang tanpa perubahan data → tidak ada HTTP sama sekali.
+        $this->enableFake();
+        $second = $service->syncVisit($visit->fresh());
+
+        $sent = Http::recorded()->map(fn ($pair) => $pair[0]->method().' '.$pair[0]->url())->all();
+        $this->assertTrue(Http::recorded()->isEmpty(), 'Sinkron ulang tanpa perubahan seharusnya tidak mengirim request apa pun. Terkirim: '.json_encode($sent));
+        $this->assertSame($first, $second);
+
+        // Satu resource SSP per data lokal — tidak pernah ganda.
+        $this->assertSame(4, $visit->satusehatLogs()->whereNotNull('external_id')->distinct()->count('external_id'));
+    }
+
+    public function test_changed_payload_updates_instead_of_duplicating(): void
+    {
+        $this->enableFake();
+        $visit = $this->signedVisit();
+        $service = new SatuSehatService;
+        $service->syncVisit($visit);
+
+        $visit->patient->update(['name' => 'Nama Diperbarui']);
+        $this->enableFake();
+        $service->syncVisit($visit->fresh());
+
+        // Data berubah → PUT ke resource yang sama, bukan POST baru.
+        Http::assertSent(fn ($req) => $req->method() === 'PUT' && str_contains($req->url(), '/Patient/P-1'));
+        Http::assertNotSent(fn ($req) => $req->method() === 'POST' && str_ends_with($req->url(), '/Patient'));
+        Http::assertNotSent(fn ($req) => $req->method() === 'POST' && str_contains($req->url(), '/Condition'));
+    }
+
+    public function test_retry_resends_only_failed_resources(): void
+    {
+        config(['satusehat.enabled' => true, 'satusehat.client_id' => 'test', 'satusehat.client_secret' => 'test', 'satusehat.org_id' => 'ORG-1']);
+
+        // Stub dicatat manual: Http::fake() menambah stub, tidak menggantinya,
+        // sehingga hasil ulang sink harus dibedakan lewat penanda, bukan re-fake.
+        $failing = true;
+        $calls = [];
+        // Closure biasa (bukan arrow fn) agar `use (&$calls)` benar-benar terikat
+        // ke variabel test — arrow fn menyalin nilainya dan rekaman jadi hilang.
+        $ok = function (string $id, int $status) use (&$calls) {
+            return function ($request) use ($id, $status, &$calls) {
+                $calls[] = $request->method().' '.basename($request->url());
+
+                return Http::response(['resourceType' => 'X', 'id' => $id], $status);
+            };
+        };
+        Http::fake([
+            '*/accesstoken' => Http::response(['access_token' => 'tok', 'expires_in' => 3600], 200),
+            '*/fhir-r4/v1/Patient*' => $ok('P-1', 201),
+            '*/fhir-r4/v1/Encounter*' => $ok('E-1', 200),
+            '*/fhir-r4/v1/Procedure*' => $ok('PR-1', 201),
+            '*/fhir-r4/v1/Condition*' => function ($request) use (&$failing, &$calls) {
+                $calls[] = $request->method().' Condition';
+
+                return $failing
+                    ? Http::response(['resourceType' => 'OperationOutcome'], 400)
+                    : Http::response(['resourceType' => 'Condition', 'id' => 'C-1'], 201);
+            },
+        ]);
+
+        $visit = $this->signedVisit();
+        (new SatuSehatService)->syncVisit($visit);
+        $this->assertSame(1, $visit->satusehatLogs()->where('status', SatuSehatSyncLog::STATUS_FAILED)->count());
+        $this->assertContains('POST Condition', $calls);
+
+        // Server pulih → ulangi lewat tombol "Ulang yang gagal".
+        $failing = false;
+        $calls = [];
+
+        $manajemen = User::where('email', 'manajemen@gmail.com')->first();
+        $this->actingAs($manajemen)->post(route('visits.satusehat.retry', $visit->id))
+            ->assertRedirect()
+            ->assertSessionHas('success', fn ($message) => str_contains($message, '1 sebelumnya gagal'));
+
+        // Baris log dipakai ulang, jadi status visit ini benar-benar bersih dari kegagalan.
+        $this->assertSame(0, $visit->satusehatLogs()->where('status', SatuSehatSyncLog::STATUS_FAILED)->count());
+        $this->assertSame('C-1', $visit->satusehatLogs()->where('resource_type', 'Condition')->first()->external_id);
+        $this->assertSame(2, $visit->satusehatLogs()->where('resource_type', 'Condition')->first()->attempts);
+        // Hanya Condition yang dikirim ulang, lalu daftar diagnosis diperbarui.
+        $this->assertSame(['POST Condition', 'PUT E-1'], $calls);
+    }
+
+    public function test_retry_reports_when_there_is_nothing_failed(): void
+    {
+        $this->enableFake();
+        $visit = $this->signedVisit();
+        (new SatuSehatService)->syncVisit($visit);
+
+        $manajemen = User::where('email', 'manajemen@gmail.com')->first();
+        $admin = User::where('email', 'admin@gmail.com')->first();
+
+        $this->actingAs($manajemen)->post(route('visits.satusehat.retry', $visit->id))
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Tidak ada sinkronisasi yang gagal pada visit ini.');
+
+        // Ulang sinkron tetap hak manajemen saja.
+        $this->actingAs($admin)->post(route('visits.satusehat.retry', $visit->id))->assertForbidden();
     }
 }

@@ -11,12 +11,12 @@ use Illuminate\Support\Str;
 class AnamnesisController extends Controller
 {
     /**
-     * Anamnesis boleh didraft "update visit" (dokter, nurse pendamping, admin).
+     * Anamnesis boleh didraf dokter & asisten pendamping (izin `write anamnesis`).
      * Visit SIGNED terkunci.
      */
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
+        $this->authorize('write anamnesis');
         $visit = Visit::findOrFail($visitId);
         abort_if($visit->isSigned(), 422, 'Visit SIGNED tidak bisa diubah.');
         abort_if($visit->anamnesis()->exists(), 422, 'Anamnesis sudah ada, gunakan ubah.');
@@ -41,7 +41,7 @@ class AnamnesisController extends Controller
 
     public function update(Request $request, $visitId)
     {
-        $this->authorize('update visit');
+        $this->authorize('write anamnesis');
         $visit = Visit::findOrFail($visitId);
         abort_if($visit->isSigned(), 422, 'Visit SIGNED tidak bisa diubah.');
 

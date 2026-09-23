@@ -76,12 +76,50 @@ class SatuSehatPayload
             ]];
         }
 
+        // Fase 4.1: Address dengan kode wilayah Kemendagri (bila terisi).
+        if ($address = $patient->address ?? null) {
+            $payload['address'] = [self::address($address)];
+        }
+
         return $payload;
     }
 
     public static function practitionerRef(?string $ihsId): ?string
     {
         return $ihsId ? 'Practitioner/'.$ihsId : null;
+    }
+
+    /**
+     * Address FHIR sesuai panduan SATUSEHAT: teks nama wilayah + extension
+     * administrativeCode berisi kode Kemendagri (provinsi/kota/kecamatan/desa).
+     */
+    public static function address(object $address): array
+    {
+        $payload = array_filter([
+            'use' => 'home',
+            'line' => trim(($address->street ?? '').' '.($address->tonarigumi ?? '')) ?: null,
+            'city' => $address->regency ?? null,
+            'district' => $address->district ?? null,
+            'state' => $address->province ?? null,
+            'postalCode' => $address->zip_code ?? null,
+            'country' => 'ID',
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $codes = collect([
+            ['province', $address->province_code ?? null],
+            ['city', $address->region_code ?? null],
+        ])->filter(fn ($c) => ! empty($c[1]));
+        if ($codes->isNotEmpty()) {
+            $payload['extension'] = $codes
+                ->map(fn ($c) => [
+                    'url' => 'https://fhir.kemkes.go.id/r4/StructureDefinition/administrativeCode',
+                    'valueCode' => (string) $c[1],
+                ])
+                ->values()
+                ->all();
+        }
+
+        return $payload;
     }
 
     /**
@@ -417,9 +455,9 @@ class SatuSehatPayload
     }
 
     /**
-     * bodySite gigi: SNOMED CT concept region gigi (F mouth structure) berbasis
-     * FDI. Pemetaan konsep gigi tunggal FDI 11-48; nilai lain → Coding FDI
-     * generik sebagai fallback (tidak memblokir pengiriman).
+     * bodySite gigi: SNOMED CT sesuai lampiran terminologi SATUSEHAT Gigi
+     * (FDI 11–48 + 51–85 → nomenklatur resmi Kemenkes).
+     * Gigi di luar tabel → coding FDI lokal sebagai fallback yang tetap terlacak.
      */
     public static function bodySiteTooth(?string $fdi): ?array
     {
@@ -428,34 +466,19 @@ class SatuSehatPayload
             return null;
         }
 
-        $snomed = [
-            '11' => '245581009', '12' => '245582002', '13' => '245583007', '14' => '245584001',
-            '15' => '245585000', '16' => '245586004', '17' => '245587009', '18' => '245588004',
-            '21' => '245589007', '22' => '245590001', '23' => '245591002', '24' => '245592009',
-            '25' => '245593004', '26' => '245594005', '27' => '245595006', '28' => '245596007',
-            '31' => '245597008', '32' => '245598003', '33' => '245599006', '34' => '245600001',
-            '35' => '245601002', '36' => '245602009', '37' => '245603004', '38' => '245604005',
-            '41' => '245605006', '42' => '245606007', '43' => '245607003', '44' => '245608008',
-            '45' => '245609000', '46' => '245610004', '47' => '245611000', '48' => '245612007',
-        ];
-
-        $coding = [];
-        if (isset($snomed[$fdi])) {
-            $coding[] = [
+        $tooth = SatuSehatDental::TOOTH_SNOMED[$fdi] ?? null;
+        if ($tooth) {
+            return ['coding' => [[
                 'system' => self::SYSTEM_SNOMED_TOOTH,
-                'code' => $snomed[$fdi],
-                'display' => 'Tooth region ('.$fdi.' FDI)',
-            ];
-        } else {
-            // Fallback: gigi susu/di luar konsep tunggal → kirim sebagai
-            // coding lokal FDI agar tetap terlacak.
-            $coding[] = [
-                'system' => 'http://terminology.kemkes.go.id/CodeSystem/tooth-fdi',
-                'code' => $fdi,
-                'display' => 'Gigi FDI '.$fdi,
-            ];
+                'code' => $tooth[0],
+                'display' => $tooth[1],
+            ]]];
         }
 
-        return ['coding' => $coding];
+        return ['coding' => [[
+            'system' => 'http://terminology.kemkes.go.id/CodeSystem/tooth-fdi',
+            'code' => $fdi,
+            'display' => 'Gigi FDI '.$fdi,
+        ]]];
     }
 }

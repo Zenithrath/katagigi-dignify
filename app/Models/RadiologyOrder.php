@@ -52,6 +52,29 @@ class RadiologyOrder extends Model
 
     public const STATUS_CANCELLED = 'CANCELLED';
 
+    /** Kode modalitas DICOM yang dipakai SATUSEHAT ServiceRequest.imagingStudy. */
+    public const MODALITIES = [
+        'DX' => 'Radiografi Digital',
+        'CR' => 'Computed Radiography',
+        'DR' => 'Direct Radiography',
+        'CT' => 'CT Scan',
+        'MG' => 'Mammografi',
+        'US' => 'Ultrasonografi',
+        'MR' => 'MRI',
+    ];
+
+    /** Status yang boleh diset saat mengisi hasil (ORDERED tidak bisa dipilih balik). */
+    public const RESULT_STATUSES = [
+        self::STATUS_SCHEDULED => 'Terjadwal',
+        self::STATUS_IN_PROGRESS => 'Diproses',
+        self::STATUS_COMPLETED => 'Selesai',
+        self::STATUS_CANCELLED => 'Dibatalkan',
+    ];
+
+    public const STATUSES = [self::STATUS_ORDERED => 'Dipesan'] + self::RESULT_STATUSES;
+
+    public const PRIORITIES = ['routine' => 'Rutin', 'urgent' => 'Segera', 'stat' => 'STAT'];
+
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class, 'visit_id', 'id');

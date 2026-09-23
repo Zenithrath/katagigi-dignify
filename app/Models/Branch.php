@@ -14,13 +14,16 @@ class Branch extends Model
 
     protected $fillable = [
         'id',
-        'name',
         'code',
+        'org',
+        'name',
         'address',
         'phone',
         'is_active',
         'organization_ihs',
         'location_ihs',
+        'satusehat_org_id',
+        'satusehat_location_id',
     ];
 
     protected $table = 'branches';
@@ -31,16 +34,6 @@ class Branch extends Model
 
     public $incrementing = false;
 
-    protected $fillable = [
-        'id',
-        'code',
-        'org',
-        'name',
-        'address',
-        'phone',
-        'is_active',
-    ];
-
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];
@@ -49,5 +42,10 @@ class Branch extends Model
     public function visits(): HasMany
     {
         return $this->hasMany(Visit::class, 'branch_id', 'id');
+    }
+
+    public function satusehatCredential(): HasOne
+    {
+        return $this->hasOne(SatuSehatCredential::class, 'branch_id', 'id');
     }
 }

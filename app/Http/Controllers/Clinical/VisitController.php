@@ -66,6 +66,7 @@ class VisitController extends Controller
         $visit = Visit::with([
             'patient', 'doctor.user', 'appointment', 'branch', 'signer:id,name',
             'anamnesis', 'examination', 'odontogramFindings', 'diagnoses', 'treatments',
+            'vitalSign', 'oralHealthIndex', 'consents.doctor.user', 'radiologyOrders.doctor.user',
             'treatmentPlans.items', 'prescriptions.items', 'attachments.uploader', 'invoices',
             'satusehatLogs' => fn ($q) => $q->orderBy('created_at', 'desc')->limit(5),
         ])->findOrFail($id);
@@ -144,6 +145,14 @@ class VisitController extends Controller
             $visit->diagnoses()->where('system', 'ICD10')->exists(),
             422,
             'Minimal 1 diagnosis ICD-10 sebelum sign (syarat SATUSEHAT).'
+        );
+
+        // Fase 1.1: informed consent wajib tercatat & disetujui sebelum rekam
+        // medis dikunci (Permenkes 24/2022 Pasal 34).
+        abort_unless(
+            $visit->consents()->where('granted', true)->exists(),
+            422,
+            'Informed consent yang disetujui pasien wajib tercatat sebelum sign (Permenkes 24/2022).'
         );
 
         $visit->update([

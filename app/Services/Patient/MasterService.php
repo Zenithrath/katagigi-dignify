@@ -305,6 +305,7 @@ class MasterService extends Service
                     'regency' => $patient->regency,
                     'province' => $patient->province,
                     'zip_code' => $patient->zip_code,
+                    'region_code' => $patient->input('region_code'),
                 ]);
 
             return $id;
@@ -345,6 +346,7 @@ class MasterService extends Service
                     'regency' => $patient->regency,
                     'province' => $patient->province,
                     'zip_code' => $patient->zip_code,
+                    'region_code' => $patient->input('region_code'),
                 ]);
 
             return $id;

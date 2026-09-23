@@ -86,7 +86,7 @@ class OdontogramTest extends TestCase
             ->assertSee('Odontogram (FDI)', false);
     }
 
-    public function test_doctor_can_delete_finding(): void
+    public function test_doctor_can_archive_finding_without_hard_delete(): void
     {
         $doctor = User::where('email', 'doctor@gmail.com')->first();
         $visit = Visit::factory()->create();
@@ -100,6 +100,9 @@ class OdontogramTest extends TestCase
         $this->actingAs($doctor)
             ->delete(route('visits.odontogram.destroy', [$visit->id, $finding->id]))
             ->assertRedirect();
-        $this->assertDatabaseMissing('odontogram_findings', ['id' => $finding->id]);
+
+        // Permenkes 24/2022: rekam medis tidak boleh hard delete — arsip saja.
+        $this->assertSoftDeleted('odontogram_findings', ['id' => $finding->id]);
+        $this->assertEquals(0, $visit->odontogramFindings()->count());
     }
 }

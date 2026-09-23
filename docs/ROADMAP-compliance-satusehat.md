@@ -37,31 +37,31 @@
 ## Fase 1 — Compliance Legal (prioritas tertinggi, risiko regulasi)
 
 ### 1.1 Informed Consent + Tanda Tangan Digital
-- [ ] Migrasi: `master_informed_consent_templates` (judul, isi HTML/blade, jenis: cabut/PSA/bedah)
-- [ ] Migrasi: `informed_consents` (visit_id, template_id, pasien/wali, ttd canvas PNG, ip, user_agent, waktu)
-- [ ] Form tanda tangan canvas *touchscreen* di halaman visit (komponen Livewire)
-- [ ] Cetak/unduh PDF consent berttd
-- [ ] Test: consent wajib sebelum visit berstatus SIGNED (middleware/validator)
+- [x] Migrasi: `medical_consent_records` (visit, pasien, jenis consent, teks, keputusan, pemberi, ttd file/canvas PNG, waktu)
+- [x] Form tanda tangan canvas *touchscreen* di halaman visit (Alpine pointer events) + opsi unggah gambar
+- [x] Cetak lembar informed consent berttd (print view, gambar TTD inline base64)
+- [x] Gate: consent disetujui wajib ada sebelum visit SIGNED (VisitController::sign)
+- [ ] (Opsional) Master template consent per jenis tindakan
 
 ### 1.2 Medical Record Addendums (No Hard Delete)
-- [ ] Migrasi: `medical_record_addendums` (model, model_id, field, nilai_lama, nilai_baru, alasan, aktor)
-- [ ] Matikan hard-delete model medis (odontogram findings, diagnoses, treatments, vitals) → pakai SoftDeletes + event listener yang menulis addendum
-- [ ] Tampilkan riwayat koreksi di detail rekam medis
-- [ ] Test: edit medis menghasilkan addendum; delete di-block/soft
+- [x] Migrasi: `medical_record_addendums` (model, model_id, field, nilai_lama, nilai_baru, alasan, aktor)
+- [x] Matikan hard-delete model medis (odontogram findings, diagnoses, treatments, vitals) → pakai SoftDeletes + event listener yang menulis addendum
+- [x] Tampilkan riwayat koreksi di detail rekam medis
+- [x] Test: edit medis menghasilkan addendum; delete di-block/soft
 
 ## Fase 2 — Infrastruktur SatuSehat Multi-Cabang (syarat 2 cabang)
 
 ### 2.1 Kredensial Per Cabang
-- [ ] Migrasi: `satusehat_credentials` (branch_id, client_id, client_secret terenkripsi, organization_id, location_id, environment dev/prod)
-- [ ] Refactor `SatuSehatService`: token & base URL resolve dari cabang visit, bukan `.env`
-- [ ] UI admin: kelola kredensial per cabang (mask secret)
-- [ ] Migrasi: tambah `satusehat_org_id`/`location_id` di `branches`
+- [x] Migrasi: `satusehat_credentials` (branch_id unik, client_id, client_secret terenkripsi `encrypted` cast, organization_id, location_id, environment sandbox/production)
+- [x] Refactor `SatuSehatService`: `resolveConfig(branch_id)` — token & base URL resolve dari cabang visit, fallback `.env` global; cache token per client_id
+- [x] UI admin: kelola kredensial per cabang (secret tak pernah dikirim balik, tombol verifikasi OAuth)
+- [x] Migrasi: tambah `satusehat_org_id`/`satusehat_location_id` di `branches`
 - [ ] Test: visit cabang A memakai token cabang A
 
 ### 2.2 Queue + Retry
-- [ ] Job `SyncVisitToSatusehat` (queued) — ganti pemanggilan sinkron di controller
-- [ ] Command `satusehat:retry` + tombol Retry per log FAILED di UI (controller sudah ada, tambah aksi)
-- [ ] Rate-limit & backoff (429 → retry with delay)
+- [x] Job `SyncVisitToSatuSehat` (queued, WithoutOverlapping, backoff 10–300s) — dikirim bila `?queue=1` pada sinkron; tombol Retry per visit sudah ada
+- [x] Rate-limit & backoff (429 → log tetap PENDING + sleep Retry-After, maks 15s)
+- [ ] Command `satusehat:retry` untuk seluruh FAILED (Retry per visit sudah ada)
 - [ ] Test: gagal API → log FAILED → retry sukses → log SUCCESS
 
 ### 2.3 Onboarding Master SatuSehat
@@ -71,41 +71,43 @@
 ## Fase 3 — Kelengkapan Klinis
 
 ### 3.1 Vital Signs Lengkap
-- [ ] Migrasi: nadi, suhu, respirasi, **status kehamilan** (enum: tidak/hamil/trimester) di `examinations`
-- [ ] Payload Observation tambahan (LOINC 8867-4 nadi, 8310-5 suhu, 9279-1 resp)
-- [ ] Form + tampilan di detail visit
-- [ ] Test: payload FHIR valid untuk 4 observasi baru
+- [x] Migrasi: nadi, suhu, respirasi, status kehamilan (tabel `vital_signs`)
+- [x] Payload Observation (LOINC 8867-4 nadi, 8310-5 suhu, 9279-1 resp, 82810-3 kehamilan)
+- [x] Form + tampilan di detail visit (partial `vital-signs`)
+- [x] Test: payload FHIR valid untuk observasi baru (SatuSehatTest)
 
 ### 3.2 Pemeriksaan Dental Standar Kemenkes
-- [ ] Migrasi: kolom OHI-S (debris, calculus), DMF-T/def-t per gigi atau agregat, oklusi, torus, palatum, diastema di `examinations`
-- [ ] Form odontogram panel: input lengkap
-- [ ] Test: hasil DMF-T terhitung benar dari findings
+- [x] Migrasi: OHI-S + DMF-T di `oral_health_indices`; oklusi, torus, palatum, diastema, relasi molar/kaninus, temuan lain di `examinations`
+- [x] Form pemeriksaan dental lengkap di tab Pemeriksaan + OHI-S di panel odontogram
+- [x] DMF-T auto-hitung dari odontogram findings (D=karies/akar/fraktur, M=missing, F=filled/crown/implan/protesa) saat tidak diisi manual
+- [x] Payload FHIR: odontogram per gigi, OHI-S, DMF-T, dan kondisi mulut lainnya (SatuSehatDental)
+- [ ] Test: hasil DMF-T auto-hitung dari findings
 
 ### 3.3 Radiologi & Foto Intraoral
-- [ ] Migrasi: `radiology_studies` (visit_id, jenis: periapikal/panoramik/intraoral, file_path, taken_at)
-- [ ] Migrasi: `diagnostic_reports` (study_id, reading dokter, `satusehat_report_id`)
-- [ ] Upload multi-file (PNG/JPG dulu; DICOM opsional)
-- [ ] Payload FHIR DiagnosticReport + Media
+- [x] Migrasi: `radiology_orders` (order, modalitas, hasil baca, berkas hasil privat, `satusehat_diagnostic_report_id`)
+- [x] Upload berkas hasil (PNG/JPG/webp; DICOM tak dikirim ke SSP)
+- [x] Payload FHIR DiagnosticReport + Media (SatuSehatDental::diagnosticReport/mediaPayload) dalam pipeline syncVisit
+- [ ] Upload multi-file per order
 - [ ] Test: upload → report → sync
 
 ## Fase 4 — Master Kamus & Administratif
 
 ### 4.1 Master Wilayah Kemendagri
-- [ ] Migrasi + seeder: `master_wilayah` (kode, nama, level: provinsi/kab/kec/kel)
-- [ ] Ganti alamat pasien: dropdown berantai + simpan kode wilayah
-- [ ] Payload Address FHIR pakai kode Kemendagri
+- [x] Migrasi + seeder: `region_codes` (kode, nama, level provinsi/kota/kec/kel; seeder 38 provinsi + kota Kalsel; impor CSV kec/kel siap)
+- [x] Alamat pasien: datalist wilayah (soft chained) + simpan `region_code` di `patient_addresses`
+- [x] Payload Address FHIR dengan extension administrativeCode kode Kemendagri
 - [ ] Test: payload Address valid
 
 ### 4.2 Master KFA / LOINC / SNOMED lokal
-- [ ] Seeder import kamus KFA (obat & BHP) → `master_kfa`
-- [ ] Kolom `kfa_code` di prescription_items di-link ke master (validator)
-- [ ] FHIR MedicationRequest (payload + kirim dalam pipeline syncVisit)
+- [x] Migrasi + seeder `master_kfa` (obat & BHP layanan gigi; impor CSV nasional siap)
+- [x] `kfa_code` di prescription_items divalidasi ke master (Rule::exists) + API lookup `api/kfa/lookup`
+- [x] FHIR MedicationRequest (payload + kirim dalam pipeline syncVisit)
 - [ ] Test: resep dengan KFA valid → MedicationRequest SUCCESS
 
 ### 4.3 Surat & Penjamin
-- [ ] `master_letter_templates` + generator surat sakit/berobat/rujukan (PDF)
+- [x] Generator surat sakit/berobat/rujukan (print view, tanpa template DB) — tab Surat di halaman visit
 - [ ] `master_insurances` + pemilihan penjamin saat pendaftaran
-- [ ] Opsional: master_suppliers untuk pengadaan
+- [ ] Opsional: master_suppliers untuk pengadaan, template surat dari DB
 
 ## Checklist Definition of Done (per fase)
 - [ ] Migrasi + rollback aman

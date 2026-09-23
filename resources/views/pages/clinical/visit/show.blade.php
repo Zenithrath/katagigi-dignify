@@ -18,7 +18,7 @@
 
         <div class="content-card overflow-hidden" x-data="{ tab: 'ringkasan' }">
             <div class="flex gap-2 p-6 pb-0 flex-wrap">
-                @foreach (['ringkasan' => 'Ringkasan', 'anamnesis' => 'Anamnesis', 'pemeriksaan' => 'Pemeriksaan', 'odontogram' => 'Odontogram', 'tindakan' => 'Diagnosis & Tindakan', 'resep' => 'Resep', 'rencana' => 'Rencana', 'lampiran' => 'Lampiran'] as $key => $label)
+                @foreach (['ringkasan' => 'Ringkasan', 'anamnesis' => 'Anamnesis', 'pemeriksaan' => 'Pemeriksaan', 'odontogram' => 'Odontogram', 'tindakan' => 'Diagnosis & Tindakan', 'resep' => 'Resep', 'rencana' => 'Rencana', 'radiologi' => 'Radiologi', 'lampiran' => 'Lampiran', 'consent' => 'Consent', 'surat' => 'Surat'] as $key => $label)
                     <button type="button" x-on:click="tab = '{{ $key }}'"
                         class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
                         :class="tab === '{{ $key }}' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
@@ -93,10 +93,18 @@
                 @if ($visit->isSigned())
                     <p class="mt-3 text-xs text-slate-500">Ditandatangani oleh {{ $visit->signer->name ?? '-' }} pada {{ $visit->signed_at?->format('d M Y H:i') }}. Visit terkunci.</p>
                     @can('manage satusehat')
-                        <form action="{{ route('visits.satusehat.sync', $visit->id) }}" method="post" class="mt-2">
-                            @csrf
-                            <button type="submit" class="clickable-ghost px-5 py-2 rounded-xl text-sm">Sinkron SATUSEHAT</button>
-                        </form>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <form action="{{ route('visits.satusehat.sync', $visit->id) }}" method="post">
+                                @csrf
+                                <button type="submit" class="clickable-ghost px-5 py-2 rounded-xl text-sm">Sinkron SATUSEHAT</button>
+                            </form>
+                            @if ($visit->satusehatLogs->contains('status', \App\Models\SatuSehatSyncLog::STATUS_FAILED))
+                                <form action="{{ route('visits.satusehat.retry', $visit->id) }}" method="post">
+                                    @csrf
+                                    <button type="submit" class="clickable-primary px-5 py-2 rounded-xl text-sm">Ulang yang gagal</button>
+                                </form>
+                            @endif
+                        </div>
                     @endcan
                 @elseif ($visit->clinical_status === 'DONE')
                     @can('sign visit')
@@ -152,7 +160,7 @@
                             <textarea name="medications" id="medications" rows="2" class="custom-input" {{ $visit->isSigned() ? 'disabled' : '' }}>{{ old('medications', $visit->anamnesis->medications ?? '') }}</textarea>
                         </div>
                     </div>
-                    @can('update visit')
+                    @can('write anamnesis')
                         @unless ($visit->isSigned())
                             <div class="mt-4 flex justify-end">
                                 <button type="submit" class="btn-submit !w-auto !px-8">{{ $visit->anamnesis ? 'Perbarui' : 'Simpan' }}</button>
@@ -192,22 +200,88 @@
                             <input type="text" name="blood_pressure" id="blood_pressure" class="custom-input" placeholder="120/80"
                                 value="{{ old('blood_pressure', $visit->examination->blood_pressure ?? '') }}" {{ $visit->isSigned() ? 'disabled' : '' }} />
                         </div>
+                        <div class="input-group">
+                            <label for="occlusion">Oklusi</label>
+                            <select name="occlusion" id="occlusion" class="custom-select" {{ $visit->isSigned() ? 'disabled' : '' }}>
+                                <option value="">—</option>
+                                @foreach (\App\Models\Examination::OCCLUSIONS as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('occlusion', $visit->examination->occlusion ?? '') === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="molar_relation">Relasi molar</label>
+                            <select name="molar_relation" id="molar_relation" class="custom-select" {{ $visit->isSigned() ? 'disabled' : '' }}>
+                                <option value="">—</option>
+                                @foreach (\App\Models\Examination::ANGLE_CLASSES as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('molar_relation', $visit->examination->molar_relation ?? '') === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="canine_relation">Relasi kaninus</label>
+                            <select name="canine_relation" id="canine_relation" class="custom-select" {{ $visit->isSigned() ? 'disabled' : '' }}>
+                                <option value="">—</option>
+                                @foreach (\App\Models\Examination::ANGLE_CLASSES as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('canine_relation', $visit->examination->canine_relation ?? '') === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="torus">Torus</label>
+                            <select name="torus" id="torus" class="custom-select" {{ $visit->isSigned() ? 'disabled' : '' }}>
+                                <option value="">—</option>
+                                @foreach (\App\Models\Examination::TORUS as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('torus', $visit->examination->torus ?? '') === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="palatum">Palatum</label>
+                            <select name="palatum" id="palatum" class="custom-select" {{ $visit->isSigned() ? 'disabled' : '' }}>
+                                <option value="">—</option>
+                                @foreach (\App\Models\Examination::PALATUM as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('palatum', $visit->examination->palatum ?? '') === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="diastema">Diastema</label>
+                            <select name="diastema" id="diastema" class="custom-select" {{ $visit->isSigned() ? 'disabled' : '' }}>
+                                <option value="">—</option>
+                                @foreach (\App\Models\Examination::DIASTEMA as $code => $label)
+                                    <option value="{{ $code }}" @selected(old('diastema', $visit->examination->diastema ?? '') === $code)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="input-group md:col-span-2">
+                            <label for="other_oral_findings">Temuan mulut lainnya</label>
+                            <textarea name="other_oral_findings" id="other_oral_findings" rows="2" class="custom-input" {{ $visit->isSigned() ? 'disabled' : '' }}>{{ old('other_oral_findings', $visit->examination->other_oral_findings ?? '') }}</textarea>
+                        </div>
                     </div>
-                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                    @if (auth()->user()->can('write examination') && ! $visit->isSigned())
                         <div class="mt-4 flex justify-end">
                             <button type="submit" class="btn-submit !w-auto !px-8">{{ $visit->examination ? 'Perbarui' : 'Simpan' }}</button>
                         </div>
                     @endif
                 </form>
+
+                @include('pages.clinical.visit.partials.vital-signs')
+                @include('pages.clinical.visit.partials.oral-health-index')
             </div>
 
-            <div x-show="tab === 'odontogram'" class="p-8" x-data="{ tooth: '{{ request('tooth', '') }}', surface: 'whole' }">
+            <div x-show="tab === 'odontogram'" class="p-8" x-data="{
+                tooth: '{{ request('tooth', '') }}',
+                surface: 'whole',
+                arch: 'both',
+                tip: { show: false, fdi: '', type: '', universal: '', palmer: '', left: 0, top: 0 },
+            }">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Odontogram (FDI)</h3>
-                <p class="text-xs text-slate-500 mb-4">Klik zona gigi untuk memilih permukaan, atau klik nomor gigi untuk seluruh gigi. Warna mengikuti kondisi terakhir.</p>
+                <p class="text-xs text-slate-500 mb-4">Klik zona gigi untuk memilih permukaan, atau klik nomor gigi untuk seluruh gigi. Arahkan kursor ke gigi untuk melihat notasi FDI / Universal / Palmer. Warna mengikuti kondisi terakhir.</p>
 
-                @include('pages.clinical.visit.partials.odontogram-chart')
+                @include('pages.clinical.visit.partials.odontogram-panel')
 
-                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                @can('write odontogram')
                     <form method="post" action="{{ route('visits.odontogram.store', $visit->id) }}" class="mt-6 pt-6 border-t border-slate-200">
                         @csrf
                         <h4 class="text-sm font-bold text-slate-700 mb-3">Catat temuan <span x-text="tooth ? 'gigi ' + tooth + ' (' + surface + ')' : '(pilih gigi di chart)'" class="text-emerald-600"></span></h4>
@@ -245,7 +319,7 @@
                         @error('fdi')<small class="danger">{{ $message }}</small>@enderror
                         @error('notes')<small class="danger">{{ $message }}</small>@enderror
                     </form>
-                @endif
+                @endcan
 
                 @if ($visit->odontogramFindings->isNotEmpty())
                     <div class="mt-6">
@@ -260,14 +334,14 @@
                                         @if ($finding->material)<span class="text-slate-500">({{ $finding->material }})</span>@endif
                                         @if ($finding->notes)<span class="text-slate-400">· {{ $finding->notes }}</span>@endif
                                     </span>
-                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                    @can('write odontogram')
                                         <form action="{{ route('visits.odontogram.destroy', [$visit->id, $finding->id]) }}" method="post"
                                             @submit.prevent="if(confirm('Hapus temuan ini?')) $el.submit()">
                                             @csrf
                                             @method('delete')
                                             <button type="submit" class="text-sm text-slate-400 hover:text-red-600">Hapus</button>
                                         </form>
-                                    @endif
+                                    @endcan
                                 </li>
                             @endforeach
                         </ul>
@@ -288,7 +362,7 @@
                                         <span class="font-semibold">[{{ $dx->code }}]</span> {{ $dx->display }}
                                         <span class="ml-1 text-xs px-2 py-0.5 rounded-md {{ $dx->is_primary ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">{{ $dx->is_primary ? 'Primer' : 'Sekunder' }}</span>
                                     </span>
-                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                    @if (auth()->user()->can('write diagnosis') && ! $visit->isSigned())
                                         <form action="{{ route('visits.diagnoses.destroy', [$visit->id, $dx->id]) }}" method="post"
                                             @submit.prevent="if(confirm('Hapus diagnosis ini?')) $el.submit()">
                                             @csrf
@@ -300,7 +374,7 @@
                             @endforeach
                         </ul>
                     @endif
-                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                    @if (auth()->user()->can('write diagnosis') && ! $visit->isSigned())
                         <form method="post" action="{{ route('visits.diagnoses.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
                             @csrf
                             <livewire:diagnosis-search system="ICD10" fieldName="diagnosis_code_ids" :selected="[]" />
@@ -341,7 +415,7 @@
                                         <span class="font-semibold">[{{ $tx->code }}]</span> {{ $tx->procedure }}
                                         <span class="text-slate-500">{{ $tx->quantity }} × Rp{{ number_format($tx->unit_price, 0, ',', '.') }}</span>
                                     </span>
-                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                    @if (auth()->user()->can('write treatment') && ! $visit->isSigned())
                                         <form action="{{ route('visits.treatments.destroy', [$visit->id, $tx->id]) }}" method="post"
                                             @submit.prevent="if(confirm('Hapus tindakan ini?')) $el.submit()">
                                             @csrf
@@ -354,7 +428,7 @@
                         </ul>
                         <p class="text-sm font-bold text-slate-900 mb-4">Estimasi: Rp{{ number_format($visit->treatments->sum(fn ($t) => $t->quantity * $t->unit_price), 0, ',', '.') }}</p>
                     @endif
-                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                    @if (auth()->user()->can('write treatment') && ! $visit->isSigned())
                         <form method="post" action="{{ route('visits.treatments.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
                             @csrf
                             <livewire:diagnosis-search system="ICD9" fieldName="procedure_code_ids" :selected="[]" />
@@ -397,7 +471,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="badge badge-info">{{ $plan->status }}</span>
-                                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                @if (auth()->user()->can('write treatment plan') && ! $visit->isSigned())
                                     <form action="{{ route('visits.plans.status', [$visit->id, $plan->id]) }}" method="post" class="flex items-center gap-1">
                                         @csrf
                                         <select name="status" class="custom-select !py-1 !px-2 !text-xs" onchange="this.form.submit()">
@@ -425,7 +499,7 @@
                                         {{ $item->description }}
                                         <span class="text-slate-500">· Rp{{ number_format($item->estimated_price, 0, ',', '.') }}</span>
                                     </span>
-                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                    @if (auth()->user()->can('write treatment plan') && ! $visit->isSigned())
                                         <form action="{{ route('visits.plans.items.destroy', [$visit->id, $plan->id, $item->id]) }}" method="post"
                                             @submit.prevent="if(confirm('Hapus item ini?')) $el.submit()">
                                             @csrf
@@ -436,7 +510,7 @@
                                 </li>
                             @endforeach
                         </ul>
-                        @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                        @if (auth()->user()->can('write treatment plan') && ! $visit->isSigned())
                             <form method="post" action="{{ route('visits.plans.items.store', [$visit->id, $plan->id]) }}" class="mt-3 grid grid-cols-1 md:grid-cols-5 gap-2">
                                 @csrf
                                 <select name="tooth_fdi" class="custom-select">
@@ -454,7 +528,7 @@
                 @empty
                     <p class="text-sm text-slate-500">Belum ada rencana perawatan.</p>
                 @endforelse
-                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                @if (auth()->user()->can('write treatment plan') && ! $visit->isSigned())
                     <form method="post" action="{{ route('visits.plans.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
@@ -480,7 +554,7 @@
                     <section class="rounded-xl border border-slate-200 p-4">
                         <div class="flex items-center justify-between gap-3">
                             <p class="font-bold text-slate-900">Resep — {{ $rx->prescribed_at?->format('d M Y') }}</p>
-                            @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                            @if (auth()->user()->can('write prescription') && ! $visit->isSigned())
                                 <form action="{{ route('visits.prescriptions.destroy', [$visit->id, $rx->id]) }}" method="post"
                                     @submit.prevent="if(confirm('Hapus resep ini?')) $el.submit()">
                                     @csrf
@@ -501,7 +575,7 @@
                                             @if ($item->instruction)— {{ $item->instruction }}@endif
                                         </span>
                                     </span>
-                                    @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                                    @if (auth()->user()->can('write prescription') && ! $visit->isSigned())
                                         <form action="{{ route('visits.prescriptions.items.destroy', [$visit->id, $rx->id, $item->id]) }}" method="post"
                                             @submit.prevent="if(confirm('Hapus obat ini?')) $el.submit()">
                                             @csrf
@@ -512,7 +586,7 @@
                                 </li>
                             @endforeach
                         </ul>
-                        @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                        @if (auth()->user()->can('write prescription') && ! $visit->isSigned())
                             <form method="post" action="{{ route('visits.prescriptions.items.store', [$visit->id, $rx->id]) }}" class="mt-3 grid grid-cols-1 md:grid-cols-4 gap-2">
                                 @csrf
                                 <input type="text" name="medicine_name" class="custom-input md:col-span-2" placeholder="Nama obat *" required />
@@ -529,7 +603,7 @@
                 @empty
                     <p class="text-sm text-slate-500">Belum ada resep.</p>
                 @endforelse
-                @if (auth()->user()->hasRole(['doctor', 'manajemen']) && ! $visit->isSigned())
+                @if (auth()->user()->can('write prescription') && ! $visit->isSigned())
                     <form method="post" action="{{ route('visits.prescriptions.store', $visit->id) }}" class="flex flex-wrap items-end gap-2">
                         @csrf
                         <div class="input-group !mb-0">
@@ -556,7 +630,7 @@
                         <div class="flex items-center gap-3">
                             <a href="{{ URL::temporarySignedRoute('attachments.file', now()->addMinutes(30), ['attachment' => $file->id]) }}"
                                 target="_blank" class="text-sm text-brand-600 hover:text-brand-700">Buka</a>
-                            @can('update visit')
+                            @can('upload visit attachment')
                                 @unless ($visit->isSigned())
                                     <form action="{{ route('visits.attachments.destroy', [$visit->id, $file->id]) }}" method="post"
                                         @submit.prevent="if(confirm('Hapus lampiran ini?')) $el.submit()">
@@ -571,7 +645,7 @@
                 @empty
                     <p class="text-sm text-slate-500">Belum ada lampiran.</p>
                 @endforelse
-                @can('update visit')
+                @can('upload visit attachment')
                     @unless ($visit->isSigned())
                         <form method="post" action="{{ route('visits.attachments.store', $visit->id) }}" enctype="multipart/form-data" class="rounded-xl border border-slate-200 p-4">
                             @csrf
@@ -601,6 +675,42 @@
                         </form>
                     @endunless
                 @endcan
+            </div>
+
+            @include('pages.clinical.visit.partials.radiology')
+            @include('pages.clinical.visit.partials.consents')
+
+            {{-- Fase 4.3: generator surat sakit/berobat/rujukan --}}
+            <div x-show="tab === 'surat'" class="p-8 space-y-6">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Surat Keterangan</h3>
+                    <p class="text-xs text-slate-500">Surat sakit / berobat / rujukan dicetak dari data visit. Data terkunci bila visit sudah SIGNED dan mengikuti isi rekam medis terkini.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    @foreach (\App\Http\Controllers\Clinical\LetterController::TYPES as $typeKey => $label)
+                        <form method="get" action="{{ route('visits.letters.print', $visit->id) }}" target="_blank"
+                            class="rounded-xl border border-slate-200 p-4 flex flex-col">
+                            <input type="hidden" name="type" value="{{ $typeKey }}" />
+                            <p class="font-semibold text-sm text-slate-800 mb-2">{{ $label }}</p>
+                            @if ($typeKey === 'sick')
+                                <label class="text-xs text-slate-500">Lama istirahat (hari)</label>
+                                <input type="number" name="rest_days" min="0" max="30" value="1" class="custom-input" />
+                                <label class="text-xs text-slate-500 mt-2">Catatan</label>
+                                <input type="text" name="rest_note" class="custom-input" placeholder="opsional" />
+                            @elseif ($typeKey === 'referral')
+                                <label class="text-xs text-slate-500">Rujuk ke</label>
+                                <input type="text" name="referral_to" class="custom-input" placeholder="RS / klinik tujuan" />
+                                <label class="text-xs text-slate-500 mt-2">Ringkasan / alasan</label>
+                                <textarea name="referral_notes" rows="2" class="custom-input"></textarea>
+                            @else
+                                <label class="text-xs text-slate-500">Catatan</label>
+                                <input type="text" name="rest_note" class="custom-input" placeholder="opsional" />
+                            @endif
+                            <button type="submit" class="btn-submit !w-auto !px-6 mt-3">Cetak</button>
+                        </form>
+                    @endforeach
+                </div>
             </div>
         </div>
     </main>

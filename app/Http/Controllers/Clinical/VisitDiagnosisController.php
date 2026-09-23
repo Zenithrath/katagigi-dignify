@@ -4,24 +4,15 @@ namespace App\Http\Controllers\Clinical;
 
 use App\Http\Controllers\Controller;
 use App\Models\DiagnosisCode;
+use App\Models\OdontogramFinding;
 use App\Models\Visit;
 use App\Models\VisitDiagnosis;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class VisitDiagnosisController extends Controller
 {
-    private function ensureClinician(): void
-    {
-        abort_unless(
-            Auth::user()->hasRole(['doctor', 'manajemen']),
-            403,
-            'Diagnosis hanya boleh ditulis dokter.'
-        );
-    }
-
     private function visit($visitId): Visit
     {
         $visit = Visit::findOrFail($visitId);
@@ -36,14 +27,13 @@ class VisitDiagnosisController extends Controller
      */
     public function store(Request $request, $visitId)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write diagnosis');
         $visit = $this->visit($visitId);
 
         $validated = $request->validate([
             'diagnosis_code_ids' => 'required|array|min:1',
             'diagnosis_code_ids.*' => ['required', 'string', 'distinct', Rule::exists('diagnosis_codes', 'id')->where('system', 'ICD10')->where('is_active', true)],
-            'tooth_fdi' => ['nullable', 'string', Rule::in(\App\Models\OdontogramFinding::allTeeth())],
+            'tooth_fdi' => ['nullable', 'string', Rule::in(OdontogramFinding::allTeeth())],
             'is_primary' => 'nullable|boolean',
         ]);
 
@@ -67,12 +57,12 @@ class VisitDiagnosisController extends Controller
 
     public function destroy($visitId, $id)
     {
-        $this->authorize('update visit');
-        $this->ensureClinician();
+        $this->authorize('write diagnosis');
         $visit = $this->visit($visitId);
 
-        VisitDiagnosis::where('visit_id', $visit->id)->where('id', $id)->firstOrFail()->delete();
+        $diagnosis = VisitDiagnosis::where('visit_id', $visit->id)->where('id', $id)->firstOrFail();
+        $diagnosis->delete();
 
-        return back()->with('success', 'Diagnosis dihapus.');
+        return back()->with('success', 'Diagnosis diarsipkan (soft delete).');
     }
 }

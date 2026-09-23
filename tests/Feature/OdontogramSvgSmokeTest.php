@@ -32,10 +32,13 @@ class OdontogramSvgSmokeTest extends TestCase
         $user = User::where('email', 'doctor@gmail.com')->first();
         $response = $this->actingAs($user)->get(route('visits.show', $visit->id));
         $response->assertOk();
-        // SVG chart: polygon zona + warna karies + legenda + info permukaan terpilih.
-        $response->assertSee('<polygon', false);
+        // Chart anatomis: path zona + akar, warna karies, notasi FDI pada tooltip,
+        // legenda kondisi, dan kontrol lengkung.
+        $response->assertSee('id="odontogramSvg"', false);
+        $response->assertSee('<path', false);
         $response->assertSee('#FCA5A5', false);
-        $response->assertSee('surface', false);
+        $response->assertSee('data-universal', false);
+        $response->assertSee('Rahang Atas', false);
         $response->assertSee('Mahkota', false);
     }
 }

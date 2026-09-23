@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
             BranchSeeder::class,
             WhatsappTemplateSeeder::class,
             DiagnosisCodeSeeder::class,
+            // Fase 4: master wilayah Kemendagri + kamus KFA lokal.
+            RegionCodeSeeder::class,
+            MasterKfaSeeder::class,
             CategoriesSeeder::class,
             ServiceUmumSeeder::class,
             ServiceBedahMulutSeeder::class,
@@ -57,6 +60,8 @@ class DatabaseSeeder extends Seeder
                     'district' => fake()->city(),
                     'regency' => fake()->city(),
                     'province' => fake()->randomElement(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur']),
+                    // Area operasional klinik dapat kode Kemendagri Kalsel.
+                    'region_code' => fake()->randomElement(['6371', '6372', '6302', '6306', null]),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

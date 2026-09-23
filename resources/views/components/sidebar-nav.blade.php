@@ -138,10 +138,8 @@
             @can('manage holiday')
                 <x-sidebar-link href="{{ route('holidays.index') }}" :active="request()->routeIs('holidays.*')" icon="calendar" :collapsible="$collapsible">{{ __('navigation.items.holidays') }}</x-sidebar-link>
             @endcan
-            @canany(['manage attendance', 'read assistant payroll'])
-                @if (auth()->user()->can('manage attendance') || auth()->user()->hasRole('nurse'))
-                    <x-sidebar-link href="{{ route('attendances.index') }}" :active="request()->routeIs('attendances.*')" icon="clipboard-check" :collapsible="$collapsible">{{ __('navigation.items.attendances') }}</x-sidebar-link>
-                @endif
+            @canany(['manage attendance', 'record own attendance'])
+                <x-sidebar-link href="{{ route('attendances.index') }}" :active="request()->routeIs('attendances.*')" icon="clipboard-check" :collapsible="$collapsible">{{ __('navigation.items.attendances') }}</x-sidebar-link>
             @endcanany
         </ul>
     </div>

@@ -179,8 +179,10 @@
                             <label for="village">{{ __('form.labels.village') }}</label>
                             <input type="text" name="village" id="village" class="custom-input"
                                 placeholder="{{ __('form.placeholders.village') }}"
-                                value="{{ $data->village ?? '' }}" />
-                            <small class="helper">{{ __('form.helpers.alphanumeric') }}</small>
+                                value="{{ $data->village ?? '' }}"
+                                list="regionVillageList" />
+                            <datalist id="regionVillageList"></datalist>
+                            <small class="helper">Pilih dari daftar wilayah Kemendagri bila tersedia; ketik manual juga bisa.</small>
                             @error('village')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
@@ -235,8 +237,10 @@
                         <div class="input-group">
                             <label for="regency">{{ __('form.labels.city') }}</label>
                             <input type="text" name="regency" id="regency" class="custom-input"
-                                placeholder="{{ __('form.placeholders.city') }}" value="{{ $data->regency ?? '' }}" />
-                            <small class="helper">{{ __('form.helpers.alphanumeric') }}</small>
+                                placeholder="{{ __('form.placeholders.city') }}" value="{{ $data->regency ?? '' }}"
+                                list="regionCityList" />
+                            <datalist id="regionCityList"></datalist>
+                            <small class="helper">Pilih dari daftar wilayah Kemendagri bila tersedia; ketik manual juga bisa.</small>
                             @error('regency')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
@@ -246,13 +250,18 @@
                             <label for="province">{{ __('form.labels.state') }}</label>
                             <input type="text" name="province" id="province" class="custom-input"
                                 placeholder="{{ __('form.placeholders.state') }}"
-                                value="{{ $data->province ?? '' }}" />
-                            <small class="helper">{{ __('form.helpers.alphanumeric') }}</small>
+                                value="{{ $data->province ?? '' }}"
+                                list="regionProvinceList" />
+                            <datalist id="regionProvinceList"></datalist>
+                            <small class="helper">Pilih dari daftar wilayah Kemendagri bila tersedia; ketik manual juga bisa.</small>
                             @error('province')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
                     </div>
+
+                    {{-- Kode wilayah Kemendagri (opsional; ikut terisi saat pilih dari daftar) --}}
+                    <input type="hidden" name="region_code" id="region_code" value="{{ old('region_code', $data->region_code ?? '') }}" />
 
                     <div x-data="{ showSosmed: false }" class="mt-4 pt-6 border-t border-slate-200">
                         <label class="flex items-center gap-2 cursor-pointer select-none mb-4">
@@ -318,7 +327,64 @@
         function copyEmail() {
             let email = document.getElementById('email');
             let payment_email = document.getElementById('payment_email');
-            payment_email.value = email.value;
+
+        // Fase 4.1: datalist wilayah Kemendagri (dropdown berantai lunak —
+        // ketik manual tetap bisa). Memilih dari daftar mengisi kode wilayah.
+        (function () {
+            const route = @json(route('api.regions.lookup'));
+            const fields = {
+                province: { level: 'province', list: 'regionProvinceList' },
+                regency: { level: 'city', list: 'regionCityList' },
+                village: { level: 'village', list: 'regionVillageList' },
+            };
+            let lastFetched = {};
+
+            function load(level, listId, parentCode, term) {
+                const key = level + '|' + (parentCode || '') + '|' + (term || '');
+                if (lastFetched[listId] === key) return;
+                lastFetched[listId] = key;
+
+                const params = new URLSearchParams({ level, q: term || '' });
+                if (parentCode) params.set('parent_code', parentCode);
+                fetch(route + '?' + params)
+                    .then((r) => (r.ok ? r.json() : []))
+                    .then((rows) => {
+                        const dl = document.getElementById(listId);
+                        if (!dl) return;
+                        dl.innerHTML = '';
+                        rows.forEach((row) => {
+                            const opt = document.createElement('option');
+                            opt.value = row.name;
+                            opt.setAttribute('data-code', row.code);
+                            dl.appendChild(opt);
+                        });
+                    });
+            }
+
+            function bind(fieldId, cfg) {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                const commit = () => {
+                    const match = [...document.getElementById(cfg.list).options]
+                        .find((o) => o.value === input.value);
+                    const codeInput = document.getElementById('region_code');
+                    if (match && codeInput) codeInput.value = match.getAttribute('data-code');
+                };
+                input.addEventListener('input', () => {
+                    const parent = cfg.level === 'city' ? (document.getElementById('province').value || '') : '';
+                    load(cfg.level, cfg.list, null, input.value);
+                    commit();
+                });
+                input.addEventListener('change', commit);
+            }
+
+            Object.entries(fields).forEach(([fieldId, cfg]) => bind(fieldId, cfg));
+
+            // Isi daftar awal (provinsi, kota Kalsel) saat halaman dibuka.
+            load('province', 'regionProvinceList', null, '');
+            load('city', 'regionCityList', null, '');
+            load('village', 'regionVillageList', null, '');
+        })();            payment_email.value = email.value;
         }
     </script>
 @endPushOnce

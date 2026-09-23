@@ -45,6 +45,27 @@ class OralHealthIndex extends Model
         ];
     }
 
+    /**
+     * Interpretasi skor OHI-S mengikuti kategori Kemenkes OI000029–OI000031.
+     * Satu-satunya sumber ambang batas: dipakai UI klinis dan payload SATUSEHAT.
+     *
+     * @return array{0: string, 1: string} [kode, label]
+     */
+    public static function interpretationFor(float $total): array
+    {
+        return match (true) {
+            $total <= 1.2 => ['OI000029', 'Kondisi Gigi Baik'],
+            $total <= 3.0 => ['OI000030', 'Kondisi Gigi Cukup Baik'],
+            default => ['OI000031', 'Kondisi Gigi Buruk'],
+        };
+    }
+
+    /** @return array{0: string, 1: string}|null */
+    public function interpretation(): ?array
+    {
+        return $this->ohis_total === null ? null : self::interpretationFor((float) $this->ohis_total);
+    }
+
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class, 'visit_id', 'id');

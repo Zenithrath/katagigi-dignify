@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Operational;
 
-use App\Http\Controllers\Controller;
 use App\Helpers\Audit;
+use App\Http\Controllers\Controller;
 use App\Models\OrganizationProfile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class OrganizationProfileController extends Controller
@@ -51,7 +50,7 @@ class OrganizationProfileController extends Controller
             'active' => true,
         ]);
 
-        Audit::record('satusehat.org_profile.create', 'organization_profiles', $profile->id, [
+        Audit::log('satusehat.org_profile.create', 'organization_profiles', $profile->id, null, [
             'branch_id' => $profile->branch_id,
         ]);
 
@@ -78,7 +77,7 @@ class OrganizationProfileController extends Controller
         ]);
 
         $profile->update($validated);
-        Audit::record('satusehat.org_profile.update', 'organization_profiles', $profile->id, [
+        Audit::log('satusehat.org_profile.update', 'organization_profiles', $profile->id, null, [
             'branch_id' => $profile->branch_id,
         ]);
 

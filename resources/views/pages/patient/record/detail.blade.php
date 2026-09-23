@@ -153,6 +153,37 @@
                 </div>
             </div>
             @endif
+
+            <div class="mt-4 pt-4 border-t border-slate-200" id="addendums">
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">Riwayat Koreksi (Addendum)</h3>
+                @if (($addendums ?? collect())->isEmpty())
+                    <p class="text-sm text-slate-400">Belum ada koreksi pada rekam medis ini.</p>
+                @else
+                    <div class="flex flex-col gap-2">
+                        @foreach ($addendums as $a)
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-sm">
+                                <div class="flex flex-col md:flex-row justify-between gap-1">
+                                    <span class="font-semibold text-slate-900">{{ $a->field }}</span>
+                                    <span class="text-xs text-slate-500">{{ $a->created_at?->format('d M Y H:i') }} · {{ $a->user->name ?? '-' }}</span>
+                                </div>
+                                <div class="mt-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-xs text-red-500 font-semibold">Lama:</span>
+                                        <pre class="text-xs text-slate-600 whitespace-pre-wrap break-words">{{ is_array($a->old_value) ? json_encode($a->old_value, JSON_PRETTY_PRINT) : $a->old_value }}</pre>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-emerald-600 font-semibold">Baru:</span>
+                                        <pre class="text-xs text-slate-600 whitespace-pre-wrap break-words">{{ is_array($a->new_value) ? json_encode($a->new_value, JSON_PRETTY_PRINT) : $a->new_value }}</pre>
+                                    </div>
+                                </div>
+                                @if ($a->reason)
+                                    <p class="mt-1 text-xs text-slate-500">Alasan: {{ $a->reason }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </section>
     </main>
 </x-app-layout>

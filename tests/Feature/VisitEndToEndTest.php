@@ -116,7 +116,14 @@ class VisitEndToEndTest extends TestCase
             'file' => UploadedFile::fake()->image('gigi46.jpg'),
         ])->assertRedirect();
 
-        // 4. DONE → SIGNED oleh dokter.
+        // 4. DONE → SIGNED oleh dokter. Consent (Permenkes 24/2022) dicatat dulu —
+        // tanpa consent disetujui, sign ditolak 422.
+        $this->actingAs($doctorUser)->post(route('visits.sign', $visit->id))->assertStatus(422);
+        $this->actingAs($doctorUser)->post(route('visits.consents.store', $visit->id), [
+            'consent_text' => \App\Models\MedicalConsentRecord::DEFAULT_TEXT,
+            'granted' => '1',
+            'granted_by_name' => 'Pasien Visit',
+        ])->assertRedirect();
         $this->actingAs($doctorUser)->post(route('visits.status', $visit->id), ['status' => Visit::STATUS_DONE])->assertRedirect();
         $this->actingAs($doctorUser)->post(route('visits.sign', $visit->id))->assertRedirect();
         $visit = $visit->fresh();
@@ -165,6 +172,15 @@ class VisitEndToEndTest extends TestCase
         $icd10 = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
         $this->actingAs($doctorUser)->post(route('visits.diagnoses.store', $visit->id), [
             'diagnosis_code_ids' => [$icd10->id],
+        ])->assertRedirect();
+
+        // DONE + ICD-10 tapi tanpa consent → masih 422 (Permenkes 24/2022).
+        $this->actingAs($doctorUser)->post(route('visits.sign', $visit->id))->assertStatus(422);
+
+        $this->actingAs($doctorUser)->post(route('visits.consents.store', $visit->id), [
+            'consent_text' => \App\Models\MedicalConsentRecord::DEFAULT_TEXT,
+            'granted' => '1',
+            'granted_by_name' => 'Pasien Visit',
         ])->assertRedirect();
         $this->actingAs($doctorUser)->post(route('visits.sign', $visit->id))->assertRedirect();
         $this->assertTrue($visit->fresh()->isSigned());
