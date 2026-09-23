@@ -50,7 +50,7 @@
                         <textarea name="address" rows="2" maxlength="2000"
                                   class="mt-1 w-full rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800"></textarea>
                     </label>
-                    <button type="submit" class="btn-primary sm:col-span-2">Simpan profil</button>
+                    <button type="submit" class="btn-submit !w-auto !px-8 sm:col-span-2">Simpan profil</button>
                 </form>
             </div>
 

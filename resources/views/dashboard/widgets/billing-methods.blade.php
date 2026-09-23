@@ -1,14 +1,9 @@
-<section data-widget="billing-methods" class="rounded-[22px] bg-white p-6 sm:p-7 border border-slate-200/90 shadow-sm transition-all duration-300 hover:shadow-md">
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5 mb-5">
-        <div>
-            <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
-                <x-lucide-credit-card class="w-5 h-5 text-emerald-600" />
-                {{ __('dashboard.billing.title') }}
-            </h3>
-            <p class="text-xs text-slate-500 mt-0.5">{{ __('dashboard.billing.subtitle') }}</p>
-        </div>
-    </div>
-
+<x-dashboard.panel
+    data-widget="billing-methods"
+    icon="credit-card"
+    :title="__('dashboard.billing.title')"
+    :subtitle="__('dashboard.billing.subtitle')"
+>
     @php
         $totalAmount = (float) $widget->methods->sum('total_amount');
     @endphp
@@ -33,4 +28,14 @@
             </div>
         @endforeach
     </div>
-</section>
+
+    @if ($widget->methods->isEmpty())
+        <div class="py-10 flex flex-col items-center justify-center text-center">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3 border border-emerald-100">
+                <x-lucide-credit-card class="w-7 h-7" />
+            </div>
+            <p class="text-base font-bold text-slate-800">{{ __('dashboard.billing.empty_title') }}</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-md">{{ __('dashboard.billing.empty_hint') }}</p>
+        </div>
+    @endif
+</x-dashboard.panel>

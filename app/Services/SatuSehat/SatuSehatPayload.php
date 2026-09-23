@@ -56,7 +56,23 @@ class SatuSehatPayload
             'name' => [['use' => 'official', 'text' => $patient->name]],
             'gender' => ($patient->gender ?? 'MALE') === 'FEMALE' ? 'female' : 'male',
             'birthDate' => $birthDate,
+            // Mandatory per docs SSP: kelahiran tunggal default.
+            'multipleBirthBoolean' => false,
+            // Mandatory per docs SSP: bahasa komunikasi pasien.
+            'communication' => [[
+                'language' => ['coding' => [[
+                    'system' => 'urn:ietf:bcp:47',
+                    'code' => 'id-ID',
+                    'display' => 'Indonesian',
+                ]]],
+                'preferred' => true,
+            ]],
         ];
+
+        // Catatan: IHS TIDAK dikirim dalam identifier. POST Patient dengan NIK
+        // yang sudah terdaftar di MPI mengembalikan IHS yang sama (idempoten);
+        // menambahkan identifier IHS justru mengubah payload antar percobaan
+        // dan memicu PUT tidak perlu.
 
         if (! empty($patient->phone)) {
             $payload['telecom'] = [[
@@ -64,6 +80,16 @@ class SatuSehatPayload
                 'value' => $patient->phone,
                 'use' => 'mobile',
             ]];
+        }
+
+        // Status perkawinan (v3-MaritalStatus) bila tercatat.
+        if (! empty($patient->marital_status)) {
+            $maritalLabels = ['S' => 'Never Married', 'M' => 'Married', 'W' => 'Separated', 'D' => 'Widowed'];
+            $payload['maritalStatus'] = ['coding' => [[
+                'system' => 'http://terminology.hl7.org/CodeSystem/v3-MaritalStatus',
+                'code' => $patient->marital_status,
+                'display' => $maritalLabels[$patient->marital_status] ?? $patient->marital_status,
+            ]]];
         }
 
         if (! empty($patient->birth_place)) {
@@ -90,33 +116,46 @@ class SatuSehatPayload
     }
 
     /**
-     * Address FHIR sesuai panduan SATUSEHAT: teks nama wilayah + extension
-     * administrativeCode berisi kode Kemendagri (provinsi/kota/kecamatan/desa).
+     * Address FHIR sesuai panduan SATUSEHAT: extension administrativeCode
+     * berupa extension NESTED berisi kode Kemendagri per level wilayah
+     * (province/city/district/village + rt/rw opsional).
      */
     public static function address(object $address): array
     {
         $payload = array_filter([
             'use' => 'home',
-            'line' => trim(($address->street ?? '').' '.($address->tonarigumi ?? '')) ?: null,
+            'line' => [trim(($address->street ?? '').' '.($address->tonarigumi ?? ''))] ?: null,
             'city' => $address->regency ?? null,
             'district' => $address->district ?? null,
             'state' => $address->province ?? null,
             'postalCode' => $address->zip_code ?? null,
             'country' => 'ID',
-        ], fn ($v) => $v !== null && $v !== '');
+        ], fn ($v) => $v !== null && $v !== []);
 
-        $codes = collect([
-            ['province', $address->province_code ?? null],
-            ['city', $address->region_code ?? null],
-        ])->filter(fn ($c) => ! empty($c[1]));
-        if ($codes->isNotEmpty()) {
-            $payload['extension'] = $codes
-                ->map(fn ($c) => [
-                    'url' => 'https://fhir.kemkes.go.id/r4/StructureDefinition/administrativeCode',
-                    'valueCode' => (string) $c[1],
-                ])
+        // Kode Kemendagri: region_code bisa berisi kode level apa pun —
+        // dipetakan ke level sesuai panjang digit (2/4/6/10).
+        $code = trim((string) ($address->region_code ?? ''));
+        if ($code !== '') {
+            $level = match (strlen($code)) {
+                2 => 'province',
+                4 => 'city',
+                6 => 'district',
+                default => 'village',
+            };
+            $nested = collect([
+                'province' => strlen($code) >= 2 ? substr($code, 0, 2) : null,
+                'city' => strlen($code) >= 4 ? substr($code, 0, 4) : null,
+                'district' => strlen($code) >= 6 ? substr($code, 0, 6) : null,
+                'village' => strlen($code) >= 10 ? $code : null,
+            ])->filter()
+                ->map(fn ($value, $url) => ['url' => $url, 'valueCode' => (string) $value])
                 ->values()
                 ->all();
+
+            $payload['extension'] = [[
+                'url' => 'https://fhir.kemkes.go.id/r4/StructureDefinition/administrativeCode',
+                'extension' => $nested,
+            ]];
         }
 
         return $payload;
@@ -126,20 +165,50 @@ class SatuSehatPayload
      * Identifier Encounter memakai system resmi per organisasi:
      * http://sys-ids.kemkes.go.id/encounter/{organization-ihs-number}
      * dengan value = nomor visit lokal.
+     * Mandatory per docs SSP: statusHistory (arrived→finished) + classHistory.
      */
-    public static function encounter(object $visit, string $patientIhsId, ?string $practitionerRef): ?array
+    public static function encounter(object $visit, string $patientIhsId, ?string $practitionerRef, ?string $orgId = null): ?array
     {
         if (! $patientIhsId) {
             return null;
         }
 
+        $start = Carbon::parse($visit->visit_date)->setTimezone('+00:00')->toIso8601String();
+        $end = Carbon::parse($visit->visit_date)->endOfDay()->setTimezone('+00:00')->toIso8601String();
+
         $payload = [
             'resourceType' => 'Encounter',
             'status' => 'finished',
+            // Mandatory: riwayat status arrived → in-progress → finished.
+            'statusHistory' => [
+                [
+                    'status' => 'arrived',
+                    'period' => ['start' => $start, 'end' => $start],
+                ],
+                [
+                    'status' => 'in-progress',
+                    'period' => ['start' => $start, 'end' => $end],
+                ],
+                [
+                    'status' => 'finished',
+                    'period' => ['start' => $end, 'end' => $end],
+                ],
+            ],
             'class' => [
                 'system' => 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
                 'code' => 'AMB',
                 'display' => 'ambulatory',
+            ],
+            // Mandatory: riwayat klasifikasi kunjungan.
+            'classHistory' => [
+                [
+                    'class' => [
+                        'system' => 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+                        'code' => 'AMB',
+                        'display' => 'ambulatory',
+                    ],
+                    'period' => ['start' => $start, 'end' => $end],
+                ],
             ],
             'subject' => ['reference' => 'Patient/'.$patientIhsId],
             'participant' => [
@@ -149,14 +218,22 @@ class SatuSehatPayload
                     'display' => 'attender',
                 ]]],
             ],
-            'period' => ['start' => Carbon::parse($visit->visit_date)->toIso8601String()],
+            'period' => ['start' => $start, 'end' => $end],
         ];
 
         if ($practitionerRef) {
             $payload['participant'][0]['individual'] = ['reference' => $practitionerRef];
         }
 
-        $orgId = config('satusehat.org_id');
+        // serviceType rawat jalan gigi (SNOMED 84687003 dental care, opsional
+        // tapi memberi konteks layanan gigi pada Encounter).
+        $payload['serviceType'] = ['coding' => [[
+            'system' => 'http://snomed.info/sct',
+            'code' => '84687003',
+            'display' => 'Dental care',
+        ]]];
+
+        $orgId = $orgId ?: config('satusehat.org_id');
         if ($orgId) {
             $payload['identifier'] = [[
                 'system' => 'http://sys-ids.kemkes.go.id/encounter/'.$orgId,
@@ -355,28 +432,42 @@ class SatuSehatPayload
             $out[] = $quantityObservation('9279-1', 'Respiratory rate', (int) $vitals->respiratory_rate, '/min', '/min');
         }
         if (! empty($vitals->pregnancy_status)) {
-            $obs = [
-                'resourceType' => 'Observation',
-                'status' => 'final',
-                'category' => [['coding' => [[
-                    'system' => 'http://terminology.hl7.org/CodeSystem/observation-category',
-                    'code' => 'vital-signs',
-                    'display' => 'Vital Signs',
-                ]]]],
-                'code' => ['coding' => [[
-                    'system' => self::SYSTEM_LOINC,
-                    'code' => '82810-3',
-                    'display' => 'Pregnancy status',
-                ]]],
-                'subject' => ['reference' => 'Patient/'.$patientIhsId],
-                'encounter' => ['reference' => 'Encounter/'.$encounterId],
-                'effectiveDateTime' => $effective,
-                'valueString' => $vitals->pregnancy_status,
+            // Kode terminologi Kemenkes (bukan teks bebas): PREGNANT=OI000011,
+            // NOT_PREGNANT=OI000012, UNSURE=OI000013.
+            $pregnancyCodes = [
+                'PREGNANT' => ['OI000011', 'Hamil'],
+                'NOT_PREGNANT' => ['OI000012', 'Tidak Hamil'],
+                'UNSURE' => ['OI000013', 'Tidak Diketahui'],
             ];
-            if ($practitionerRef) {
-                $obs['performer'] = [['reference' => $practitionerRef]];
+            $code = $pregnancyCodes[$vitals->pregnancy_status] ?? null;
+            if ($code) {
+                $obs = [
+                    'resourceType' => 'Observation',
+                    'status' => 'final',
+                    'category' => [['coding' => [[
+                        'system' => 'http://terminology.hl7.org/CodeSystem/observation-category',
+                        'code' => 'vital-signs',
+                        'display' => 'Vital Signs',
+                    ]]]],
+                    'code' => ['coding' => [[
+                        'system' => self::SYSTEM_LOINC,
+                        'code' => '82810-3',
+                        'display' => 'Pregnancy status',
+                    ]]],
+                    'subject' => ['reference' => 'Patient/'.$patientIhsId],
+                    'encounter' => ['reference' => 'Encounter/'.$encounterId],
+                    'effectiveDateTime' => $effective,
+                    'valueCodeableConcept' => ['coding' => [[
+                        'system' => 'http://terminology.kemkes.go.id/CodeSystem/oi',
+                        'code' => $code[0],
+                        'display' => $code[1],
+                    ]]],
+                ];
+                if ($practitionerRef) {
+                    $obs['performer'] = [['reference' => $practitionerRef]];
+                }
+                $out[] = $obs;
             }
-            $out[] = $obs;
         }
 
         return $out;

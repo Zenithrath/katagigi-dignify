@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Appointment;
+use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +29,8 @@ class PermissionEnforcementTest extends TestCase
     {
         $nurse = User::where('email', 'nurse@gmail.com')->first();
         $manajemen = User::where('email', 'manajemen@gmail.com')->first();
-        $patient = DB::table('patients')->first();
-        $this->assertNotNull($patient);
+        // DB bersih tanpa data dummy — buat pasien sendiri.
+        $patient = Patient::factory()->create();
 
         // Negatif: nurse (tanpa delete patient sejak D-04) ditolak via URL langsung.
         $this->actingAs($nurse)
@@ -51,11 +53,11 @@ class PermissionEnforcementTest extends TestCase
         $this->actingAs($admin)->get(route('medical-records.create'))->assertForbidden();
         $this->actingAs($admin)->get(route('medical-records.edit', $ghostId))->assertForbidden();
 
-        // Payload valid (data seed) agar lolos validasi FormRequest lalu kena gate.
-        $appointment = DB::table('appointments')->first();
+        // Payload valid (factory, bukan data dummy) agar lolos validasi
+        // FormRequest lalu kena gate.
+        $appointment = Appointment::factory()->create();
         $service = DB::table('services')->where('is_active', true)->first();
         $dxCode = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
-        $this->assertNotNull($appointment);
         $payload = [
             'appointment_id' => $appointment->id,
             'checkup_result' => 'Hasil',
@@ -86,7 +88,7 @@ class PermissionEnforcementTest extends TestCase
         $doctor = User::where('email', 'doctor@gmail.com')->first();
 
         // Kasir: doctor tanpa create transaction (payload valid → kena gate, bukan validasi).
-        $appointment = DB::table('appointments')->first();
+        $appointment = Appointment::factory()->create();
         $service = DB::table('services')->where('is_active', true)->first();
         $this->actingAs($doctor)->post(route('transactions.store'), [
             'appointment_id' => $appointment->id,

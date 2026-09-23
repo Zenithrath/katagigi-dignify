@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AuditLog;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\PatientAddress;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\Patient\MasterService;
@@ -82,7 +83,8 @@ class NewFeaturesTest extends TestCase
 
     public function test_patient_completeness_tabs_count_correctly(): void
     {
-        Patient::factory()->complete()->create(); // lengkap
+        $complete = Patient::factory()->complete()->create(); // lengkap
+        PatientAddress::factory()->create(['patient_id' => $complete->id]); // + alamat terisi
         Patient::factory()->incomplete()->create(); // tanpa NIK/consent
 
         $counts = app(\App\Services\Patient\MasterService::class)->countByCompleteness();

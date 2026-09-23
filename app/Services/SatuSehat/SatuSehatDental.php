@@ -6,6 +6,7 @@ use App\Models\Examination;
 use App\Models\OdontogramFinding;
 use App\Models\OralHealthIndex;
 use App\Models\RadiologyOrder;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 /**
@@ -377,6 +378,75 @@ class SatuSehatDental
         }
 
         return $payload;
+    }
+
+    /**
+     * ServiceRequest permintaan radiologi — prasyarat DiagnosticReport di SSP
+     * (report berbasis order, bukan berdiri sendiri).
+     */
+    public static function serviceRequest(RadiologyOrder $order, string $patientIhsId, string $encounterId, ?string $practitionerRef): array
+    {
+        return array_filter([
+            'resourceType' => 'ServiceRequest',
+            // Identifier lokal agar kirim ulang tidak membuat order baru di SSP.
+            'identifier' => [[
+                'system' => 'http://sys-ids.kemkes.go.id/servicerequest/lokal',
+                'use' => 'official',
+                'value' => 'RAD-'.$order->id,
+            ]],
+            'status' => $order->status === RadiologyOrder::STATUS_COMPLETED ? 'completed' : 'active',
+            'intent' => 'order',
+            'category' => [['coding' => [[
+                'system' => 'http://snomed.info/sct',
+                'code' => '363679005',
+                'display' => 'Imaging',
+            ]]]],
+            'code' => ['coding' => [[
+                'system' => 'http://loinc.org',
+                'code' => '39764-4',
+                'display' => 'Disease x-ray panel',
+            ]]],
+            'subject' => ['reference' => 'Patient/'.$patientIhsId],
+            'encounter' => ['reference' => 'Encounter/'.$encounterId],
+            'authoredOn' => Carbon::parse($order->created_at)->setTimezone('+07:00')->toIso8601String(),
+            'requester' => $practitionerRef ? ['reference' => $practitionerRef] : null,
+            'priority' => match ($order->priority) {
+                'urgent' => 'urgent',
+                'stat' => 'stat',
+                default => 'routine',
+            },
+            'bodySite' => $order->body_site ? [[
+                'coding' => [[
+                    'system' => 'http://terminology.kemkes.go.id/CodeSystem/tooth-fdi',
+                    'code' => $order->body_site,
+                ]],
+                'text' => $order->body_site,
+            ]] : null,
+        ], fn ($v) => $v !== null);
+    }
+
+    /**
+     * AllergyIntolerance dari riwayat alergi anamnesis (teks bebas →
+     * valueString di coding text; tanpadua kategori tak pasti, gunakan
+     * 'biologic' sebagai kategori generik).
+     */
+    public static function allergyIntolerance(object $anamnesis, string $patientIhsId): ?array
+    {
+        $text = trim((string) ($anamnesis->allergies ?? ''));
+        if ($text === '' || in_array(strtolower($text), ['tidak ada', 'none', '-', 'tidak', 'nkda', 'no allergy'], true)) {
+            return null;
+        }
+
+        return [
+            'resourceType' => 'AllergyIntolerance',
+            'clinicalStatus' => ['coding' => [[
+                'system' => 'http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical',
+                'code' => 'active',
+            ]]],
+            'code' => ['text' => $text],
+            'patient' => ['reference' => 'Patient/'.$patientIhsId],
+            'recordedDate' => Carbon::parse($anamnesis->created_at ?? now())->setTimezone('+07:00')->toIso8601String(),
+        ];
     }
 
     /**

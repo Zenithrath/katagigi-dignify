@@ -1,6 +1,7 @@
 <?php
 
 return [
+
     'role' => [
         'admin' => 'Manajemen Klinik',
         'doctor' => 'Dokter',
@@ -18,37 +19,25 @@ return [
         'subtitle_guest' => 'Selamat datang di sistem informasi klinik.',
     ],
     'action' => [
-        'new_patient' => 'Pasien Baru',
-        'transaction' => 'Transaksi',
-        'export' => 'Tarik Data',
-        'workspace' => 'Workspace',
-        'queue' => 'Antrian',
+        'view_all' => 'Lihat Semua',
+        'manage' => 'Kelola',
     ],
     'kpi' => [
-        'revenue_clinic' => 'Total Pendapatan',
+        'revenue_clinic' => 'Pendapatan Klinik',
         'revenue_own' => 'Pendapatan Jasa Anda',
+        'from_notes' => 'dari :count nota bulan ini',
         'this_month' => 'Bulan Ini',
-        'from_notes' => 'Dari :count nota pasien selesai',
         'database' => 'Database',
-        'patients_total' => 'Total Pasien Terdaftar',
-        'patients_total_hint' => 'Keseluruhan pasien terdata di klinik',
-        'patients_new' => 'Pasien Baru Bulan Ini',
-        'patients_new_hint' => 'Pasien yang baru didata bulan berjalan',
+        'patients_total' => 'Total Pasien',
+        'patients_total_hint' => 'Seluruh pasien terdaftar di klinik.',
+        'patients_new' => 'Pasien Baru',
+        'patients_new_hint' => 'Terdaftar pertama kali bulan ini.',
         'new_badge' => 'baru',
-        'visits' => 'Pasien Datang / Kunjungan',
+        'visits' => 'Kunjungan',
         'visits_unit' => 'kunjungan',
-        'visits_hint' => 'Pasien yang telah selesai tindakan & nota terbit',
-        'records' => 'Rekam Medis Bulan Ini',
-        'records_hint' => 'Rekam medis yang dibuat bulan berjalan',
-    ],
-    'chart' => [
-        'title' => 'Analisis Pendapatan',
-        'vs_prev' => 'vs total periode sebelumnya',
-        'mode_revenue' => 'Rupiah',
-        'mode_visits' => 'Kunjungan',
-        'period_weekly' => 'Mingguan',
-        'period_monthly' => 'Bulanan',
-        'period_yearly' => 'Tahunan',
+        'visits_hint' => 'Kunjungan tercatat bulan berjalan.',
+        'records' => 'Rekam Medis',
+        'records_hint' => 'Rekam medis bulan berjalan.',
     ],
     'queue' => [
         'title' => 'Antrian Hari Ini',
@@ -69,6 +58,8 @@ return [
         'subtitle' => 'Breakdown nota berdasarkan metode pembayaran.',
         'transactions' => 'transaksi',
         'method_other' => 'Lainnya',
+        'empty_title' => 'Belum Ada Nota Bulan Ini',
+        'empty_hint' => 'Breakdown metode pembayaran akan muncul setelah ada transaksi.',
     ],
     'incomplete' => [
         'title' => 'Data Pasien Belum Lengkap',
@@ -81,6 +72,8 @@ return [
         'action' => 'Lengkapi Data',
         'footer' => 'Menampilkan pasien dengan kelengkapan data tertunda',
         'see_all' => 'Buka Master Data Pasien',
+        'empty_title' => 'Semua Data Pasien Lengkap',
+        'empty_hint' => 'Tidak ada pasien yang perlu dilengkapi datanya saat ini. Kerja bagus!',
     ],
     'recent' => [
         'title_transactions' => 'Nota Terbaru',
@@ -93,6 +86,8 @@ return [
         'th_date' => 'Tanggal',
         'th_diagnosis' => 'Diagnosis',
         'th_total' => 'Total',
+        'empty_transactions' => 'Belum Ada Nota Terbit',
+        'empty_records' => 'Belum Ada Rekam Medis',
     ],
     'empty_widgets' => 'Belum ada widget yang tersedia untuk peran ini.',
 ];

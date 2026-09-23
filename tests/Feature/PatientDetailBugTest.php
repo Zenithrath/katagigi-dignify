@@ -53,6 +53,10 @@ class PatientDetailBugTest extends TestCase
     {
         $admin = User::where('email', 'admin@gmail.com')->first();
 
+        // DB bersih tanpa data dummy — buat rekam medis sendiri agar tabel
+        // (dan link hover-underline-nya) dirender.
+        \App\Models\MedicalRecord::factory()->create();
+
         $this->actingAs($admin)->get(route('medical-records.index'))
             ->assertOk()
             ->assertSee('hover:underline', false);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -37,6 +38,9 @@ class Patient extends Model
         'nik',
         'ihs_id',
         'religion',
+        'marital_status',
+        'insurance_id',
+        'insurance_number',
         'gender',
         'picture',
         'sosmed',
@@ -56,6 +60,11 @@ class Patient extends Model
     public function address(): HasOne
     {
         return $this->hasOne(PatientAddress::class, 'patient_id', 'id');
+    }
+
+    public function insurance(): BelongsTo
+    {
+        return $this->belongsTo(MasterInsurance::class, 'insurance_id', 'id');
     }
 
     /**

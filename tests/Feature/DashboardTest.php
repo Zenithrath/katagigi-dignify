@@ -55,13 +55,15 @@ class DashboardTest extends TestCase
     public function test_nurse_dashboard_renders_with_database_cache(): void
     {
         config(['cache.default' => 'database']);
-        Cache::forget('dashboard:doctor-overview:all');
+        Cache::forget('dashboard:admin-overview');
 
         $this->actingAs($this->verifiedUser('nurse@gmail.com'))
             ->get(route('dashboard'))
             ->assertOk();
 
-        $cached = Cache::get('dashboard:doctor-overview:all');
+        // Nurse memakai overview operasional klinik (cache yang sama dengan admin),
+        // bukan overview dokter lain — lihat DashboardController::index.
+        $cached = Cache::get('dashboard:admin-overview');
         $this->assertIsArray($cached);
     }
 
@@ -76,6 +78,10 @@ class DashboardTest extends TestCase
     {
         config(['cache.default' => 'database']);
         Cache::forget('dashboard:admin-overview');
+
+        // Widget "pasien belum lengkap" hanya dirender bila ada pasien incomplete
+        // (DB bersih tanpa data dummy) — buat satu untuk verifikasi partial.
+        Patient::factory()->incomplete()->create();
 
         $response = $this->actingAs($this->verifiedUser('manajemen@gmail.com'))
             ->get(route('dashboard'));

@@ -34,6 +34,7 @@ use App\Http\Controllers\Integration\WhatsappController;
 use App\Http\Controllers\Inventory\InventoryController;
 use App\Http\Controllers\Master\AdminController;
 use App\Http\Controllers\Master\DoctorController;
+use App\Http\Controllers\Master\InsuranceController;
 use App\Http\Controllers\Master\NurseController;
 use App\Http\Controllers\Operational\BranchController;
 use App\Http\Controllers\Operational\ExpenseController;
@@ -176,6 +177,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('services', ServiceController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('admins', AdminController::class)->except('show');
+
+    // Fase 4.3: master penjamin/asuransi (manajemen).
+    Route::post('insurances', [InsuranceController::class, 'store'])->name('insurances.store');
+    Route::put('insurances/{insurance}', [InsuranceController::class, 'update'])->name('insurances.update');
     Route::resource('doctors', DoctorController::class)->except('show');
     Route::resource('nurses', NurseController::class)->except('show');
     Route::resource('patients', MasterController::class);

@@ -590,7 +590,13 @@
                             <form method="post" action="{{ route('visits.prescriptions.items.store', [$visit->id, $rx->id]) }}" class="mt-3 grid grid-cols-1 md:grid-cols-4 gap-2">
                                 @csrf
                                 <input type="text" name="medicine_name" class="custom-input md:col-span-2" placeholder="Nama obat *" required />
-                                <input type="text" name="kfa_code" class="custom-input" placeholder="Kode KFA" />
+                                {{-- Fase 4.2: pilih kode dari kamus KFA; label = nama + bentuk sediaan --}}
+                                <input type="text" name="kfa_code" class="custom-input" placeholder="Kode KFA" list="kfaProductList" />
+                                <datalist id="kfaProductList">
+                                    @foreach (\App\Models\KfaProduct::query()->orderBy('name')->limit(500)->get() as $kfa)
+                                        <option value="{{ $kfa->code }}">{{ $kfa->name }}{{ $kfa->dosage_form ? ' — '.$kfa->dosage_form : '' }}</option>
+                                    @endforeach
+                                </datalist>
                                 <input type="text" name="dosage" class="custom-input" placeholder="Dosis (500 mg)" />
                                 <input type="text" name="frequency" class="custom-input" placeholder="Frekuensi (3× sehari)" />
                                 <input type="text" name="duration" class="custom-input" placeholder="Durasi (5 hari)" />

@@ -132,11 +132,12 @@ class SatuSehatService extends Service
             $visit->patient->update(['ihs_id' => $patientIhsId]);
         }
 
-        // 2. Encounter.
+        // 2. Encounter (identifier pakai org IHS dari kredensial cabang bila ada).
         $encounterPayload = SatuSehatPayload::encounter(
             $visit,
             $patientIhsId,
-            SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null)
+            SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null),
+            $this->runtime['org_id'] ?? null
         );
         if (! $encounterPayload) {
             $this->log($visit, 'Encounter', $visit->id, null, SatuSehatSyncLog::STATUS_SKIPPED, 'IHS pasien belum ada.');
@@ -253,15 +254,34 @@ class SatuSehatService extends Service
             $this->tally($summary, $this->post('MedicationRequest', $payload, $visit, $prescription->id));
         }
 
-        // 6. DiagnosticReport + Media per order radiologi COMPLETED (Fase 3.3).
+        // 5g. AllergyIntolerance dari anamnesis (bila pasien punya alergi).
+        $visit->loadMissing('anamnesis');
+        if ($visit->anamnesis && ($allergyPayload = SatuSehatDental::allergyIntolerance($visit->anamnesis, $patientIhsId))) {
+            $this->tally($summary, $this->post('AllergyIntolerance', $allergyPayload, $visit, 'allergy-'.$visit->anamnesis->id));
+        }
+
+        // 6. ServiceRequest → Media → DiagnosticReport per order radiologi
+        // COMPLETED (Fase 3.3; ServiceRequest prasyarat report di SSP).
         $visit->loadMissing('radiologyOrders');
         foreach ($visit->radiologyOrders->where('status', RadiologyOrder::STATUS_COMPLETED) as $order) {
+            $serviceRequestResult = $this->post(
+                'ServiceRequest',
+                SatuSehatDental::serviceRequest($order, $patientIhsId, $encounterResult['external_id'], SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null)),
+                $visit,
+                'sr-'.$order->id
+            );
+            $this->tally($summary, $serviceRequestResult);
+
             $reportPayload = SatuSehatDental::diagnosticReport(
                 $order,
                 $patientIhsId,
                 $encounterResult['external_id'],
                 SatuSehatPayload::practitionerRef($visit->doctor->ihs_id ?? null)
             );
+            // Report berbasis order: rujuk ServiceRequest yang barusan terbit.
+            if ($reportPayload && ! empty($serviceRequestResult['external_id'])) {
+                $reportPayload['basedOn'] = [['reference' => 'ServiceRequest/'.$serviceRequestResult['external_id']]];
+            }
             if (! $reportPayload) {
                 $this->log($visit, 'DiagnosticReport', $order->id, null, SatuSehatSyncLog::STATUS_SKIPPED, 'Hasil baca (result_text) belum ada.');
                 $summary['skipped']++;

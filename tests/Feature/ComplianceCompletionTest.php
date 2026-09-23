@@ -205,15 +205,118 @@ class ComplianceCompletionTest extends TestCase
 
         $payload = SatuSehatPayload::patient($patient);
 
+        // Mandatory per docs SSP.
+        $this->assertFalse($payload['multipleBirthBoolean']);
+        $this->assertSame('id-ID', $payload['communication'][0]['language']['coding'][0]['code']);
+
         $this->assertArrayHasKey('address', $payload);
         $address = $payload['address'][0];
         $this->assertSame('Kota Banjarmasin', $address['city']);
         $this->assertSame('Kalimantan Selatan', $address['state']);
-        $extensions = collect($address['extension'] ?? []);
-        $this->assertTrue($extensions->contains(fn ($e) => $e['valueCode'] === '6371'));
+
+        // administrativeCode = extension nested per level wilayah (docs SSP).
+        $codeExt = collect($address['extension'] ?? [])
+            ->firstWhere('url', 'https://fhir.kemkes.go.id/r4/StructureDefinition/administrativeCode');
+        $this->assertNotNull($codeExt);
+        $nested = collect($codeExt['extension'])->pluck('valueCode', 'url')->all();
+        $this->assertSame('63', $nested['province']);
+        $this->assertSame('6371', $nested['city']);
+        $this->assertArrayNotHasKey('village', $nested);
     }
 
-    // ── Fase 4.2: validator KFA ─────────────────────────────────
+    public function test_encounter_payload_has_status_and_class_history(): void
+    {
+        $visit = $this->makeVisit();
+        $payload = SatuSehatPayload::encounter($visit, 'P02478375538', null, 'ORG-1');
+
+        $this->assertSame('finished', $payload['status']);
+        $this->assertCount(3, $payload['statusHistory']);
+        $this->assertSame(['arrived', 'in-progress', 'finished'], collect($payload['statusHistory'])->pluck('status')->all());
+        $this->assertNotEmpty($payload['classHistory']);
+        $this->assertSame('AMB', $payload['classHistory'][0]['class']['code']);
+        // Identifier memakai org IHS dari parameter (kredensial cabang).
+        $this->assertStringContainsString('encounter/ORG-1', $payload['identifier'][0]['system']);
+        $this->assertSame('84687003', $payload['serviceType']['coding'][0]['code']);
+    }
+
+    public function test_service_request_and_allergy_payloads(): void
+    {
+        $visit = $this->makeVisit();
+        $order = RadiologyOrder::create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'visit_id' => $visit->id,
+            'patient_id' => $visit->patient_id,
+            'ordered_by' => $visit->doctor_id,
+            'modality' => 'DX',
+            'body_site' => '46',
+            'clinical_indication' => 'Karies dalam',
+            'priority' => 'urgent',
+            'status' => RadiologyOrder::STATUS_COMPLETED,
+        ]);
+
+        $sr = SatuSehatDental::serviceRequest($order, 'P1', 'E1', 'Practitioner/D1');
+        $this->assertSame('ServiceRequest', $sr['resourceType']);
+        $this->assertSame('completed', $sr['status']);
+        $this->assertSame('urgent', $sr['priority']);
+        $this->assertSame('RAD-'.$order->id, $sr['identifier'][0]['value']);
+
+        // Alergi tercatat → AllergyIntolerance; NKDA/tidak ada → null.
+        $anamnesis = (object) ['allergies' => 'Penisilin', 'created_at' => now()];
+        $allergy = SatuSehatDental::allergyIntolerance($anamnesis, 'P1');
+        $this->assertSame('AllergyIntolerance', $allergy['resourceType']);
+        $this->assertSame('Penisilin', $allergy['code']['text']);
+
+        $nkda = (object) ['allergies' => 'Tidak ada', 'created_at' => now()];
+        $this->assertNull(SatuSehatDental::allergyIntolerance($nkda, 'P1'));
+    }    // ── Fase 4.2: validator KFA ─────────────────────────────
+
+    public function test_patient_payload_maps_marital_status(): void
+    {
+        $patient = \App\Models\Patient::factory()->complete()->create(['marital_status' => 'M']);
+        $payload = SatuSehatPayload::patient($patient);
+
+        $this->assertSame('v3-MaritalStatus', substr($payload['maritalStatus']['coding'][0]['system'], -16));
+        $this->assertSame('M', $payload['maritalStatus']['coding'][0]['code']);
+
+        // Tanpa marital status → elemen tidak dikirim (opsional).
+        $single = \App\Models\Patient::factory()->complete()->create(['marital_status' => null]);
+        $this->assertArrayNotHasKey('maritalStatus', SatuSehatPayload::patient($single));
+    }
+
+    public function test_pregnancy_status_uses_kemenkes_codes(): void
+    {
+        $vitals = (object) [
+            'pulse_bpm' => null, 'temperature_c' => null, 'respiratory_rate' => null,
+            'pregnancy_status' => 'PREGNANT',
+        ];
+        $payloads = SatuSehatPayload::vitalSignObservations($vitals, 'P1', 'E1', null, '2026-09-22 10:00:00');
+
+        $this->assertCount(1, $payloads);
+        $this->assertSame('82810-3', $payloads[0]['code']['coding'][0]['code']);
+        $this->assertSame('OI000011', $payloads[0]['valueCodeableConcept']['coding'][0]['code']);
+        $this->assertSame(
+            'http://terminology.kemkes.go.id/CodeSystem/oi',
+            $payloads[0]['valueCodeableConcept']['coding'][0]['system']
+        );
+    }
+
+    public function test_insurance_seeded_and_assignable_to_patient(): void
+    {
+        $this->seed(\Database\Seeders\MasterInsuranceSeeder::class);
+
+        $bpjs = \App\Models\MasterInsurance::where('name', 'BPJS Kesehatan')->first();
+        $this->assertNotNull($bpjs);
+
+        $patient = \App\Models\Patient::factory()->complete()->create([
+            'insurance_id' => $bpjs->id,
+            'insurance_number' => '0001234567890',
+        ]);
+
+        $this->assertTrue($patient->insurance->is($bpjs));
+        $this->assertSame('0001234567890', $patient->insurance_number);
+    }
+
+    // ── Fase 4.2: validator KFA ─────────────────────────────
 
     public function test_prescription_item_rejects_unknown_kfa_code(): void
     {

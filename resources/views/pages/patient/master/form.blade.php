@@ -124,6 +124,28 @@
                             @enderror
                         </div>
 
+                        {{-- Fase 4.3: penjamin saat pendaftaran --}}
+                        <div class="input-group">
+                            <label for="insurance_id">Penjamin</label>
+                            <select id="insurance_id" name="insurance_id" class="custom-select">
+                                @foreach (\App\Models\MasterInsurance::orderBy('name')->get() as $ins)
+                                    <option value="{{ $ins->id }}" @selected(old('insurance_id', $data->insurance_id ?? '') == $ins->id)>{{ $ins->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('insurance_id')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="insurance_number">No. kartu penjamin</label>
+                            <input type="text" name="insurance_number" id="insurance_number" class="custom-input"
+                                placeholder="No. BPJS / kartu asuransi" value="{{ old('insurance_number', $data->insurance_number ?? '') }}" />
+                            @error('insurance_number')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
                         <div class="input-group">
                             <label for="religion">{{ __('form.labels.religion') }}</label>
                             <select id="religion" name="religion" autocomplete="religion" class="custom-select">
@@ -153,6 +175,20 @@
                                 </option>
                             </select>
                             @error('religion')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="marital_status">Status perkawinan</label>
+                            <select id="marital_status" name="marital_status" autocomplete="off" class="custom-select">
+                                <option value="" {{ empty($data->marital_status) ? 'selected' : '' }}>—</option>
+                                <option value="S" @selected($data->marital_status === 'S')>Belum Menikah</option>
+                                <option value="M" @selected($data->marital_status === 'M')>Menikah</option>
+                                <option value="W" @selected($data->marital_status === 'W')>Cerai Hidup</option>
+                                <option value="D" @selected($data->marital_status === 'D')>Cerai Mati</option>
+                            </select>
+                            @error('marital_status')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
@@ -328,6 +364,9 @@
             let email = document.getElementById('email');
             let payment_email = document.getElementById('payment_email');
 
+            payment_email.value = email.value;
+        }
+
         // Fase 4.1: datalist wilayah Kemendagri (dropdown berantai lunak —
         // ketik manual tetap bisa). Memilih dari daftar mengisi kode wilayah.
         (function () {
@@ -384,8 +423,7 @@
             load('province', 'regionProvinceList', null, '');
             load('city', 'regionCityList', null, '');
             load('village', 'regionVillageList', null, '');
-        })();            payment_email.value = email.value;
-        }
+        })();
     </script>
 @endPushOnce
 </x-app-layout>

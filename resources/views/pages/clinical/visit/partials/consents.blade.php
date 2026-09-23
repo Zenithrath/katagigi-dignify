@@ -107,7 +107,7 @@
                             },
                             pos(e) {
                                 const r = $refs.canvas.getBoundingClientRect();
-                                return [($event.clientX - r.left) * $refs.canvas.width / r.width, ($event.clientY - r.top) * $refs.canvas.height / r.height];
+                                return [(e.clientX - r.left) * $refs.canvas.width / r.width, (e.clientY - r.top) * $refs.canvas.height / r.height];
                             },
                             start(e) {
                                 this.drawing = true;

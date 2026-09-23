@@ -104,7 +104,10 @@
         <x-sidebar-section :collapsible="$collapsible">{{ __('navigation.sections.integrations') }}</x-sidebar-section>
         <ul class="nav-list">
             @can('manage satusehat')
-                <x-sidebar-link href="{{ route('satusehat.index') }}" :active="request()->routeIs('satusehat.*')" icon="activity" :collapsible="$collapsible">SATUSEHAT</x-sidebar-link>
+                <x-sidebar-link href="{{ route('satusehat.index') }}" :active="request()->routeIs('satusehat.index')" icon="activity" :collapsible="$collapsible">SATUSEHAT</x-sidebar-link>
+                <x-sidebar-link href="{{ route('satusehat.credentials.index') }}" :active="request()->routeIs('satusehat.credentials.*')" icon="key-round" :collapsible="$collapsible">Kredensial SATUSEHAT</x-sidebar-link>
+                <x-sidebar-link href="{{ route('satusehat.onboarding.index') }}" :active="request()->routeIs('satusehat.onboarding.*')" icon="user-plus" :collapsible="$collapsible">Onboarding SATUSEHAT</x-sidebar-link>
+                <x-sidebar-link href="{{ route('satusehat.org-profile.index') }}" :active="request()->routeIs('satusehat.org-profile.*')" icon="building-2" :collapsible="$collapsible">Profil Organisasi</x-sidebar-link>
             @endcan
             @can('manage whatsapp')
                 <x-sidebar-link href="{{ route('whatsapp.index') }}" :active="request()->routeIs('whatsapp.*')" icon="message-circle" :collapsible="$collapsible">WhatsApp</x-sidebar-link>

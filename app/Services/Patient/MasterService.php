@@ -200,10 +200,11 @@ class MasterService extends Service
     {
         return DB::table('patients')
             ->join('patient_addresses', 'patient_addresses.patient_id', '=', 'patients.id', 'left')
+            ->leftJoin('master_insurances', 'master_insurances.id', '=', 'patients.insurance_id')
             ->select([
-                'id',
-                'name',
-                'code',
+                'patients.id as id',
+                'patients.name as name',
+                'patients.code as code',
                 'email',
                 'payment_email',
                 'sosmed',
@@ -215,6 +216,10 @@ class MasterService extends Service
                 'ihs_id',
                 'satusehat_consent',
                 'religion',
+                'marital_status',
+                'insurance_id',
+                'insurance_number',
+                'master_insurances.name as insurance_name',
                 'village',
                 'street',
                 'zip_code',
@@ -222,6 +227,7 @@ class MasterService extends Service
                 'district',
                 'regency',
                 'province',
+                'patient_addresses.region_code as region_code',
                 'picture',
             ])
             ->where('patients.id', '=', $id)
@@ -291,6 +297,9 @@ class MasterService extends Service
                     'ihs_id' => $patient->input('ihs_id'),
                     'satusehat_consent' => $patient->boolean('satusehat_consent'),
                     'religion' => $patient->religion ?? 'OTHER',
+                    'marital_status' => $patient->input('marital_status') ?: null,
+                    'insurance_id' => $patient->input('insurance_id') ?: null,
+                    'insurance_number' => $patient->input('insurance_number') ?: null,
                     'gender' => $patient->gender ?? 'MALE',
                     'picture' => $patient->input('picture'),
                 ]);
@@ -332,6 +341,9 @@ class MasterService extends Service
                     'ihs_id' => $patient->input('ihs_id'),
                     'satusehat_consent' => $patient->boolean('satusehat_consent'),
                     'religion' => $patient->religion ?? 'OTHER',
+                    'marital_status' => $patient->input('marital_status') ?: null,
+                    'insurance_id' => $patient->input('insurance_id') ?: null,
+                    'insurance_number' => $patient->input('insurance_number') ?: null,
                     'gender' => $patient->gender ?? 'MALE',
                     'picture' => $patient->input('picture'),
                 ]);

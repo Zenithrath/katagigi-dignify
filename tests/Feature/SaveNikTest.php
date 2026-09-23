@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -64,21 +65,21 @@ class SaveNikTest extends TestCase
     public function test_patient_store_rejects_duplicate_nik(): void
     {
         $admin = User::where('email', 'admin@gmail.com')->first();
-        $existingNik = DB::table('patients')->whereNotNull('nik')->value('nik');
-        $this->assertNotNull($existingNik, 'Seeder harus punya pasien ber-NIK');
+        // DB bersih tanpa data dummy — buat pasien pemilik NIK sendiri.
+        $owner = Patient::factory()->complete()->create(['nik' => '6371011705900002']);
 
         $this->actingAs($admin)->post(route('patients.store'), [
             'name' => 'Pasien Duplikat',
             'phone' => '081234567892',
-            'nik' => $existingNik,
+            'nik' => $owner->nik,
         ])->assertSessionHasErrors('nik');
     }
 
     public function test_patient_update_keeps_own_nik(): void
     {
         $admin = User::where('email', 'admin@gmail.com')->first();
-        $patient = DB::table('patients')->whereNotNull('nik')->first();
-        $this->assertNotNull($patient);
+        // DB bersih tanpa data dummy — buat pasien sendiri.
+        $patient = Patient::factory()->complete()->create(['nik' => '6371011705900003']);
 
         $this->actingAs($admin)->put(route('patients.update', $patient->id), [
             'name' => $patient->name,
@@ -123,7 +124,7 @@ class SaveNikTest extends TestCase
             ->assertSee('satusehat_consent', false)
             ->assertSee('ID IHS (SATUSEHAT)', false);
 
-        $patient = DB::table('patients')->first();
+        $patient = Patient::factory()->create();
         $this->actingAs($admin)->get(route('patients.show', $patient->id))
             ->assertOk()
             ->assertSee('Kesiapan SATUSEHAT', false);

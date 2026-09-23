@@ -55,7 +55,7 @@
                         <textarea name="address" rows="2" maxlength="2000"
                                   class="mt-1 w-full rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800"></textarea>
                     </label>
-                    <button type="submit" class="btn-primary sm:col-span-2" @disabled(!$enabled)">
+                    <button type="submit" class="btn-submit !w-auto !px-8 sm:col-span-2" @disabled(!$enabled)">
                         Daftarkan Organization
                     </button>
                 </form>
@@ -97,7 +97,7 @@
                         <input name="phone" maxlength="32"
                                class="mt-1 w-full rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800" />
                     </label>
-                    <button type="submit" class="btn-primary sm:col-span-2" @disabled(!$enabled)">
+                    <button type="submit" class="btn-submit !w-auto !px-8 sm:col-span-2" @disabled(!$enabled)">
                         Daftarkan Practitioner
                     </button>
                 </form>
@@ -122,7 +122,7 @@
                         <textarea name="address" rows="2" maxlength="2000"
                                   class="mt-1 w-full rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800"></textarea>
                     </label>
-                    <button type="submit" class="btn-primary sm:col-span-2" @disabled(!$enabled)">
+                    <button type="submit" class="btn-submit !w-auto !px-8 sm:col-span-2" @disabled(!$enabled)">
                         Daftarkan Location
                     </button>
                 </form>

@@ -166,6 +166,16 @@
                         </div>
 
                         <div class="data-container">
+                            <dt>Penjamin</dt>
+                            <dd>
+                                {{ $data->insurance_name ?? 'Umum (Tunai)' }}
+                                @if ($data->insurance_number)
+                                    <span class="text-xs text-slate-400 ml-1">{{ $data->insurance_number }}</span>
+                                @endif
+                            </dd>
+                        </div>
+
+                        <div class="data-container">
                             <dt>{{ __('patient.master.detail.labels.religion._title') }}</dt>
                             <dd>
                                 @switch($data->religion)

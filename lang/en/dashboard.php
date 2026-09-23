@@ -69,6 +69,8 @@ return [
         'subtitle' => 'Notes breakdown by payment method.',
         'transactions' => 'transactions',
         'method_other' => 'Other',
+        'empty_title' => 'No Notes This Month',
+        'empty_hint' => 'Payment method breakdown will appear once transactions exist.',
     ],
     'incomplete' => [
         'title' => 'Incomplete Patient Data',
@@ -81,6 +83,8 @@ return [
         'action' => 'Complete Data',
         'footer' => 'Showing patients with pending data completeness',
         'see_all' => 'Open Patient Master',
+        'empty_title' => 'All Patient Data Complete',
+        'empty_hint' => 'No patients need data completion right now. Great job!',
     ],
     'recent' => [
         'title_transactions' => 'Recent Notes',
@@ -93,6 +97,8 @@ return [
         'th_date' => 'Date',
         'th_diagnosis' => 'Diagnosis',
         'th_total' => 'Total',
+        'empty_transactions' => 'No Notes Issued Yet',
+        'empty_records' => 'No Medical Records Yet',
     ],
     'empty_widgets' => 'No widgets available for this role.',
 ];

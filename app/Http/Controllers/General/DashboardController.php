@@ -23,10 +23,11 @@ class DashboardController extends Controller
         $role = $roles->contains('manajemen') ? 'admin' : ($roles->first() ?? 'guest');
 
         // Overview array bersih dari cache (serialize-safe) — lihat DashboardService.
+        // Nurse: overview operasional klinik (bukan overview dokter lain).
         $overview = match ($role) {
             'admin' => $this->service->getAdminDataOverview(),
             'doctor' => $this->service->getDoctorDataOverview(auth()->user()->id),
-            'nurse' => $this->service->getDoctorDataOverview($request->doctor),
+            'nurse' => $this->service->getAdminDataOverview(),
             default => null,
         };
 
@@ -76,8 +77,10 @@ class DashboardController extends Controller
     private function widgetMap(): array
     {
         return [
+            // Pendapatan (kpi + grafik) HANYA manajemen/admin — dokter &
+            // perawat melihat kinerja operasional tanpa angka finansial.
             'kpi-row' => [['admin', 'doctor', 'nurse'], 'kpiRow'],
-            'chart-trend' => [['admin', 'doctor'], 'chartTrend'],
+            'chart-trend' => [['admin'], 'chartTrend'],
             'queue-today' => [['admin', 'doctor', 'nurse'], 'queueToday'],
             'billing-methods' => [['admin'], 'billingMethods'],
             'patients-incomplete' => [['admin'], 'patientsIncomplete'],
@@ -88,8 +91,8 @@ class DashboardController extends Controller
     private function kpiRow(array $o, string $role): object
     {
         return (object) [
-            // Perawat fokus operasional: tanpa kartu finansial.
-            'show_revenue' => in_array($role, ['admin', 'doctor'], true),
+            // Keuangan hanya untuk manajemen (dashboard admin).
+            'show_revenue' => $role === 'admin',
             'revenue' => GeneralHelper::floatToRupiah((float) ($o['revenue'] ?? 0)),
             'transactions' => (int) ($o['transactions'] ?? 0),
             'patients' => isset($o['patients']) ? (int) $o['patients'] : null,
@@ -119,21 +122,19 @@ class DashboardController extends Controller
 
     private function billingMethods(array $o, string $role): ?object
     {
-        if (empty($o['payment_methods'])) {
-            return null;
-        }
-
-        return (object) ['methods' => $this->toObjects($o['payment_methods'])];
+        // Selalu dirender (manajemen): tabel kosong = info transaksi bulan ini
+        // belum ada, bukan widget hilang. Partial menangani kosong sendiri.
+        return (object) [
+            'methods' => $this->toObjects($o['payment_methods'] ?? []),
+        ];
     }
 
     private function patientsIncomplete(array $o, string $role): ?object
     {
-        if ((int) ($o['incomplete_count'] ?? 0) === 0) {
-            return null;
-        }
-
+        // Selalu dirender (manajemen): "semua lengkap" adalah info yang berarti,
+        // jangan hilangkan widget-nya — partial menampilkan empty state.
         return (object) [
-            'count' => (int) $o['incomplete_count'],
+            'count' => (int) ($o['incomplete_count'] ?? 0),
             'patients' => $this->toObjects($o['incomplete_patients'] ?? []),
         ];
     }
@@ -141,18 +142,10 @@ class DashboardController extends Controller
     private function recentActivities(array $o, string $role): ?object
     {
         if ($role === 'doctor') {
-            if (empty($o['recent_records'])) {
-                return null;
-            }
-
-            return (object) ['type' => 'records', 'rows' => $this->toObjects($o['recent_records'])];
+            return (object) ['type' => 'records', 'rows' => $this->toObjects($o['recent_records'] ?? [])];
         }
 
-        if (empty($o['recent_transactions'])) {
-            return null;
-        }
-
-        return (object) ['type' => 'transactions', 'rows' => $this->toObjects($o['recent_transactions'])];
+        return (object) ['type' => 'transactions', 'rows' => $this->toObjects($o['recent_transactions'] ?? [])];
     }
 
     /**

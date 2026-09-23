@@ -57,7 +57,7 @@
                             </select>
                         </label>
                         <div class="flex items-center gap-3 sm:col-span-2">
-                            <button type="submit" class="btn-primary">Simpan</button>
+                            <button type="submit" class="btn-submit !w-auto !px-8">Simpan</button>
                             @if ($branch->satusehatCredential)
                                 <a href="{{ route('satusehat.credentials.verify', $branch->id) }}"
                                    class="text-sm text-brand-600 hover:text-brand-700">Verifikasi token</a>

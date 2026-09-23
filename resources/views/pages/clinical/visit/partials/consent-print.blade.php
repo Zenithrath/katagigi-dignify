@@ -31,7 +31,7 @@
 <body onload="window.print()">
 <header>
     <h1>Lembar Persetujuan Umum (Informed Consent)</h1>
-    <p>{{ config('app.name') }} — {{ \App\Models\OrganizationProfile::query()->value('name') ?? '' }}</p>
+    <p>{{ config('app.name') }} — {{ \App\Models\OrganizationProfile::query()->value('organization_name') ?? '' }}</p>
     <p>Nomor: IC/{{ $consent->consent_type }}/{{ $consent->created_at->format('Y/m') }}/{{ substr($consent->id, 0, 8) }}</p>
 </header>
 
