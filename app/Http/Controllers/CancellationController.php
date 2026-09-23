@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Audit;
 use App\Models\Transaction;
 use App\Models\TransactionCancellationRequest;
 use App\Services\TransactionService;
@@ -42,6 +43,8 @@ class CancellationController extends Controller
             $transaction->update(['is_locked' => true]);
         });
 
+        Audit::log('propose-cancellation', 'transaction', $transaction->id, null, ['is_locked' => true], $validated['cancel_reason']);
+
         return back()->with('success', 'Usulan pembatalan dikirim ke manajemen.');
     }
 
@@ -65,6 +68,8 @@ class CancellationController extends Controller
             $proposal->transaction->update(['is_locked' => false]);
         });
 
+        Audit::log('cancel-transaction', 'transaction', $proposal->transaction_id, ['status' => 'ACTIVE'], ['status' => 'CANCELED'], $proposal->reason);
+
         return back()->with('success', 'Pembatalan nota disetujui.');
     }
 
@@ -84,6 +89,8 @@ class CancellationController extends Controller
             ]);
             $proposal->transaction->update(['is_locked' => false]);
         });
+
+        Audit::log('reject-cancellation', 'transaction_cancellation_request', $proposal->id, ['status' => 'PROPOSED'], ['status' => 'REJECTED'], $validated['decision_note'] ?? null);
 
         return back()->with('success', 'Usulan pembatalan ditolak, nota dibuka kembali.');
     }

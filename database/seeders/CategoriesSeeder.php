@@ -46,26 +46,28 @@ class CategoriesSeeder extends Seeder
                 'name' => 'Prostodonsia',
                 'code' => 'PRO',
             ],
-            // [
-            //     'id' => Uuid::uuid4(),
-            //     'name' => 'Prostodonsia Lab BAS',
-            //     'code' => 'PROSTO BAS',
-            // ],
-            // [
-            //     'id' => Uuid::uuid4(),
-            //     'name' => 'Prostodonsia Klinik',
-            //     'code' => 'PROSTO KLINIK',
-            // ],
-            // [
-            //     'id' => Uuid::uuid4(),
-            //     'name' => 'Prostodonsia Lab Afif',
-            //     'code' => 'PROSTO AFIF',
-            // ],
-            // [
-            //     'id' => Uuid::uuid4(),
-            //     'name' => 'Prostodonsia Lab Delta',
-            //     'code' => 'PROSTO DELTA',
-            // ],
+            // D-06e: kategori lab prostodonsia diaktifkan kembali (seeder
+            // lab BAS/Klinik/Afif/Delta orphan tanpa kategori ini).
+            [
+                'id' => Uuid::uuid4(),
+                'name' => 'Prostodonsia Lab BAS',
+                'code' => 'PROB',
+            ],
+            [
+                'id' => Uuid::uuid4(),
+                'name' => 'Prostodonsia Klinik',
+                'code' => 'PROK',
+            ],
+            [
+                'id' => Uuid::uuid4(),
+                'name' => 'Prostodonsia Lab Afif',
+                'code' => 'PROA',
+            ],
+            [
+                'id' => Uuid::uuid4(),
+                'name' => 'Prostodonsia Lab Delta',
+                'code' => 'PROD',
+            ],
         ];
 
         DB::beginTransaction();

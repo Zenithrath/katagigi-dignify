@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CategoryRequest extends FormRequest
 {
@@ -25,7 +26,9 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|min:3',
-            'code' => 'required|unique:categories,code',
+            // D-06b: abaikan baris sendiri saat update agar simpan tanpa
+            // ubah kode tidak gagal unique.
+            'code' => ['required', Rule::unique('categories', 'code')->ignore($this->route('category'), 'id')],
         ];
     }
 }

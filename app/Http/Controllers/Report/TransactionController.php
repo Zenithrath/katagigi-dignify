@@ -31,6 +31,7 @@ class TransactionController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('read transaction');
         $rupiahConverter = function (float $value) {
             return GeneralHelper::floatToRupiah($value);
         };
@@ -43,6 +44,7 @@ class TransactionController extends Controller
 
     public function getTransactionsByKeyword(Request $request)
     {
+        $this->authorize('read transaction');
         $appointmentList = $this->service->readTransactionByFilter($request);
         $total = $this->service->countTotalData($request);
         $limit = $request->limit ?? 20;
@@ -61,6 +63,7 @@ class TransactionController extends Controller
 
     public function getTransactionsByID(Request $request, $id)
     {
+        $this->authorize('read transaction');
         return response()->json([
             'data' => $this->service->readTransactionByID($id),
         ], 200);
@@ -73,15 +76,28 @@ class TransactionController extends Controller
      */
     public function create()
     {
+        $this->authorize('create transaction');
         $appointments = $this->service->readPayableAppointments();
         $services = $this->optionService->getServiceList();
         $assistants = $this->service->readAssistants();
+
+        // Fase 2 Task 9: prefill dari visit (kasir tinggal sesuaikan harga).
+        $prefillVisit = null;
+        $prefillAppointmentID = null;
+        if (request()->filled('visit')) {
+            $prefillVisit = \App\Models\Visit::with(['patient:id,code,name', 'treatments'])->find(request()->input('visit'));
+            if ($prefillVisit && $prefillVisit->appointment_id) {
+                $prefillAppointmentID = $prefillVisit->appointment_id;
+            }
+        }
 
         return view('pages.report.transaction.form', [
             'type' => 'create',
             'appointments' => $appointments,
             'services' => $services,
             'assistants' => $assistants,
+            'prefillVisit' => $prefillVisit,
+            'prefillAppointmentID' => $prefillAppointmentID,
         ]);
     }
 
@@ -93,6 +109,7 @@ class TransactionController extends Controller
      */
     public function store(TransactionRequest $request)
     {
+        $this->authorize('create transaction');
         try {
             if ($id = $this->service->createTransaction((object) $request->validated())) {
                 return redirect()->route('transactions.show', ['transaction' => $id])
@@ -145,6 +162,7 @@ class TransactionController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read transaction');
         $toRupiah = function ($value) {
             return str_replace('Rp. ', '', GeneralHelper::floatToRupiah($value));
         };
@@ -202,6 +220,8 @@ class TransactionController extends Controller
 
     public function reschedule(Request $request, string $id)
     {
+        // D-04: reschedule tanggal kontrol = perubahan nota → butuh update transaction.
+        $this->authorize('update transaction');
         if ($this->service->reschedule($id, $request->date) instanceof Throwable) {
             return response(null, 500);
         }
@@ -222,36 +242,5 @@ class TransactionController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+    // D-06c: edit/update/destroy nota dinonaktifkan di route (ledger final).
 }

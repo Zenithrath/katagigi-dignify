@@ -98,7 +98,7 @@ class Transaction extends Model
      */
     public function transaction_service(): HasMany
     {
-        return $this->hasMany(TransactionService::class, 'id', 'transaction_id');
+        return $this->hasMany(TransactionService::class, 'transaction_id', 'id');
     }
 
     /**

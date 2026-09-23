@@ -4,14 +4,13 @@ namespace App\Http\Controllers\General;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ScheduleRequest;
-use App\Models\Schedule;
 use App\Services\General\ScheduleService;
 use App\Services\Master\DoctorService;
 use App\Types\Entities\ScheduleEntity;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ScheduleController extends Controller
 {
@@ -27,6 +26,7 @@ class ScheduleController extends Controller
 
     public function index()
     {
+        $this->authorize('read schedule');
         $doctorList = $this->doctorService->selectAllDoctorOption();
 
         return view('pages.general.schedule.index', [
@@ -36,6 +36,7 @@ class ScheduleController extends Controller
 
     public function lookup(Request $request)
     {
+        $this->authorize('read schedule');
         $total = $this->service->countTotalData($request);
         $limit = $request->limit ?? 20;
         $pagination = (object) [
@@ -53,6 +54,7 @@ class ScheduleController extends Controller
 
     public function lookupDoctor(Request $request)
     {
+        $this->authorize('read schedule');
         $doctorID = auth()->user()->id;
         $total = $this->service->countTotalDataDoctor($doctorID);
         $limit = $request->limit ?? 20;
@@ -71,6 +73,7 @@ class ScheduleController extends Controller
 
     public function store(ScheduleRequest $request)
     {
+        $this->authorize('create schedule');
         $validated = $request->validated();
 
         $schedule = new ScheduleEntity;
@@ -81,7 +84,7 @@ class ScheduleController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.schedule.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.schedule.error.oncreate')])->withInput();
         }
 
         return redirect()->route('schedules.index')
@@ -90,12 +93,13 @@ class ScheduleController extends Controller
 
     public function updateStatus($id)
     {
+        $this->authorize('update schedule');
         $updated = $this->service->updateStatusSchedule($id);
         if ($updated instanceof Exception) {
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.schedule.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.schedule.error.onupdate')])->withInput();
         }
 
         return redirect()->route('schedules.index')
@@ -104,12 +108,13 @@ class ScheduleController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('delete schedule');
         $deleted = $this->service->deleteSchedule($id);
         if ($deleted instanceof Exception) {
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.schedule.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.schedule.error.ondelete')])->withInput();
         }
 
         return redirect()->route('schedules.index')

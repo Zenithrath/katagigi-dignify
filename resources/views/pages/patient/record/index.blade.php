@@ -58,16 +58,18 @@
                                 <td class="column w-72">
                                     <div class="flex flex-col">
                                         <a href="{{ route('medical-records.show', ['medical_record' => $record->id]) }}"
-                                            class="text-base mb-1">{{ $record->patient_name }}</a>
-                                        <span>{{ $record->patient_code }}</span>
-                                        <span class="w-72 truncate">{{ $record->patient_address }}</span>
+                                            class="text-base mb-1 font-medium text-brand-600 hover:text-brand-700 hover:underline">{{ $record->patient_name }}</a>
+                                        <a href="{{ route('patients.show', ['patient' => $record->patient_id]) }}"
+                                            class="text-xs text-slate-400 hover:text-brand-600 hover:underline w-fit">{{ $record->patient_code }}</a>
+                                        <span class="w-72 truncate text-xs text-slate-500">{{ $record->patient_address }}</span>
                                     </div>
                                 </td>
                                 <td class="column">{{ $record->patient_phone }}</td>
                                 <td class="column">
                                     <ul>
-                                        @foreach (json_decode($record->services) as $item)
-                                            <li>{{ $item->code }} - {{ $item->name }}</li>
+                                        {{-- Tahan format lama: record lawas bisa tidak punya code/name --}}
+                                        @foreach (is_iterable($services = json_decode($record->services)) ? $services : [] as $item)
+                                            <li>{{ $item->code ?? '—' }} - {{ $item->name ?? 'Layanan' }}</li>
                                         @endforeach
                                     </ul>
                                 </td>

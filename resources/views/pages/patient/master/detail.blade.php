@@ -4,6 +4,7 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
+                <x-back-button href="{{ route('patients.index') }}" />
                 <h1>{{ __('patient.master.detail.title') }}</h1>
                 <p>{{ $data->name ?? '-' }}</p>
             </div>
@@ -31,6 +32,34 @@
 
             {{-- Tab 1: Information --}}
             <div x-show="tab === 1" class="p-8">
+                @php
+                    $satusehatChecks = [
+                        ['label' => __('patient.master.detail.satusehat.checks.nik'), 'ok' => !empty($data->nik) && strlen($data->nik) === 16],
+                        ['label' => __('patient.master.detail.satusehat.checks.birth'), 'ok' => !empty($data->birth_place) && !empty($data->birthdate)],
+                        ['label' => __('patient.master.detail.satusehat.checks.ihs'), 'ok' => !empty($data->ihs_id)],
+                        ['label' => __('patient.master.detail.satusehat.checks.consent'), 'ok' => !empty($data->satusehat_consent)],
+                    ];
+                    $satusehatReady = collect($satusehatChecks)->every(fn ($c) => $c['ok']);
+                @endphp
+                <section id="satusehat-readiness" class="mb-6 p-4 rounded-xl border {{ $satusehatReady ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200' }}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-sm font-bold {{ $satusehatReady ? 'text-emerald-700' : 'text-amber-700' }}">
+                            {{ __('patient.master.detail.satusehat.title') }}: {{ $satusehatReady ? __('patient.master.detail.satusehat.ready') : __('patient.master.detail.satusehat.not_ready') }}
+                        </span>
+                    </div>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-1">
+                        @foreach ($satusehatChecks as $check)
+                            <li class="flex items-center gap-2 text-sm {{ $check['ok'] ? 'text-emerald-700' : 'text-slate-500' }}">
+                                <span>{{ $check['ok'] ? '✓' : '○' }}</span>
+                                <span>{{ $check['label'] }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @unless ($satusehatReady)
+                        <p class="mt-2 text-xs text-amber-600">{{ __('patient.master.detail.satusehat.hint') }}</p>
+                    @endunless
+                </section>
+
                 <section id="information-title" class="mb-6">
                     <span class="font-bold text-lg text-slate-900">{{ __('patient.master.detail.labels.title.information') }}</span>
                 </section>
@@ -117,6 +146,36 @@
                         </div>
 
                         <div class="data-container">
+                            <dt>{{ __('patient.master.detail.labels.birth_place') }}</dt>
+                            <dd>{{ $data->birth_place ?? '-' }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>{{ __('patient.master.detail.labels.nik') }}</dt>
+                            <dd class="font-semibold">{{ $data->nik ?? '-' }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>{{ __('patient.master.detail.labels.ihs_id') }}</dt>
+                            <dd>{{ $data->ihs_id ?? '-' }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>{{ __('patient.master.detail.labels.satusehat_consent') }}</dt>
+                            <dd>{{ !empty($data->satusehat_consent) ? __('patient.master.detail.labels.yes') : __('patient.master.detail.labels.no') }}</dd>
+                        </div>
+
+                        <div class="data-container">
+                            <dt>Penjamin</dt>
+                            <dd>
+                                {{ $data->insurance_name ?? 'Umum (Tunai)' }}
+                                @if ($data->insurance_number)
+                                    <span class="text-xs text-slate-400 ml-1">{{ $data->insurance_number }}</span>
+                                @endif
+                            </dd>
+                        </div>
+
+                        <div class="data-container">
                             <dt>{{ __('patient.master.detail.labels.religion._title') }}</dt>
                             <dd>
                                 @switch($data->religion)
@@ -171,10 +230,10 @@
                                 <div>
                                     <h3 class="font-bold text-slate-900 flex items-center gap-2">
                                         <x-lucide-file-text class="w-4 h-4 text-emerald-500" />
-                                        {{ __('Medical Record') }} #{{ strtoupper(substr($record->id, 0, 7)) }}
+                                        {{ __('patient.master.detail.labels.medical_record') }} #{{ strtoupper(substr($record->id, 0, 7)) }}
                                     </h3>
                                     <p class="text-xs text-slate-500 mt-1">
-                                        {{ Carbon::parse($record->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
+                                        {{ \Carbon\Carbon::parse($record->created_at)->locale(app()->getLocale())->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}
                                     </p>
                                 </div>
                             </div>
@@ -199,15 +258,16 @@
                                 <div class="preview-container py-2">
                                     <dt class="font-semibold">{{ __('patient.record.detail.data.service.title') }}</dt>
                                     <dd class="flex flex-col gap-2">
-                                        @foreach ($record->services as $service)
+                                        {{-- Tahan format lama: record lawas bisa null / skalar / tanpa code/name --}}
+                                        @foreach (is_iterable($record->services) ? $record->services : [] as $service)
                                             <div class="flex flex-col md:flex-row justify-between bg-white p-3 rounded-xl border border-slate-100">
                                                 <div class="flex flex-1 flex-col gap-0">
-                                                    <span class="font-semibold">{{ $service->name }}</span>
-                                                    <span class="text-sm text-slate-500">{{ $service->code }}: {{ $service->category }}</span>
+                                                    <span class="font-semibold">{{ $service->name ?? __('patient.record.form.labels.service') }}</span>
+                                                    <span class="text-sm text-slate-500">{{ $service->code ?? '—' }}: {{ $service->category ?? '—' }}</span>
                                                 </div>
                                                 <div class="flex flex-col gap-0 text-right">
-                                                    <span class="font-medium">{{ $service->quantity . ' x ' . $toRupiah($service->price) }}</span>
-                                                    <span class="text-sm text-slate-500">Discount: {{ $toRupiah($service->discount) }}</span>
+                                                    <span class="font-medium">{{ ($service->quantity ?? 1) . ' x ' . $toRupiah($service->price ?? 0) }}</span>
+                                                    <span class="text-sm text-slate-500">{{ __('patient.record.detail.data.discount') }}: {{ $toRupiah($service->discount ?? 0) }}</span>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -217,7 +277,7 @@
                                 <div class="preview-container py-2">
                                     <dt class="font-semibold">{{ __('patient.record.detail.data.recomendation') }}</dt>
                                     <dd>
-                                        {{ Carbon::parse($record->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
+                                        {{ \Carbon\Carbon::parse($record->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
                                     </dd>
                                 </div>
 
@@ -287,7 +347,7 @@
                     @empty
                         <div class="text-center py-12">
                             <x-lucide-folder-open class="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                            <p class="text-sm text-slate-500">No medical records found</p>
+                            <p class="text-sm text-slate-500">{{ __('patient.master.detail.history_empty') }}</p>
                         </div>
                     @endforelse
                 </section>

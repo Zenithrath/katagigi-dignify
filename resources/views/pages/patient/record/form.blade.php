@@ -4,8 +4,8 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
-                <h1>{{ $type == 'update' ? __('form.title.update.medical_record') : __('form.title.create.medical_record') }}</h1>
-                <p>{{ $type == 'update' ? 'Update medical record' : 'Create a new medical record' }}</p>
+                <x-back-button href="{{ $type == 'update' ? route('medical-records.show', $record->id) : route('medical-records.index') }}" /></h1>
+                <p>{{ $type == 'update' ? __('patient.record.form.subtitle.update') : __('patient.record.form.subtitle.create') }}</p>
             </div>
         </section>
 
@@ -29,7 +29,7 @@
                                 @foreach ($appointments as $appointment)
                                     <option value="{{ $appointment->id }}"
                                         {{ $appointment->id == $record->appointment_id ? 'selected' : '' }}>
-                                        {{ sprintf('%s - %s (%s %s-%s)', $appointment->patient_code, $appointment->patient_name, $appointment->date, Carbon::parse($appointment->time_start)->format('H:i'), Carbon::parse($appointment->time_end)->format('H:i')) }}
+                                        {{ sprintf('%s - %s (%s %s-%s)', $appointment->patient_code, $appointment->patient_name, $appointment->date, \Carbon\Carbon::parse($appointment->time_start)->format('H:i'), \Carbon\Carbon::parse($appointment->time_end)->format('H:i')) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -145,9 +145,21 @@
                             </div>
 
                             <div class="input-group md:col-span-2">
-                                <label>Kode Diagnosis Resmi <span class="text-red-500">*</span></label>
-                                <livewire:diagnosis-search :selected="$diagnosisCodes ?? []" />
-                                <small class="helper">Wajib pilih minimal 1 kode (ICD-10 / ICD-9 / SNOMED). Ketik bahasa awam, mis. "gigi berlubang".</small>
+                                <label>{{ __('patient.record.form.labels.diagnosis_icd10') }} <span class="text-red-500">*</span></label>
+                                <livewire:diagnosis-search system="ICD10" fieldName="diagnosis_codes_icd10" :selected="$diagnosisCodesIcd10 ?? []" />
+                                <small class="helper">{{ __('patient.record.form.helpers.diagnosis_icd10') }}</small>
+                                @error('diagnosis_codes_icd10')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="input-group md:col-span-2">
+                                <label>{{ __('patient.record.form.labels.procedure_icd9') }}</label>
+                                <livewire:diagnosis-search system="ICD9" fieldName="procedure_codes_icd9" :selected="$procedureCodesIcd9 ?? []" />
+                                <small class="helper">{{ __('patient.record.form.helpers.procedure_icd9') }}</small>
+                                @error('procedure_codes_icd9')
+                                    <small class="danger">{{ $message }}</small>
+                                @enderror
                             </div>
 
                             <div class="input-group md:col-span-2">

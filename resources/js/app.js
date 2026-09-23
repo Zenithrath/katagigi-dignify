@@ -176,6 +176,59 @@ Alpine.data('revenueChartComponent', (analyticsData = {}) => ({
     }
 }));
 
+// YoY revenue chart (Chart.js grouped bars) — dipakai halaman revenue-report.
+// Chart.js di-load malas via dynamic import supaya halaman lain tetap ringan.
+Alpine.data('yoyChart', (payload = {}) => ({
+    mode: 'collected',
+    chart: null,
+    ChartLib: null,
+    months: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+
+    init() {
+        this.$nextTick(() => this.render());
+        this.$watch('mode', () => this.render());
+    },
+
+    async render() {
+        const canvas = this.$refs.yoyCanvas;
+        if (!canvas) return;
+        if (!this.ChartLib) {
+            const mod = await import('chart.js/auto');
+            this.ChartLib = mod.default;
+        }
+        if (this.chart) {
+            this.chart.destroy();
+            this.chart = null;
+        }
+        const rows = Array.isArray(payload.rows) ? payload.rows : [];
+        this.chart = new this.ChartLib(canvas, {
+            type: 'bar',
+            data: {
+                labels: this.months,
+                datasets: [
+                    { label: String(payload.year), data: rows.map((r) => Number(r[this.mode]) || 0), backgroundColor: '#059669', borderRadius: 6 },
+                    { label: String(payload.prev), data: rows.map((r) => Number(r[this.mode + '_prev']) || 0), backgroundColor: '#cbd5e1', borderRadius: 6 },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => ' ' + (window.convertRupiah ? window.convertRupiah(c.parsed.y) : 'Rp. ' + c.parsed.y.toLocaleString('id-ID')),
+                        },
+                    },
+                },
+                scales: {
+                    y: { ticks: { callback: (v) => v >= 1e6 ? 'Rp' + (v / 1e6) + 'jt' : 'Rp' + v } },
+                },
+            },
+        });
+    },
+}));
+
 Alpine.start();
 
 // jQuery + Select2 init — guarded so third-party init can NEVER break Alpine boot.

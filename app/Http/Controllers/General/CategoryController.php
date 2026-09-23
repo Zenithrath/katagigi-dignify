@@ -26,6 +26,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
+        $this->authorize('read category');
         return view('pages.general.service.category.index', data: [
             'categoryList' => $this->service->readAllCategories(),
         ]);
@@ -38,6 +39,7 @@ class CategoryController extends Controller
      */
     public function create(Request $request)
     {
+        $this->authorize('create category');
         $redirectRoute = isset($request->redirect) ? ['redirect' => $request->redirect] : null;
 
         return view('pages.general.service.category.form', [
@@ -56,6 +58,7 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
+        $this->authorize('create category');
         $status = $this->service->createCategory($request->name, $request->code);
 
         if ($status instanceof Exception) {
@@ -78,7 +81,7 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        //
+        $this->authorize('read category');
     }
 
     /**
@@ -89,6 +92,7 @@ class CategoryController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('update category');
         return view('pages.general.service.category.form', [
             'type' => 'update',
             'data' => $this->service->readCategoryById($id),
@@ -102,8 +106,9 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
+        $this->authorize('update category');
         $status = $this->service->updateCategory($id, $request->name, $request->code);
 
         if ($status instanceof Exception) {
@@ -124,6 +129,7 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete category');
         $status = $this->service->deleteCategory($id);
 
         if ($status instanceof Exception) {

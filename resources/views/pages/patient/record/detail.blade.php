@@ -4,8 +4,9 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
+                <x-back-button href="{{ route('medical-records.index') }}" />
                 <h1>{{ __('Medical Record') }} #{{ strtoupper(substr($data->id, 0, 7)) }}</h1>
-                <p>{{ Carbon::parse($data->created_at)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}</p>
+                <p>{{ \Carbon\Carbon::parse($data->created_at)->locale(app()->getLocale())->setTimezone('Asia/Jakarta')->isoFormat('dddd, DD MMMM YYYY HH:mm ZZ') }}</p>
             </div>
         </section>
 
@@ -29,7 +30,7 @@
                     <div class="preview-container py-2">
                         <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.recomendation') }}</dt>
                         <dd class="font-medium text-slate-900">
-                            {{ Carbon::parse($data->next_schedule)->locale('id')->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
+                            {{ \Carbon\Carbon::parse($data->next_schedule)->locale(app()->getLocale())->setTimezone('Asia/Jakarta')->isoFormat('DD MMMM YYYY') }}
                         </dd>
                     </div>
                     <div class="preview-container py-2">
@@ -45,9 +46,9 @@
                         <dd class="font-medium text-slate-900">{{ $data->anamnesis ?? '-' }}</dd>
                     </div>
                     <div class="preview-container py-2">
-                        <dt class="text-sm font-semibold text-slate-600">Kode Diagnosis Resmi</dt>
+                        <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.form.labels.diagnosis_icd10') }}</dt>
                         <dd class="flex flex-col gap-1">
-                            @forelse ($diagnosisCodes ?? [] as $code)
+                            @forelse ($diagnosisCodesIcd10 ?? [] as $code)
                                 <span class="font-medium text-slate-900 bg-emerald-50 px-2 py-0.5 rounded-lg text-sm inline-flex items-center gap-1">
                                     <span class="text-emerald-600 font-bold">[{{ $code->system }}]</span>
                                     {{ $code->code }} - {{ $code->display }}
@@ -57,11 +58,37 @@
                             @endforelse
                         </dd>
                     </div>
+                    <div class="preview-container py-2">
+                        <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.form.labels.procedure_icd9') }}</dt>
+                        <dd class="flex flex-col gap-1">
+                            @forelse ($procedureCodesIcd9 ?? [] as $code)
+                                <span class="font-medium text-slate-900 bg-teal-50 px-2 py-0.5 rounded-lg text-sm inline-flex items-center gap-1">
+                                    <span class="text-teal-600 font-bold">[{{ $code->system }}]</span>
+                                    {{ $code->code }} - {{ $code->display }}
+                                </span>
+                            @empty
+                                <span class="text-slate-400">-</span>
+                            @endforelse
+                        </dd>
+                    </div>
+                    @if (($otherCodes ?? collect())->isNotEmpty())
+                        <div class="preview-container py-2">
+                            <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.other_codes') }}</dt>
+                            <dd class="flex flex-col gap-1">
+                                @foreach ($otherCodes as $code)
+                                    <span class="font-medium text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg text-sm inline-flex items-center gap-1">
+                                        <span class="text-slate-500 font-bold">[{{ $code->system }}]</span>
+                                        {{ $code->code }} - {{ $code->display }}
+                                    </span>
+                                @endforeach
+                            </dd>
+                        </div>
+                    @endif
                 </dl>
 
                 <dl class="detail-list">
                     <div class="preview-container py-2">
-                        <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.diagnosis') }} (catatan)</dt>
+                        <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.diagnosis') }} ({{ __('patient.record.detail.data.note') }})</dt>
                         <dd class="font-medium text-slate-900">{{ $data->diagnosis }}</dd>
                     </div>
                     <div class="preview-container py-2">
@@ -70,7 +97,7 @@
                     </div>
                     <div class="preview-container py-2">
                         <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.prescription') }}</dt>
-                        <dd class="font-medium text-slate-900">{{ $data->prescription ?? 'No Prescription' }}</dd>
+                        <dd class="font-medium text-slate-900">{{ $data->prescription ?? __('patient.record.detail.data.prescription') }}</dd>
                     </div>
                     <div class="preview-container py-2">
                         <dt class="text-sm font-semibold text-slate-600">{{ __('patient.record.detail.data.promat') }}</dt>
@@ -90,15 +117,15 @@
             <div class="mt-4 pt-4 border-t border-slate-200">
                 <h3 class="text-sm font-semibold text-slate-700 mb-3">{{ __('patient.record.detail.data.service.title') }}</h3>
                 <div class="flex flex-col gap-2">
-                    @foreach ($data->services as $service)
+                    @foreach (is_iterable($data->services) ? $data->services : [] as $service)
                         <div class="flex flex-col md:flex-row justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <div class="flex flex-1 flex-col gap-0">
-                                <span class="font-semibold text-slate-900">{{ $service->name }}</span>
-                                <span class="text-sm text-slate-500">{{ $service->code }}: {{ $service->category }}</span>
+                                <span class="font-semibold text-slate-900">{{ $service->name ?? __('patient.record.form.labels.service') }}</span>
+                                <span class="text-sm text-slate-500">{{ $service->code ?? '—' }}: {{ $service->category ?? '—' }}</span>
                             </div>
                             <div class="flex flex-col gap-0 text-right">
-                                <span class="font-medium text-slate-900">{{ $service->quantity . ' x ' . $toRupiah($service->price) }}</span>
-                                <span class="text-sm text-slate-500">Discount: {{ $toRupiah($service->discount) }}</span>
+                                <span class="font-medium text-slate-900">{{ ($service->quantity ?? 1) . ' x ' . $toRupiah($service->price ?? 0) }}</span>
+                                <span class="text-sm text-slate-500">{{ __('patient.record.detail.data.discount') }}: {{ $toRupiah($service->discount ?? 0) }}</span>
                             </div>
                         </div>
                     @endforeach
@@ -126,6 +153,37 @@
                 </div>
             </div>
             @endif
+
+            <div class="mt-4 pt-4 border-t border-slate-200" id="addendums">
+                <h3 class="text-sm font-semibold text-slate-700 mb-3">Riwayat Koreksi (Addendum)</h3>
+                @if (($addendums ?? collect())->isEmpty())
+                    <p class="text-sm text-slate-400">Belum ada koreksi pada rekam medis ini.</p>
+                @else
+                    <div class="flex flex-col gap-2">
+                        @foreach ($addendums as $a)
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-sm">
+                                <div class="flex flex-col md:flex-row justify-between gap-1">
+                                    <span class="font-semibold text-slate-900">{{ $a->field }}</span>
+                                    <span class="text-xs text-slate-500">{{ $a->created_at?->format('d M Y H:i') }} · {{ $a->user->name ?? '-' }}</span>
+                                </div>
+                                <div class="mt-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-xs text-red-500 font-semibold">Lama:</span>
+                                        <pre class="text-xs text-slate-600 whitespace-pre-wrap break-words">{{ is_array($a->old_value) ? json_encode($a->old_value, JSON_PRETTY_PRINT) : $a->old_value }}</pre>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-emerald-600 font-semibold">Baru:</span>
+                                        <pre class="text-xs text-slate-600 whitespace-pre-wrap break-words">{{ is_array($a->new_value) ? json_encode($a->new_value, JSON_PRETTY_PRINT) : $a->new_value }}</pre>
+                                    </div>
+                                </div>
+                                @if ($a->reason)
+                                    <p class="mt-1 text-xs text-slate-500">Alasan: {{ $a->reason }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </section>
     </main>
 </x-app-layout>

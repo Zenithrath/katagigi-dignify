@@ -10,6 +10,8 @@ class DoctorEntity extends UserEntity
 
     public ?string $niptk;
 
+    public ?string $ihs_id;
+
     public ?string $profile_picture;
 
     public ?string $cover_picture;
@@ -34,7 +36,8 @@ class DoctorEntity extends UserEntity
 
         // admin data
         $this->nipp = $validatedRequest['nipp'];
-        $this->niptk = $validatedRequest['niptk'];
+        $this->niptk = $validatedRequest['niptk'] ?? null;
+        $this->ihs_id = $validatedRequest['ihs_id'] ?? null;
         $this->profile_picture = $profilePicturePath;
         $this->cover_picture = $coverPicturePath;
     }
@@ -58,7 +61,8 @@ class DoctorEntity extends UserEntity
 
         // admin data
         $this->nipp = $validatedRequest['nipp'];
-        $this->niptk = $validatedRequest['niptk'];
+        $this->niptk = $validatedRequest['niptk'] ?? null;
+        $this->ihs_id = $validatedRequest['ihs_id'] ?? null;
         $this->profile_picture = $profilePicturePath;
         $this->cover_picture = $coverPicturePath;
     }

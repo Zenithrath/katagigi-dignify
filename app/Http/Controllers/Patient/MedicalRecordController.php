@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Patient;
 
+use App\Helpers\Audit;
 use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MedicalRecordRequest;
 use App\Models\DiagnosisCode;
 use App\Models\MedicalRecord;
+use App\Models\MedicalRecordAddendum;
 use App\Services\General\AppointmentService;
 use App\Services\General\ServiceService;
 use App\Services\Master\DoctorService;
@@ -19,8 +21,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 class MedicalRecordController extends Controller
@@ -54,6 +56,8 @@ class MedicalRecordController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('read medical record');
+
         return view('pages.patient.record.index', [
             'medicalRecordList' => $this->service->readAllMedicalRecords($request),
         ]);
@@ -61,6 +65,7 @@ class MedicalRecordController extends Controller
 
     public function lookup(Request $request)
     {
+        $this->authorize('read medical record');
         $total = $this->service->countTotalData($request);
         $limit = $request->limit ?? 20;
         $pagination = (object) [
@@ -78,6 +83,7 @@ class MedicalRecordController extends Controller
 
     public function lookupMedicalHistory(Request $request, string $patient_id)
     {
+        $this->authorize('read patient');
         $request['sort'] = 'asc';
         $total = $this->service->countTotalDataHistory($request, $patient_id);
         $limit = $request->limit ?? 20;
@@ -107,6 +113,7 @@ class MedicalRecordController extends Controller
      */
     public function create()
     {
+        $this->authorize('create medical record');
         $services = $this->optionService->getServiceList();
         if (Auth::user()->hasRole('doctor')) {
             $doctorID = Auth::user()->id;
@@ -133,10 +140,12 @@ class MedicalRecordController extends Controller
      */
     public function store(MedicalRecordRequest $request)
     {
+        $this->authorize('create medical record');
         $validated = $request->validated();
         $appointment = $this->appointmentService->readAppointmentByID($validated['appointment_id']);
         $patient_id = $appointment->patient_id;
         $patient = $this->patientService->selectPatientByID($patient_id);
+        abort_if(! $patient, 404, 'Pasien tidak ditemukan.');
         $validated['patient_id'] = $patient_id;
         $validated['patient_name'] = $patient->name;
         $validated['patient_code'] = $patient->code;
@@ -219,8 +228,14 @@ class MedicalRecordController extends Controller
                 ->withInput();
         }
 
-        // V2: simpan kode diagnosis resmi (wajib min. 1, tervalidasi di Request).
-        $this->syncDiagnosisCodes($inserted, $validated['diagnosis_codes'] ?? []);
+        Audit::log('create-medical-record', 'medical_record', $inserted, null, ['patient_id' => $patient_id, 'appointment_id' => $validated['appointment_id']]);
+
+        // D-03: gabung diagnosis ICD-10 + tindakan ICD-9 ke pivot (satu sumber
+        // riwayat). Kode sistem lain yang sudah tersimpan dipertahankan sync.
+        $this->syncDiagnosisCodes($inserted, array_merge(
+            $validated['diagnosis_codes_icd10'] ?? [],
+            $validated['procedure_codes_icd9'] ?? []
+        ));
 
         return redirect()->route('medical-records.index')
             ->with('success', __('messages.medical-record.success.oncreate'));
@@ -234,17 +249,26 @@ class MedicalRecordController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read medical record');
         $toRupiah = function ($value) {
             return GeneralHelper::floatToRupiah($value);
         };
 
+        $allCodes = DB::table('medical_record_diagnoses')
+            ->where('medical_record_id', $id)
+            ->orderBy('system')
+            ->orderBy('code')
+            ->get();
+
         return view('pages.patient.record.detail', [
             'data' => $this->service->readMedicalRecordByID($id),
             'toRupiah' => $toRupiah,
-            'diagnosisCodes' => DB::table('medical_record_diagnoses')
-                ->where('medical_record_id', $id)
-                ->orderBy('system')
-                ->orderBy('code')
+            'diagnosisCodesIcd10' => $allCodes->where('system', 'ICD10')->values(),
+            'procedureCodesIcd9' => $allCodes->where('system', 'ICD9')->values(),
+            'otherCodes' => $allCodes->whereNotIn('system', ['ICD10', 'ICD9'])->values(),
+            'addendums' => MedicalRecordAddendum::where('model_type', 'MedicalRecord')
+                ->where('model_id', $id)
+                ->orderBy('created_at', 'desc')
                 ->get(),
         ]);
     }
@@ -257,6 +281,7 @@ class MedicalRecordController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update medical record');
         $services = $this->optionService->getServiceList();
 
         $record = $this->service->readMedicalRecordByID($id);
@@ -264,28 +289,30 @@ class MedicalRecordController extends Controller
             $this->appointmentService->readAppointmentByID($record->appointment_id),
         ];
 
+        $codedRows = DB::table('medical_record_diagnoses')
+            ->join('diagnosis_codes', 'diagnosis_codes.id', '=', 'medical_record_diagnoses.diagnosis_code_id')
+            ->where('medical_record_diagnoses.medical_record_id', $id)
+            ->select([
+                'diagnosis_codes.id',
+                'diagnosis_codes.system',
+                'diagnosis_codes.code',
+                'diagnosis_codes.display_id',
+            ])
+            ->get()
+            ->map(fn ($row) => [
+                'id' => $row->id,
+                'system' => $row->system,
+                'code' => $row->code,
+                'display_id' => $row->display_id,
+            ]);
+
         return view('pages.patient.record.form', [
             'type' => 'update',
             'record' => $record,
             'services' => $services,
             'appointments' => $appointments,
-            'diagnosisCodes' => DB::table('medical_record_diagnoses')
-                ->join('diagnosis_codes', 'diagnosis_codes.id', '=', 'medical_record_diagnoses.diagnosis_code_id')
-                ->where('medical_record_diagnoses.medical_record_id', $id)
-                ->select([
-                    'diagnosis_codes.id',
-                    'diagnosis_codes.system',
-                    'diagnosis_codes.code',
-                    'diagnosis_codes.display_id',
-                ])
-                ->get()
-                ->map(fn ($row) => [
-                    'id' => $row->id,
-                    'system' => $row->system,
-                    'code' => $row->code,
-                    'display_id' => $row->display_id,
-                ])
-                ->all(),
+            'diagnosisCodesIcd10' => $codedRows->where('system', 'ICD10')->values()->all(),
+            'procedureCodesIcd9' => $codedRows->where('system', 'ICD9')->values()->all(),
             'action' => route('medical-records.update', ['medical_record' => $id]),
         ]);
     }
@@ -299,6 +326,7 @@ class MedicalRecordController extends Controller
      */
     public function update(MedicalRecordRequest $request, $id)
     {
+        $this->authorize('update medical record');
         $beforeImageInput = [];
         foreach ($request->image_before_meta as $index => $image) {
             if (str_contains($image, 'blob:')) {
@@ -386,21 +414,31 @@ class MedicalRecordController extends Controller
                 ->withInput();
         }
 
-        // V2: sinkronkan ulang kode diagnosis resmi.
-        $this->syncDiagnosisCodes($id, $request->input('diagnosis_codes', []));
+        // D-03: sinkronkan ulang diagnosis ICD-10 + tindakan ICD-9.
+        $this->syncDiagnosisCodes($id, array_merge(
+            $request->input('diagnosis_codes_icd10', []),
+            $request->input('procedure_codes_icd9', [])
+        ));
+
+        // Permenkes 24/2022: koreksi RME SIGNED wajib teraudit (old/new).
+        Audit::log('update-medical-record', 'medical_record', $id, $this->service->readMedicalRecordByID($id)?->diagnosis ? ['diagnosis' => $this->service->readMedicalRecordByID($id)->diagnosis] : null, ['diagnosis' => $request->input('diagnosis')], $request->input('audit_reason'));
 
         return redirect()->route('medical-records.show', ['medical_record' => $id])
             ->with('success', __('messages.medical-record.success.onupdate'));
     }
 
     /**
-     * V2: simpan/timpa kode diagnosis resmi rekam medis beserta snapshot
+     * D-03: simpan/timpa kode diagnosis resmi rekam medis beserta snapshot
      * (agar riwayat tetap benar walau master berubah). Dipanggil setelah
-     * insert/update; daftar kode sudah tervalidasi exists di Request.
+     * insert/update; daftar kode sudah tervalidasi per sistem di Request.
+     * Baris sistem lain (mis. SNOMED lama) dipertahankan, tidak dihapus.
      */
     private function syncDiagnosisCodes(string $recordId, array $codeIds): void
     {
-        DB::table('medical_record_diagnoses')->where('medical_record_id', $recordId)->delete();
+        DB::table('medical_record_diagnoses')
+            ->where('medical_record_id', $recordId)
+            ->whereIn('system', ['ICD10', 'ICD9'])
+            ->delete();
 
         $codes = DiagnosisCode::whereIn('id', array_unique($codeIds))->get();
         $now = now();
@@ -428,6 +466,7 @@ class MedicalRecordController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete medical record');
         $medicalRecord = $this->service->readMedicalRecordByID($id);
         $imageBefore = $medicalRecord->image_before;
         $imageAfter = $medicalRecord->image_after;
@@ -440,15 +479,18 @@ class MedicalRecordController extends Controller
             $this->service->deleteImageAfter($image);
         }
 
-        $status = $this->service->deleteMedicalRecord($id);
-        if ($status instanceof Exception) {
-            Log::error($status->getMessage());
-
-            return redirect()->back()
-                ->with('error', __('messages.medical-record.success.ondelete'));
+        // Permenkes 24/2022: rekam medis tidak boleh hard delete.
+        // Gunakan soft delete + addendum.
+        $record = MedicalRecord::find($id);
+        if (! $record) {
+            return redirect()->route('medical-records.index')
+                ->with('error', 'Rekam medis tidak ditemukan.');
         }
 
+        $record->delete();
+        Audit::log('soft-delete-medical-record', 'medical_record', $id, null, ['deleted' => true], request()->input('audit_reason'));
+
         return redirect()->route('medical-records.index')
-            ->with('success', __('messages.medical-record.success.ondelete'));
+            ->with('success', 'Rekam medis diarsipkan (soft delete). Data tetap tersimpan untuk audit.');
     }
 }
