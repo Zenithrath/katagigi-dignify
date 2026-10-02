@@ -3,7 +3,7 @@
 @props(['href', 'active' => false, 'icon' => 'house', 'badge' => null, 'collapsible' => false])
 
 <li class="nav-item{{ $active ? ' active' : '' }}">
-    <a href="{{ $href }}" {{ $attributes }}>
+    <a href="{{ $href }}" {{ $attributes }} wire:navigate>
         <x-icon :name="'lucide-'.$icon" aria-hidden="true" />
         <span class="nav-label" @if($collapsible) x-data x-show="$store.sidenavExpanded.isExpanded" @endif>{{ $slot }}</span>
         @if ($badge)

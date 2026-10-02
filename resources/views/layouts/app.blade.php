@@ -27,6 +27,9 @@
         </script>
     </head>
     <body class="antialiased">
+        <div id="navigate-progress"
+            class="pointer-events-none fixed inset-x-0 top-0 z-[70] h-1 bg-emerald-500 opacity-0 transition-opacity"></div>
+
         <div class="app-shell" x-data="{ sidebarOpen: false, sidebarCollapsed: false }" x-on:open-sidebar.window="sidebarOpen = true">
 
             {{-- Sidebar: full-height, flush edges --}}
@@ -93,32 +96,57 @@
 
         @stack('scripts')
         <script type="text/javascript">
-            // Sidebar: ingat posisi scroll saat pindah halaman (full reload me-reset scroll).
-            (function () {
+            (function() {
                 var KEY = 'sidebar-scroll-top';
-                document.addEventListener('DOMContentLoaded', function () {
+                function restoreSidebarScroll() {
                     var top = parseInt(sessionStorage.getItem(KEY) || '0', 10);
                     document.querySelectorAll('.sidebar-scroll').forEach(function (el) {
-                        el.addEventListener('click', function (e) {
-                            if (e.target.closest('a')) sessionStorage.setItem(KEY, String(el.scrollTop));
-                        });
+                        if (el.dataset.scrollBound !== '1') {
+                            el.addEventListener('click', function (e) {
+                                if (e.target.closest('a')) sessionStorage.setItem(KEY, String(el.scrollTop));
+                            });
+                            el.dataset.scrollBound = '1';
+                        }
                         el.scrollTop = top;
                     });
+                }
+
+                function initSelectables() {
+                    const elems = document.getElementsByClassName('selectable');
+                    for (let index = 0; index < elems.length; index++) {
+                        try { initSelectable(elems[index]); } catch (_) {}
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    restoreSidebarScroll();
+                    initSelectables();
+                });
+
+                document.addEventListener('livewire:navigated', function () {
+                    restoreSidebarScroll();
+                    initSelectables();
+                });
+
+                document.addEventListener('livewire:navigate', function () {
+                    document.getElementById('navigate-progress')?.classList.remove('opacity-0');
+                });
+
+                document.addEventListener('livewire:navigated', function () {
+                    document.getElementById('navigate-progress')?.classList.add('opacity-0');
                 });
             })();
-            document.addEventListener('DOMContentLoaded', () => {
-                const elems = document.getElementsByClassName('selectable');
-                for (let index = 0; index < elems.length; index++) {
-                    try { initSelectable(elems[index]); } catch (_) {}
-                }
-            });
+
             function initSelectable(element) {
                 if (!window.$ || !window.$.fn || typeof window.$.fn.select2 !== 'function') return;
+                if (element.dataset.selectableBound === '1') return;
+
                 $(element).select2({
                     width: '100%',
                     id: element.getAttribute('id'),
                     dropdownParent: $(element).parent()
                 });
+                element.dataset.selectableBound = '1';
             }
         </script>
         @livewireScriptConfig

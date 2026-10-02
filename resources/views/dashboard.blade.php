@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot:title>{{ __("dashboard.header.title_  $data->role") }}</x-slot:title>
+    <x-slot:title>{{ __('dashboard.header.title_' . $data->role) }}</x-slot:title>
 
     <div class="space-y-6">
         {{-- Header Ringkasan & Aksi Cepat --}}
@@ -23,12 +23,12 @@
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 @if ($data->role === 'admin')
-                    <a href="{{ route('patients.create') }}"
+                    <a href="{{ route('patients.create') }}" wire:navigate
                         class="btn-shiny-emerald inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white">
                         <x-icon name="lucide-user-plus" class="w-4 h-4" />
                         <span>{{ __('dashboard.action.new_patient') }}</span>
                     </a>
-                    <a href="{{ route('transactions.create') }}"
+                    <a href="{{ route('transactions.create') }}" wire:navigate
                         class="btn-shiny-emerald inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white">
                         <x-icon name="lucide-receipt" class="w-4 h-4" /> {{ __('dashboard.action.transaction') }}
                     </a>
@@ -37,12 +37,12 @@
                         <x-icon name="lucide-download" class="w-4 h-4" /> {{ __('dashboard.action.export') }}
                     </a>
                 @elseif (in_array($data->role, ['doctor', 'nurse'], true) && auth()->user()->can('read visit'))
-                    <a href="{{ route('workspace.index') }}"
+                    <a href="{{ route('workspace.index') }}" wire:navigate
                         class="btn-shiny-emerald inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white">
                         <x-icon name="lucide-stethoscope" class="w-4 h-4" />
                         <span>{{ __('dashboard.action.workspace') }}</span>
                     </a>
-                    <a href="{{ route('workspace.index') }}"
+                    <a href="{{ route('workspace.index') }}" wire:navigate
                         class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">
                         <x-icon name="lucide-list-ordered" class="w-4 h-4" /> {{ __('dashboard.action.queue') }}
                     </a>
@@ -52,7 +52,7 @@
 
         {{-- Widget role-gated: urutan & isi ditentukan DashboardController::widgetMap() --}}
         @foreach ($data->widgets as $widget)
-            @includeIf("dashboard.widgets.  $widget->view", ['widget' => $widget->payload, 'data' => $data])
+            @includeIf('dashboard.widgets.'.$widget->view, ['widget' => $widget->payload, 'data' => $data])
         @endforeach
 
         @if ($data->widgets->isEmpty())

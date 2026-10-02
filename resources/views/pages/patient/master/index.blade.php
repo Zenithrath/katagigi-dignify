@@ -9,7 +9,7 @@
             </div>
 
             @can('create patient')
-                <a href="{{ route('patients.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
+                <a href="{{ route('patients.create') }}" wire:navigate class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('patient.master.index.buttons.add') }}
                 </a>
             @endcan
@@ -26,17 +26,17 @@
             ]));
         @endphp
         <div class="flex flex-wrap items-center gap-2 mb-1">
-            <a href="{{ $tabUrl('all') }}"
+            <a href="{{ $tabUrl('all') }}" wire:navigate
                 class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'all' ? 'clickable-primary' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
                 {{ __('patient.master.index.table.all') }}
             </a>
-            <a href="{{ $tabUrl('complete') }}"
+            <a href="{{ $tabUrl('complete') }}" wire:navigate
                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'complete' ? 'clickable-primary' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
                 <span class="w-2 h-2 rounded-full {{ $tab === 'complete' ? 'bg-white' : 'bg-emerald-500' }}"></span>
                 {{ __('patient.master.index.table.complete') }}
                 <span class="text-xs font-bold px-1.5 py-0.5 rounded-md {{ $tab === 'complete' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-700' }}">{{ $completeness['complete'] }}</span>
             </a>
-            <a href="{{ $tabUrl('incomplete') }}"
+            <a href="{{ $tabUrl('incomplete') }}" wire:navigate
                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'incomplete' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
                 <span class="w-2 h-2 rounded-full {{ $tab === 'incomplete' ? 'bg-white' : 'bg-amber-500' }}"></span>
                 {{ __('patient.master.index.table.incomplete') }}
@@ -98,7 +98,7 @@
                                             <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center font-bold text-emerald-700 text-sm border-2 border-slate-100 shrink-0">{{ strtoupper(substr($patient->name, 0, 1)) }}</div>
                                         @endif
                                         <div class="flex flex-col min-w-0">
-                                            <a href="{{ route('patients.show', ['patient' => $patient->id]) }}" class="font-bold text-slate-900 text-sm truncate hover:text-brand-600">{{ $patient->name }}</a>
+                                            <a href="{{ route('patients.show', ['patient' => $patient->id]) }}" wire:navigate class="font-bold text-slate-900 text-sm truncate hover:text-brand-600">{{ $patient->name }}</a>
                                             <span class="text-xs text-slate-400 truncate">{{ $patient->email }}</span>
                                         </div>
                                     </div>
@@ -124,7 +124,7 @@
                                 </td>
                                 <td class="action-column">
                                     <div class="flex gap-2">
-                                        <a href="{{ route('patients.edit', ['patient' => $patient->id]) }}" class="h-full">
+                                        <a href="{{ route('patients.edit', ['patient' => $patient->id]) }}" wire:navigate class="h-full">
                                             {{ __('patient.master.index.buttons.edit') }}
                                             <span class="sr-only">{{ $patient->name }}</span>
                                         </a>

@@ -15,14 +15,14 @@
     <tbody>
         @forelse ($rows as $visit)
             <tr class="border-b border-slate-100 last:border-0 {{ (string) request('highlight') === (string) $visit->id ? 'bg-emerald-50' : '' }} {{ ($clickableRow ?? false) ? 'cursor-pointer hover:bg-slate-50' : '' }}"
-                @if ($clickableRow ?? false) x-on:click="window.location='{{ route('visits.show', $visit->id) }}'" @endif>
+                @if ($clickableRow ?? false) x-on:click="Livewire.navigate('{{ route('visits.show', $visit->id) }}')" @endif>
                 <td class="py-2.5 pr-4 font-bold">{{ $visit->queueLabel() }}</td>
                 <td class="py-2.5 pr-4 font-semibold">{{ $visit->visit_number }}</td>
                 <td class="py-2.5 pr-4">
                     @role('nurse')
                         <span class="font-medium">{{ $visit->patient->name ?? '-' }}</span>
                     @else
-                        <a href="{{ route('visits.show', $visit->id) }}" class="font-medium hover:text-brand-600">{{ $visit->patient->name ?? '-' }}</a>
+                        <a href="{{ route('visits.show', $visit->id) }}" wire:navigate class="font-medium hover:text-brand-600">{{ $visit->patient->name ?? '-' }}</a>
                     @endrole
                     <span class="text-xs text-slate-400 ml-1">{{ $visit->patient->code ?? '' }}</span>
                 </td>
@@ -50,7 +50,7 @@
                 @unlessrole('nurse')
                 <td class="py-2.5">
                     <div class="flex items-center justify-end gap-2">
-                        <a href="{{ route('visits.show', $visit->id) }}"
+                        <a href="{{ route('visits.show', $visit->id) }}" wire:navigate
                             class="text-sm text-brand-600 hover:text-brand-700">Buka</a>
                         @if ($visit->clinical_status === \App\Models\Visit::STATUS_WAITING)
                             @canany(['write vital sign', 'write anamnesis'])

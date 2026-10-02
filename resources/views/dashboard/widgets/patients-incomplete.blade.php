@@ -43,7 +43,7 @@
                         </div>
                     </td>
                     <td class="py-3.5 text-right pr-2">
-                        <a href="{{ route('patients.edit', $patient->id) }}" class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 transition-colors">
+                        <a href="{{ route('patients.edit', $patient->id) }}" wire:navigate class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 transition-colors">
                             {{ __('dashboard.incomplete.action') }} <x-icon name="lucide-arrow-up-right" class="w-3.5 h-3.5" />
                         </a>
                     </td>
@@ -54,7 +54,7 @@
 
     <x-slot:footer>
         <span>{{ __('dashboard.incomplete.footer') }}</span>
-        <a href="{{ route('patients.index') }}" class="font-semibold text-emerald-800 hover:text-emerald-900 inline-flex items-center gap-1">
+        <a href="{{ route('patients.index') }}" wire:navigate class="font-semibold text-emerald-800 hover:text-emerald-900 inline-flex items-center gap-1">
             {{ __('dashboard.incomplete.see_all') }} <x-icon name="lucide-arrow-right" class="w-3.5 h-3.5" />
         </a>
     </x-slot:footer>

@@ -85,7 +85,7 @@
                 </form>
             @endcan
 
-            <a href="{{ route('visits.show', $visit->id) }}" class="block text-center text-sm text-brand-600 hover:text-brand-700">Buka halaman visit lengkap →</a>
+            <a href="{{ route('visits.show', $visit->id) }}" wire:navigate class="block text-center text-sm text-brand-600 hover:text-brand-700">Buka halaman visit lengkap →</a>
         </div>
     </aside>
 </div>

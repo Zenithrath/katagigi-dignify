@@ -35,7 +35,7 @@
                             <span class="text-xs text-slate-500 font-normal">{{ $current->queueLabel() }} · {{ $current->visit_number }}</span>
                         </p>
                     </div>
-                    <a href="{{ route('visits.show', $current->id) }}" class="clickable-primary px-5 py-2.5 rounded-xl">Lanjutkan visit</a>
+                    <a href="{{ route('visits.show', $current->id) }}" wire:navigate class="clickable-primary px-5 py-2.5 rounded-xl">Lanjutkan visit</a>
                 </div>
             </div>
         @endif

@@ -5,7 +5,7 @@
         <div class="flex gap-4">
             <div class="flex">
                 <a href="{{ route('transactions.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
-                    <x-lucide-chevron-left class="w-full h-full" />
+                    <x-icon name="lucide-chevron-left" class="w-full h-full" />
                 </a>
             </div>
             <section class="heading w-full">

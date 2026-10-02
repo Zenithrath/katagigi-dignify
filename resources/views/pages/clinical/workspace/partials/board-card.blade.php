@@ -20,7 +20,7 @@
     @unless ($hideDoctor ?? false)
         <p class="mt-2 text-xs font-semibold text-slate-500">{{ $visit->doctor->user->name ?? '-' }}</p>
     @endunless
-    <p class="mt-0.5 text-base font-bold text-slate-900">@role('nurse'){{ $visit->patient->name ?? '-' }}@else<a href="{{ route('visits.show', $visit->id) }}" class="hover:text-brand-600">{{ $visit->patient->name ?? '-' }}</a>@endrole</p>
+    <p class="mt-0.5 text-base font-bold text-slate-900">@role('nurse'){{ $visit->patient->name ?? '-' }}@else<a href="{{ route('visits.show', $visit->id) }}" wire:navigate class="hover:text-brand-600">{{ $visit->patient->name ?? '-' }}</a>@endrole</p>
     <p class="text-xs text-slate-400">{{ $visit->visit_number }} · No. RM {{ $visit->patient->code ?? '-' }}@if ($visit->appointment?->time_start)· Janji {{ \Carbon\Carbon::parse($visit->appointment->time_start)->format('H:i') }}@endif</p>
     @if (in_array($visit->clinical_status, \App\Models\Visit::QUEUE_STATUSES, true))
         <p class="mt-1 text-xs font-semibold text-amber-600">Tunggu <span class="wait-timer" data-since="{{ $visit->created_at->toIso8601String() }}">--:--</span></p>

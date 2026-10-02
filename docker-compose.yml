@@ -25,6 +25,7 @@ services:
             QUEUE_CONNECTION: database
         volumes:
             - ./:/var/www
+            - vendor:/var/www/vendor
         depends_on:
             db:
                 condition: service_healthy
@@ -79,5 +80,6 @@ services:
         profiles:
             - frontend
 volumes:
+  vendor:
   node_modules:
   pgsql_data:

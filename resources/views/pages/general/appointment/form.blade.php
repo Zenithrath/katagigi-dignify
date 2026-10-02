@@ -4,7 +4,7 @@
     <main class="main-table-container">
         <div class="flex gap-4 items-center">
             <a href="{{ route('appointments.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
-                <x-lucide-chevron-left class="w-full h-full" />
+                <x-icon name="lucide-chevron-left" class="w-full h-full" />
             </a>
             <h1 class="text-xl font-bold text-slate-900">
                 {{ $type == 'update' ? __('form.title.update.appointment') : __('form.title.create.appointment') }}
@@ -166,7 +166,7 @@
                                     <button class="clickable-ghost !border-danger-500 px-2 rounded-md stroke-danger-500"
                                         @click.prevent="handleRemoveService(index)">
                                         <div class="w-6 h-6">
-                                            <x-lucide-trash-2 class="w-6 h-6" />
+                                            <x-icon name="lucide-trash-2" class="w-6 h-6" />
                                         </div>
                                     </button>
                                 </div>

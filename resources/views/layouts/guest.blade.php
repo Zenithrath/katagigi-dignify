@@ -73,8 +73,8 @@
                     "
                     class="dark-toggle absolute top-5 right-5 grid h-9 w-9 place-items-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 transition-colors"
                     title="Mode terang/gelap" aria-label="Ganti mode terang/gelap">
-                    <x-lucide-moon class="h-4 w-4 dark:hidden" />
-                    <x-lucide-sun class="h-4 w-4 hidden dark:block" />
+                    <x-icon name="lucide-moon" class="h-4 w-4 dark:hidden" />
+                    <x-icon name="lucide-sun" class="h-4 w-4 hidden dark:block" />
                 </button>
                 <div class="w-full max-w-md">
                     {{-- Logo untuk mobile --}}

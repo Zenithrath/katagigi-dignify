@@ -27,8 +27,6 @@ if [ -f artisan ]; then
     if [ -f .env ] && grep -q '^APP_KEY=$' .env; then
         php artisan key:generate --force --no-interaction
     fi
-
-    su -s /bin/sh www-data -c 'php artisan view:clear --no-interaction' || true
 fi
 
 exec docker-php-entrypoint "$@"

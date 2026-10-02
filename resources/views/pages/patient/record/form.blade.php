@@ -99,7 +99,7 @@
                                                 <button
                                                     class="clickable-ghost !border-red-300 !text-red-500 px-2 rounded-xl"
                                                     @click.prevent="handleRemoveService(index)">
-                                                    <x-lucide-trash-2 class="w-4 h-4" />
+                                                    <x-icon name="lucide-trash-2" class="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>
@@ -118,7 +118,7 @@
                         <div class="input-group items-start mt-4">
                             <button class="btn-submit !w-auto !px-5"
                                 @click.prevent="handleAddService()">
-                                <x-lucide-plus class="w-4 h-4" />
+                                <x-icon name="lucide-plus" class="w-4 h-4" />
                                 {{ __('patient.record.form.buttons.add_service') }}
                             </button>
                         </div>

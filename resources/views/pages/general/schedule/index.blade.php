@@ -1,7 +1,88 @@
 <x-app-layout>
     <x-slot:title>{{ __('general.schedule.index.title') }}</x-slot:title>
 
-    <main class="main-table-container" x-data="scheduleLookup">
+
+@php
+        $scheduleLookupUrl = auth()->user()->hasRole('doctor')
+            ? route('api.schedules.lookup.doctor')
+            : route('api.schedules.lookup');
+    @endphp
+
+    <script type="text/javascript">
+        window.scheduleLookup = function (lookupUrl) {
+            return {
+                keyword: "",
+                filterDoctorId: "",
+                scheduleList: [],
+                isLoading: false,
+                pagination: {
+                    page: 1,
+                    limit: 20,
+                    last: 1,
+                    total: 1,
+                },
+                init() {
+                    this.lookup();
+                },
+                lookup() {
+                    this.isLoading = true;
+                    this.scheduleList = [];
+                    let params = new URLSearchParams({
+                        keyword: this.keyword,
+                        page: this.pagination.page,
+                        limit: this.pagination.limit,
+                    });
+
+                    if (this.filterDoctorId) {
+                        params.append('doctor_id', this.filterDoctorId);
+                    }
+
+                    fetch(`${lookupUrl}?${params}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.scheduleList = data.data;
+                            this.pagination = {
+                                ...this.pagination,
+                                last: Math.max(1, data.pagination.last),
+                                total: data.pagination.total,
+                            };
+                            this.isLoading = false;
+                        })
+                        .catch(() => {
+                            this.isLoading = false;
+                        });
+                },
+                handleNextPage() {
+                    this.pagination.page++;
+                    this.lookup();
+                },
+                handlePreviousPage() {
+                    this.pagination.page--;
+                    this.lookup();
+                },
+                formatTime(timeString) {
+                    if (!timeString) {
+                        return '-';
+                    }
+
+                    const parts = timeString.split(':');
+
+                    return (parts[0] || '00').padStart(2, '0') + ':' + (parts[1] || '00').padStart(2, '0');
+                },
+                ucfirst(text) {
+                    if (!text) {
+                        return '';
+                    }
+
+                    const t = text.toLowerCase();
+
+                    return t.charAt(0).toUpperCase() + t.slice(1);
+                },
+            }
+        }
+    </script>
+
+    <main class="main-table-container" x-data="scheduleLookup(@js($scheduleLookupUrl))">
         <section class="heading">
             <div>
                 <h1>{{ __('general.schedule.index.title') }}</h1>
@@ -38,7 +119,7 @@
                                     <span x-text="doctorValue ? document.querySelector(`[data-doctor-val='${doctorValue}']`)?.textContent || '{{ __('general.schedule.form.labels.doctor.default') }}' : '{{ __('general.schedule.form.labels.doctor.default') }}'"></span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :style="doctorOpen ? 'transform: rotate(180deg)' : ''" style="transition: transform 0.2s; flex-shrink: 0; color: #94a3b8;"><path d="m6 9 6 6 6-6"/></svg>
                                 </button>
-                                <div x-show="doctorOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                <div x-show="doctorOpen" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                                     class="dropdown-panel">
                                     <div class="dropdown-item is-placeholder" x-text="'{{ __('general.schedule.form.labels.doctor.default') }}'"></div>
                                     @if (count($doctorList) == 0)
@@ -72,7 +153,7 @@
                                         <span x-text="dayValue ? document.querySelector(`[data-day-val='${dayValue}']`)?.textContent || '{{ __('general.schedule.form.labels.day.default') }}' : '{{ __('general.schedule.form.labels.day.default') }}'"></span>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :style="dayOpen ? 'transform: rotate(180deg)' : ''" style="transition: transform 0.2s; flex-shrink: 0; color: #94a3b8;"><path d="m6 9 6 6 6-6"/></svg>
                                     </button>
-                                    <div x-show="dayOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                                    <div x-show="dayOpen" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                                         class="dropdown-panel">
                                         <div class="dropdown-item is-placeholder" x-text="'{{ __('general.schedule.form.labels.day.default') }}'"></div>
                                         @foreach (['MONDAY' => 'monday', 'TUESDAY' => 'tuesday', 'WEDNESDAY' => 'wednesday', 'THURSDAY' => 'thursday', 'FRIDAY' => 'friday', 'SATURDAY' => 'saturday', 'SUNDAY' => 'sunday'] as $value => $key)
@@ -144,7 +225,7 @@
                                 <span x-text="filterDoctorId ? $el.parentElement.querySelector(`[data-value='${filterDoctorId}']`)?.textContent || 'Semua Dokter' : 'Semua Dokter'"></span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="open ? 'rotate-180' : ''" class="transition-transform shrink-0"><path d="m6 9 6 6 6-6"/></svg>
                             </button>
-                            <div x-show="open" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                                 class="dropdown-panel w-full">
                                 <div class="dropdown-item text-[13px] py-2 px-3.5" :class="filterDoctorId === '' ? 'is-selected' : ''"
                                     @click="filterDoctorId = ''; pagination.page = 1; lookup(); open = false">Semua Dokter</div>
@@ -379,81 +460,4 @@
         </section>
     </main>
 
-@pushOnce('scripts')
-    <script type="text/javascript">
-        const scheduleLookup = {
-            keyword: "",
-            filterDoctorId: "",
-            scheduleList: [],
-            isLoading: false,
-            pagination: {
-                page: 1,
-                limit: 20,
-                last: 1,
-                total: 1,
-            },
-            init() {
-                this.lookup();
-            },
-            lookup() {
-                this.isLoading = true;
-                this.scheduleList = [];
-                let params = new URLSearchParams({
-                    keyword: this.keyword,
-                    page: this.pagination.page,
-                    limit: this.pagination.limit,
-                });
-                if (this.filterDoctorId) {
-                    params.append('doctor_id', this.filterDoctorId);
-                }
-                @role('manajemen|admin|nurse')
-                    fetch(`{{ route('api.schedules.lookup') }}?${params}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            this.scheduleList = data.data;
-                            this.pagination = {
-                                ...this.pagination,
-                                last: Math.max(1, data.pagination.last),
-                                total: data.pagination.total,
-                            };
-                            this.isLoading = false;
-                        })
-                        .catch(() => { this.isLoading = false; })
-                @endrole
-                @role('doctor')
-                    fetch(`{{ route('api.schedules.lookup.doctor') }}?${params}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            this.scheduleList = data.data;
-                            this.pagination = {
-                                ...this.pagination,
-                                last: Math.max(1, data.pagination.last),
-                                total: data.pagination.total,
-                            };
-                            this.isLoading = false;
-                        })
-                        .catch(() => { this.isLoading = false; })
-                @endrole
-            },
-            handleNextPage() {
-                this.pagination.page++;
-                this.lookup();
-            },
-            handlePreviousPage() {
-                this.pagination.page--;
-                this.lookup();
-            },
-            formatTime(timeString) {
-                if (!timeString) return '-';
-                const parts = timeString.split(':');
-                return (parts[0] || '00').padStart(2, '0') + ':' + (parts[1] || '00').padStart(2, '0');
-            },
-            ucfirst(text) {
-                if (!text) return '';
-                const t = text.toLowerCase();
-                return t.charAt(0).toUpperCase() + t.slice(1);
-            },
-        }
-    </script>
-@endPushOnce
 </x-app-layout>

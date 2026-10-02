@@ -101,6 +101,8 @@ Container `app` otomatis:
 
 Ini mencegah error seperti `touch(): Utime failed: Operation not permitted` yang sebelumnya bisa memicu `504 Gateway Time-out` setelah login.
 
+Dependency PHP (`vendor`) disimpan di Docker named volume agar Laravel tidak membaca ribuan file PHP dari bind mount Windows. Ini membuat request dashboard dan navigasi jauh lebih stabil di Docker Desktop.
+
 ## Jalankan Tanpa Docker
 
 ```powershell
