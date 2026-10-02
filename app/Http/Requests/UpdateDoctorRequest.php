@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateDoctorRequest extends FormRequest
 {
@@ -36,6 +37,7 @@ class UpdateDoctorRequest extends FormRequest
             'zip_code' => 'required|string|max:255',
             'nipp' => 'required|string|max:255',
             'niptk' => 'nullable|string|max:255',
+            'ihs_id' => ['nullable', 'string', 'max:255', Rule::unique('doctors', 'ihs_id')->ignore($this->route('doctor'), 'user_id')],
             'profile_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'cover_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];

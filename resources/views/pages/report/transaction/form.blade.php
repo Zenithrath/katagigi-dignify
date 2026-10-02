@@ -4,7 +4,7 @@
     <main class="main-table-container">
         <section class="flex gap-4 items-center">
             <a href="{{ route('transactions.index') }}" class="clickable-ghost w-9 h-9 rounded-xl">
-                <x-lucide-chevron-left class="w-full h-full" />
+                <x-icon name="lucide-chevron-left" class="w-full h-full" />
             </a>
             <h1 class="text-xl font-bold text-slate-900"> {{ $type == 'update' ? __('form.title.update.transaction') : __('form.title.create.transaction') }}
             </h1>
@@ -13,6 +13,14 @@
         <x-flash-alerts />
 
         <section class="content-card" x-data="appointmentState" x-init="$watch('isDataShown', unmountChangeAppointment)">
+            @isset($prefillVisit)
+                <div class="m-6 mb-0 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">
+                    Dari visit <strong>{{ $prefillVisit->visit_number }}</strong> ({{ $prefillVisit->patient->name ?? '-' }}):
+                    {{ $prefillVisit->treatments->count() }} tindakan,
+                    estimasi Rp{{ number_format($prefillVisit->treatments->sum(fn ($t) => $t->quantity * $t->unit_price), 0, ',', '.') }}.
+                    Appointment terpilih otomatis — sesuaikan layanan & harga lalu simpan.
+                </div>
+            @endisset
             <form action="{{ route('transactions.store') }}" method="post">
                 @csrf
 
@@ -105,7 +113,7 @@
                                                     class="clickable-ghost !border-danger-500 px-2 rounded-md stroke-danger-500"
                                                     @click.prevent="handleRemoveService(index)">
                                                     <div class="w-6 h-6">
-                                                        <x-lucide-trash-2 class="w-6 h-6" />
+                                                        <x-icon name="lucide-trash-2" class="w-6 h-6" />
                                                     </div>
                                                 </button>
                                             </div>
@@ -347,6 +355,20 @@
 
                 if (this.appointment) {
                     this.services = this.appointment.services;
+                }
+
+                // Fase 2 Task 9: prefill appointment dari visit.
+                const prefillID = @json($prefillAppointmentID ?? null);
+                if (prefillID) {
+                    this.selectedAppointmentID = prefillID;
+                    const select = document.querySelector('#appointment_id');
+                    if (select) {
+                        select.value = prefillID;
+                        if (window.jQuery) {
+                            window.jQuery(select).val(prefillID).trigger('change');
+                        }
+                    }
+                    this.findAppointment();
                 }
             },
             setDataFromAppointment(appointment) {

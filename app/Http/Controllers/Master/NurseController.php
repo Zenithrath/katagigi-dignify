@@ -85,7 +85,7 @@ class NurseController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.nurse.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.nurse.error.oncreate')])->withInput();
         }
 
         return redirect()->route('nurses.index')
@@ -100,6 +100,7 @@ class NurseController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update nurse');
         $data = $this->service->selectNurseByID($id);
 
         return view('pages.master.nurse.form', [
@@ -117,6 +118,7 @@ class NurseController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('update nurse');
         $updatedNurse = Nurse::findOrFail($id);
         if ($request->hasFile('cover_image')) {
             if ($updatedNurse->cover_picture) {
@@ -144,7 +146,7 @@ class NurseController extends Controller
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.nurse.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.nurse.error.onupdate')])->withInput();
         }
 
         return redirect()->route('nurses.index')
@@ -159,6 +161,7 @@ class NurseController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete nurse');
         $deletedNurse = Nurse::findOrFail($id);
         if ($deletedNurse->cover_picture) {
             $this->service->deleteCoverImage($deletedNurse->cover_picture);
@@ -172,7 +175,7 @@ class NurseController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.nurse.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.nurse.error.ondelete')])->withInput();
         }
 
         return redirect()->route('nurses.index')

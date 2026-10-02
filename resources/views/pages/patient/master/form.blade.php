@@ -4,8 +4,9 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
-                <h1>{{ $type == 'update' ? __('form.title.update.patient') : __('form.title.create.patient') }}</h1>
-                <p>{{ $type == 'update' ? 'Update patient information' : 'Register a new patient' }}</p>
+                <x-back-button href="{{ $type == 'update' ? route('patients.show', $data->id) : route('patients.index') }}" />
+                <h1>{{ $type == 'update' ? __('patient.master.form.title.edit') : __('patient.master.form.title.add') }}</h1>
+                <p>{{ $type == 'update' ? __('patient.master.form.subtitle.update') : __('patient.master.form.subtitle.create') }}</p>
             </div>
         </section>
 
@@ -84,6 +85,68 @@
                         </div>
 
                         <div class="input-group">
+                            <label for="birth_place">{{ __('patient.master.form.labels.birth_place') }}</label>
+                            <input type="text" name="birth_place" id="birth_place" class="custom-input"
+                                placeholder="{{ __('patient.master.form.placeholders.birth_place') }}" value="{{ $data->birth_place ?? '' }}" />
+                            @error('birth_place')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="nik">{{ __('patient.master.form.labels.nik') }}</label>
+                            <input type="text" name="nik" id="nik" class="custom-input" inputmode="numeric"
+                                placeholder="{{ __('patient.master.form.placeholders.nik') }}" value="{{ $data->nik ?? '' }}" />
+                            <small class="helper">{{ __('patient.master.form.helpers.satusehat_nik') }}</small>
+                            @error('nik')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="ihs_id">{{ __('patient.master.form.labels.ihs_id') }}</label>
+                            <input type="text" name="ihs_id" id="ihs_id" class="custom-input"
+                                placeholder="{{ __('patient.master.form.placeholders.ihs_id') }}" value="{{ $data->ihs_id ?? '' }}" />
+                            @error('ihs_id')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" name="satusehat_consent" id="satusehat_consent" value="1"
+                                    class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                    {{ !empty($data->satusehat_consent) ? 'checked' : '' }} />
+                                <span class="text-sm font-medium text-slate-700">{{ __('patient.master.form.labels.satusehat_consent') }}</span>
+                            </label>
+                            @error('satusehat_consent')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        {{-- Fase 4.3: penjamin saat pendaftaran --}}
+                        <div class="input-group">
+                            <label for="insurance_id">Penjamin</label>
+                            <select id="insurance_id" name="insurance_id" class="custom-select">
+                                @foreach (\App\Models\MasterInsurance::orderBy('name')->get() as $ins)
+                                    <option value="{{ $ins->id }}" @selected(old('insurance_id', $data->insurance_id ?? '') == $ins->id)>{{ $ins->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('insurance_id')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
+                            <label for="insurance_number">No. kartu penjamin</label>
+                            <input type="text" name="insurance_number" id="insurance_number" class="custom-input"
+                                placeholder="No. BPJS / kartu asuransi" value="{{ old('insurance_number', $data->insurance_number ?? '') }}" />
+                            @error('insurance_number')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
                             <label for="religion">{{ __('form.labels.religion') }}</label>
                             <select id="religion" name="religion" autocomplete="religion" class="custom-select">
                                 <option {{ !isset($data->religion) || !$data->religion ? 'selected' : '' }} disabled>
@@ -117,6 +180,20 @@
                         </div>
 
                         <div class="input-group">
+                            <label for="marital_status">Status perkawinan</label>
+                            <select id="marital_status" name="marital_status" autocomplete="off" class="custom-select">
+                                <option value="" {{ empty($data->marital_status) ? 'selected' : '' }}>—</option>
+                                <option value="S" @selected($data->marital_status === 'S')>Belum Menikah</option>
+                                <option value="M" @selected($data->marital_status === 'M')>Menikah</option>
+                                <option value="W" @selected($data->marital_status === 'W')>Cerai Hidup</option>
+                                <option value="D" @selected($data->marital_status === 'D')>Cerai Mati</option>
+                            </select>
+                            @error('marital_status')
+                                <small class="danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+
+                        <div class="input-group">
                             <label for="gender">{{ __('form.labels.gender') }}</label>
                             <select id="gender" name="gender" autocomplete="gender-name" class="custom-select">
                                 <option {{ !isset($data->gender) || !$data->gender || $data->gender === '' ? 'selected' : '' }} disabled>
@@ -138,8 +215,10 @@
                             <label for="village">{{ __('form.labels.village') }}</label>
                             <input type="text" name="village" id="village" class="custom-input"
                                 placeholder="{{ __('form.placeholders.village') }}"
-                                value="{{ $data->village ?? '' }}" />
-                            <small class="helper">{{ __('form.helpers.alphanumeric') }}</small>
+                                value="{{ $data->village ?? '' }}"
+                                list="regionVillageList" />
+                            <datalist id="regionVillageList"></datalist>
+                            <small class="helper">Pilih dari daftar wilayah Kemendagri bila tersedia; ketik manual juga bisa.</small>
                             @error('village')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
@@ -194,8 +273,10 @@
                         <div class="input-group">
                             <label for="regency">{{ __('form.labels.city') }}</label>
                             <input type="text" name="regency" id="regency" class="custom-input"
-                                placeholder="{{ __('form.placeholders.city') }}" value="{{ $data->regency ?? '' }}" />
-                            <small class="helper">{{ __('form.helpers.alphanumeric') }}</small>
+                                placeholder="{{ __('form.placeholders.city') }}" value="{{ $data->regency ?? '' }}"
+                                list="regionCityList" />
+                            <datalist id="regionCityList"></datalist>
+                            <small class="helper">Pilih dari daftar wilayah Kemendagri bila tersedia; ketik manual juga bisa.</small>
                             @error('regency')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
@@ -205,13 +286,18 @@
                             <label for="province">{{ __('form.labels.state') }}</label>
                             <input type="text" name="province" id="province" class="custom-input"
                                 placeholder="{{ __('form.placeholders.state') }}"
-                                value="{{ $data->province ?? '' }}" />
-                            <small class="helper">{{ __('form.helpers.alphanumeric') }}</small>
+                                value="{{ $data->province ?? '' }}"
+                                list="regionProvinceList" />
+                            <datalist id="regionProvinceList"></datalist>
+                            <small class="helper">Pilih dari daftar wilayah Kemendagri bila tersedia; ketik manual juga bisa.</small>
                             @error('province')
                                 <small class="danger">{{ $message }}</small>
                             @enderror
                         </div>
                     </div>
+
+                    {{-- Kode wilayah Kemendagri (opsional; ikut terisi saat pilih dari daftar) --}}
+                    <input type="hidden" name="region_code" id="region_code" value="{{ old('region_code', $data->region_code ?? '') }}" />
 
                     <div x-data="{ showSosmed: false }" class="mt-4 pt-6 border-t border-slate-200">
                         <label class="flex items-center gap-2 cursor-pointer select-none mb-4">
@@ -277,8 +363,67 @@
         function copyEmail() {
             let email = document.getElementById('email');
             let payment_email = document.getElementById('payment_email');
+
             payment_email.value = email.value;
         }
+
+        // Fase 4.1: datalist wilayah Kemendagri (dropdown berantai lunak —
+        // ketik manual tetap bisa). Memilih dari daftar mengisi kode wilayah.
+        (function () {
+            const route = @json(route('api.regions.lookup'));
+            const fields = {
+                province: { level: 'province', list: 'regionProvinceList' },
+                regency: { level: 'city', list: 'regionCityList' },
+                village: { level: 'village', list: 'regionVillageList' },
+            };
+            let lastFetched = {};
+
+            function load(level, listId, parentCode, term) {
+                const key = level + '|' + (parentCode || '') + '|' + (term || '');
+                if (lastFetched[listId] === key) return;
+                lastFetched[listId] = key;
+
+                const params = new URLSearchParams({ level, q: term || '' });
+                if (parentCode) params.set('parent_code', parentCode);
+                fetch(route + '?' + params)
+                    .then((r) => (r.ok ? r.json() : []))
+                    .then((rows) => {
+                        const dl = document.getElementById(listId);
+                        if (!dl) return;
+                        dl.innerHTML = '';
+                        rows.forEach((row) => {
+                            const opt = document.createElement('option');
+                            opt.value = row.name;
+                            opt.setAttribute('data-code', row.code);
+                            dl.appendChild(opt);
+                        });
+                    });
+            }
+
+            function bind(fieldId, cfg) {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                const commit = () => {
+                    const match = [...document.getElementById(cfg.list).options]
+                        .find((o) => o.value === input.value);
+                    const codeInput = document.getElementById('region_code');
+                    if (match && codeInput) codeInput.value = match.getAttribute('data-code');
+                };
+                input.addEventListener('input', () => {
+                    const parent = cfg.level === 'city' ? (document.getElementById('province').value || '') : '';
+                    load(cfg.level, cfg.list, null, input.value);
+                    commit();
+                });
+                input.addEventListener('change', commit);
+            }
+
+            Object.entries(fields).forEach(([fieldId, cfg]) => bind(fieldId, cfg));
+
+            // Isi daftar awal (provinsi, kota Kalsel) saat halaman dibuka.
+            load('province', 'regionProvinceList', null, '');
+            load('city', 'regionCityList', null, '');
+            load('village', 'regionVillageList', null, '');
+        })();
     </script>
 @endPushOnce
 </x-app-layout>

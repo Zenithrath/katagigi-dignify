@@ -1,0 +1,308 @@
+/* ============================================================
+   Dark theme — diaktifkan via class .dark pada <html>.
+   Palet: hitam netral (zinc), kontras tinggi, aksen emerald.
+   Token warna didefinisikan sebagai CSS variables agar mudah
+   dityetel ulang dari satu tempat.
+
+   PENTING: selector utilitas memakai [class~="content-card"],
+   BUKAN .content-card — jika memakai class selector, Tailwind
+   mencatatnya sebagai definisi utility sehingga @apply bg-white
+   pada .content-card (card.css) dianggap circular dependency
+   dan build gagal. Pemilihan elemen keduanya identik.
+   ============================================================ */
+
+html.dark {
+    color-scheme: dark;
+
+    /* Background */
+    --dz-bg: #09090b;            /* shell utama (hitam sejati) */
+    --dz-bg-sidebar: #0c0c0e;    /* sidebar & topbar */
+    --dz-card: #131316;          /* kartu & panel */
+    --dz-card-2: #17171a;        /* input, thead, bg-white dalam kartu */
+    --dz-elev-1: #1a1a1f;        /* hover level 1 */
+    --dz-elev-2: #202024;        /* hover level 2 / garis baris */
+
+    /* Border */
+    --dz-border: #26262b;        /* border utama kartu */
+    --dz-border-strong: #2e2e33; /* border input */
+
+    /* Teks (kontras tinggi) */
+    --dz-text: #f4f4f5;          /* teks utama */
+    --dz-text-2: #a1a1aa;        /* teks sekunder / label */
+    --dz-text-3: #71717a;        /* teks muted */
+    --dz-text-4: #52525b;        /* teks samar */
+
+    /* Aksen */
+    --dz-accent: #34d399;        /* emerald-400: aksen di latar gelap */
+    --dz-accent-soft: #6ee7b7;   /* emerald-300: teks aksen terang */
+}
+
+/* ---------- Shell & sidebar ---------- */
+html.dark .app-shell,
+html.dark .main-column {
+    background: var(--dz-bg);
+}
+
+html.dark .app-sidebar {
+    background: var(--dz-bg-sidebar);
+    border-color: var(--dz-border);
+}
+
+html.dark .app-sidebar .nav-item a,
+html.dark .app-sidebar .nav-item button {
+    color: var(--dz-text-2);
+}
+
+html.dark .app-sidebar .nav-item:hover a,
+html.dark .app-sidebar .nav-item:hover button {
+    background-color: var(--dz-elev-1);
+    color: var(--dz-text);
+    box-shadow: 0 0 0 1px rgb(16 185 129 / 0.25);
+}
+
+html.dark .app-sidebar .nav-item.active a,
+html.dark .app-sidebar .nav-item.active button {
+    background-color: rgba(16, 185, 129, 0.14);
+    color: var(--dz-accent-soft);
+    box-shadow: 0 0 0 1px rgb(16 185 129 / 0.3);
+}
+
+html.dark .app-sidebar .menu-title {
+    color: var(--dz-text-4);
+}
+
+html.dark .app-sidebar .logo {
+    color: var(--dz-text);
+}
+
+/* Sidebar lama (legacy-scope) + collapse button */
+html.dark .app-sidebar .border-slate-200\/80,
+html.dark .app-sidebar .border-t {
+    border-color: var(--dz-border) !important;
+}
+
+/* ---------- Topbar ---------- */
+html.dark header.bg-\[\#f8fafc\] {
+    background: var(--dz-bg-sidebar);
+    border-color: var(--dz-border);
+}
+
+html.dark .topbar-select,
+html.dark header select {
+    background-color: var(--dz-elev-1);
+    border-color: var(--dz-border);
+    color: var(--dz-text);
+}
+
+/* ---------- Card & heading ---------- */
+html.dark .content-card {
+    background: var(--dz-card);
+    border-color: var(--dz-border);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+}
+
+html.dark .main-table-container section.heading h1,
+html.dark main > div.flex.gap-4.items-center > h1 {
+    color: var(--dz-text);
+}
+
+html.dark .main-table-container section.heading p {
+    color: var(--dz-text-2);
+}
+
+/* Kartu inline bergaya dashboard (bg-white langsung di view) */
+html.dark .bg-white.rounded-\[22px\],
+html.dark div.bg-white[class*="rounded"] {
+    background-color: var(--dz-card);
+    border-color: var(--dz-border);
+}
+
+/* ---------- Tabel ---------- */
+html.dark table > thead {
+    background: var(--dz-elev-1);
+}
+
+html.dark table > thead .column,
+html.dark table > thead .index-column,
+html.dark table > thead .action-column {
+    color: var(--dz-text-2);
+}
+
+html.dark table > thead > tr {
+    border-color: var(--dz-border);
+}
+
+html.dark table > tbody {
+    background: transparent;
+}
+
+html.dark table > tbody > tr {
+    border-color: var(--dz-elev-2);
+}
+
+html.dark table > tbody > tr:hover td {
+    background-color: var(--dz-elev-1);
+}
+
+html.dark table > tbody .column {
+    color: var(--dz-text);
+}
+
+/* ---------- Detail list ---------- */
+html.dark dl.detail-list {
+    border-color: var(--dz-elev-2);
+}
+
+html.dark .data-container dt,
+html.dark .preview-container dt {
+    color: var(--dz-text-2);
+}
+
+html.dark .data-container dd,
+html.dark .preview-container dd {
+    color: var(--dz-text);
+}
+
+/* ---------- Input & dropdown ---------- */
+html.dark .custom-input,
+html.dark .custom-select,
+html.dark .input-group input,
+html.dark .input-group textarea,
+html.dark .input-group select,
+html.dark .dropdown-trigger {
+    background-color: var(--dz-card-2);
+    border-color: var(--dz-border-strong);
+    color: var(--dz-text);
+}
+
+html.dark .custom-input::placeholder,
+html.dark .input-group input::placeholder,
+html.dark .input-group textarea::placeholder {
+    color: var(--dz-text-3);
+}
+
+html.dark .custom-input:focus,
+html.dark .custom-select:focus,
+html.dark .input-group input:focus,
+html.dark .input-group textarea:focus,
+html.dark .input-group select:focus,
+html.dark .dropdown-trigger:focus {
+    background-color: var(--dz-card);
+    border-color: #10b981;
+}
+
+html.dark .input-wrapper label,
+html.dark .input-group label {
+    color: var(--dz-text-2);
+}
+
+html.dark .input-group .helper {
+    color: var(--dz-text-3);
+}
+
+html.dark select option {
+    background-color: var(--dz-card-2);
+    color: var(--dz-text);
+}
+
+html.dark .dropdown-panel {
+    background: var(--dz-card-2);
+    border-color: var(--dz-border-strong);
+}
+
+html.dark .dropdown-panel .dropdown-item {
+    color: var(--dz-text-2);
+}
+
+html.dark .dropdown-panel .dropdown-item:hover {
+    background-color: var(--dz-elev-1);
+    color: var(--dz-text);
+}
+
+/* ---------- Statistic card ---------- */
+html.dark .statistic-card {
+    background: var(--dz-card);
+    box-shadow: inset 0 0 0 1px var(--dz-border);
+}
+
+html.dark .statistic-card .value {
+    color: var(--dz-text);
+}
+
+html.dark .statistic-card .title-container .title {
+    color: var(--dz-text-2);
+}
+
+/* ---------- Utilitas teks & warna latar di dalam kartu ----------
+   Menimpa utility Tailwind yang paling sering dipakai view agar
+   halaman ikut gelap tanpa mengubah tiap view. */
+html.dark [class~="content-card"] .text-slate-900,
+html.dark .bg-white[class*="rounded"] .text-slate-900 { color: var(--dz-text); }
+html.dark [class~="content-card"] .text-slate-800 { color: #e4e4e7; }
+html.dark [class~="content-card"] .text-slate-700 { color: #d4d4d8; }
+html.dark [class~="content-card"] .text-slate-600 { color: var(--dz-text-2); }
+html.dark [class~="content-card"] .text-slate-500 { color: var(--dz-text-2); }
+html.dark [class~="content-card"] .text-slate-400 { color: var(--dz-text-3); }
+html.dark [class~="content-card"] .bg-white { background-color: var(--dz-card-2); }
+html.dark [class~="content-card"] .bg-slate-50 { background-color: var(--dz-card-2); }
+html.dark [class~="content-card"] .bg-slate-100 { background-color: var(--dz-elev-1); }
+html.dark [class~="content-card"] .border-slate-200 { border-color: var(--dz-border-strong); }
+html.dark [class~="content-card"] .border-slate-100 { border-color: var(--dz-border); }
+
+/* Aksen berwarna jadi versi terang agar kontras di latar gelap */
+html.dark [class~="content-card"] .text-emerald-600,
+html.dark [class~="content-card"] .text-emerald-700 { color: var(--dz-accent); }
+html.dark [class~="content-card"] .text-emerald-800 { color: var(--dz-accent-soft); }
+html.dark [class~="content-card"] .text-teal-600 { color: #2dd4bf; }
+html.dark [class~="content-card"] .text-amber-600,
+html.dark [class~="content-card"] .text-amber-700 { color: #fbbf24; }
+html.dark [class~="content-card"] .text-amber-800 { color: #fcd34d; }
+html.dark [class~="content-card"] .text-red-600 { color: #f87171; }
+html.dark [class~="content-card"] .bg-emerald-50,
+html.dark [class~="content-card"] .hover\:bg-emerald-50:hover { background-color: rgba(16, 185, 129, 0.12); }
+html.dark [class~="content-card"] .border-emerald-200,
+html.dark [class~="content-card"] .border-emerald-100 { border-color: rgba(16, 185, 129, 0.35); }
+html.dark [class~="content-card"] .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12); }
+html.dark [class~="content-card"] .border-amber-200,
+html.dark [class~="content-card"] .border-amber-200\/70 { border-color: rgba(245, 158, 11, 0.35); }
+html.dark [class~="content-card"] .bg-teal-50 { background-color: rgba(20, 184, 166, 0.12); }
+html.dark [class~="content-card"] .bg-blue-50 { background-color: rgba(59, 130, 246, 0.12); }
+html.dark [class~="content-card"] .text-blue-600 { color: #60a5fa; }
+html.dark [class~="content-card"] .border-blue-100 { border-color: rgba(59, 130, 246, 0.3); }
+
+html.dark header .text-slate-900 { color: var(--dz-text); }
+html.dark header .text-slate-500 { color: var(--dz-text-2); }
+html.dark header .bg-white {
+    background-color: var(--dz-elev-1);
+    border-color: var(--dz-border-strong);
+}
+
+/* Dropdown & panel di dalam header */
+html.dark header .hover\:bg-slate-50:hover,
+html.dark header .hover\:bg-slate-100:hover { background-color: var(--dz-elev-1); }
+
+/* Panel kiri halaman auth tetap hijau; panel kanan ikut gelap */
+html.dark body .min-h-screen > div.bg-slate-50 {
+    background: var(--dz-bg);
+}
+
+/* Pagination */
+html.dark .pagination a,
+html.dark .pagination span {
+    color: var(--dz-text-2);
+}
+
+html.dark footer {
+    color: var(--dz-text-3);
+}
+
+/* ---------- Toggle tombol dark/light ---------- */
+html.dark .dark-toggle {
+    background-color: var(--dz-elev-1);
+    border-color: var(--dz-border-strong);
+    color: var(--dz-text-2);
+}
+html.dark .dark-toggle:hover {
+    background-color: var(--dz-elev-2);
+    color: var(--dz-text);
+}

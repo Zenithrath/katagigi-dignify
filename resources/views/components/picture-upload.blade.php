@@ -10,7 +10,7 @@
                 src="{{ $type == 'update' && isset($data->profile_picture) ? url('storage/' . $data->profile_picture) : '' }}"
                 class="w-full h-full object-cover" />
             <div x-show="!isProfilePreviewMode" class="w-full h-full flex flex-col items-center justify-center">
-                <x-lucide-camera class="w-7 h-7 text-slate-300" />
+                <x-icon name="lucide-camera" class="w-7 h-7 text-slate-300" />
                 <p class="text-[10px] text-slate-300 mt-1">Photo</p>
             </div>
         </div>
@@ -24,14 +24,14 @@
                 <label class="picture-action cursor-pointer">
                     <input type="file" name="profile_image" id="profile"
                         @change="showProfilePreview(event, 'profile-preview')" accept="image/*" class="hidden" />
-                    <x-lucide-upload class="w-3.5 h-3.5" />
+                    <x-icon name="lucide-upload" class="w-3.5 h-3.5" />
                     <span>Upload</span>
                 </label>
 
                 <template x-if="isProfilePreviewMode">
                     <button type="button" class="picture-action !bg-red-50 !border-red-200 !text-red-500 hover:!bg-red-100"
                         @click="clearProfile(event, 'profile_image', 'profile-preview')">
-                        <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                        <x-icon name="lucide-trash-2" class="w-3.5 h-3.5" />
                         <span>Remove</span>
                     </button>
                 </template>

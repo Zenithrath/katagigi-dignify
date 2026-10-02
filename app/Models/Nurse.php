@@ -45,6 +45,6 @@ class Nurse extends Model
      */
     public function transaction_nurse(): HasMany
     {
-        return $this->hasMany(TransactionNurse::class, 'id', 'nurse_id');
+        return $this->hasMany(TransactionNurse::class, 'nurse_id', 'user_id');
     }
 }

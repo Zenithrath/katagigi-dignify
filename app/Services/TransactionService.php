@@ -59,7 +59,8 @@ class TransactionService extends Service
                 ->through(function ($a) {
                     $services = (array) json_decode($a->services);
                     $serviceList = array_map(function ($item) {
-                        return $item->code.' - '.$item->name;
+                        // Tahan format lama: record lawas bisa tidak punya code/name.
+                        return ($item->code ?? '—').' - '.($item->name ?? 'Layanan');
                     }, $services);
 
                     return (object) [
@@ -215,7 +216,7 @@ class TransactionService extends Service
                 function ($a) {
                     $services = (array) json_decode($a->services);
                     $serviceList = array_map(function ($item) {
-                        return $item->code.' - '.$item->name;
+                        return ($item->code ?? '—').' - '.($item->name ?? 'Layanan');
                     }, $services);
 
                     return (object) [

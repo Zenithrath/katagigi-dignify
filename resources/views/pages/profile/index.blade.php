@@ -136,7 +136,7 @@
                 <div class="p-8 flex flex-col">
                     <div class="card-header-clean !mb-4">
                         <div class="icon-box">
-                            <x-lucide-key-round class="w-5 h-5" />
+                            <x-icon name="lucide-key-round" class="w-5 h-5" />
                         </div>
                         <div>
                             <h2>{{ __('general.password.form.labels.password') }}</h2>

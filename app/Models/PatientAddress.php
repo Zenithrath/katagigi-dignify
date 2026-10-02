@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PatientAddress extends Model
 {
     use HasFactory;
-    use HasFactory;
 
     protected $table = 'patient_addresses';
 
@@ -33,6 +32,7 @@ class PatientAddress extends Model
         'district',
         'regency',
         'province',
+        'region_code',
     ];
 
     /**

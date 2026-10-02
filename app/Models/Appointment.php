@@ -21,20 +21,28 @@ class Appointment extends Model
 
     /**
      * The attributes that are mass assignable.
+     * D-05: selaras dengan migrasi (tanpa schedule_id/status hantu).
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'id',
         'patient_id',
+        'patient_code',
         'patient_name',
+        'patient_phone',
         'doctor_id',
         'doctor_name',
-        'schedule_id',
+        'doctor_nipp',
+        'doctor_niptk',
         'date',
+        'services',
         'time_start',
         'time_end',
-        'status',
+        'confirmed_at',
+        'paid_at',
+        'recorded_at',
+        'canceled_at',
     ];
 
     /**
@@ -54,18 +62,10 @@ class Appointment extends Model
     }
 
     /**
-     * Get the appointment that owns the schedule.
-     */
-    public function schedule(): BelongsTo
-    {
-        return $this->belongsTo(Schedule::class, 'schedule_id', 'id');
-    }
-
-    /**
      * Get the appointment associated with the transaction.
      */
     public function transaction(): HasMany
     {
-        return $this->hasMany(Transaction::class, 'id', 'appointment_id');
+        return $this->hasMany(Transaction::class, 'appointment_id', 'id');
     }
 }

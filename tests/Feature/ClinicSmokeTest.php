@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ClinicSmokeTest extends TestCase
@@ -23,9 +24,11 @@ class ClinicSmokeTest extends TestCase
         $pages = [
             'dashboard',
             'admins.index', 'doctors.index', 'nurses.index',
-            'patients.index', 'schedules.index', 'appointments.index',
-            'services.index', 'categories.index', 'medical-records.index',
-            'transactions.index', 'incomes.index', 'installments.index',
+            'patients.index', 'patients.create', 'schedules.index', 'appointments.index',
+            'appointments.create', 'services.index', 'services.create',
+            'categories.index', 'categories.create', 'medical-records.index',
+            'medical-records.create', 'transactions.index', 'transactions.create',
+            'incomes.index', 'installments.index',
         ];
 
         foreach ($pages as $route) {
@@ -35,8 +38,22 @@ class ClinicSmokeTest extends TestCase
                 "Route [$route] returned ".$response->status()
             );
         }
+    }
 
-        $this->actingAs($user)->get('/salaries')->assertOk();
+    public function test_manajemen_sees_schedule_and_appointment_tables(): void
+    {
+        // Regresi: gate @role di view sempat mengeluarkan manajemen
+        // sehingga form + tabel jadwal/janji temu tidak tampil.
+        $manajemen = User::where('email', 'manajemen@gmail.com')->first();
+
+        $this->actingAs($manajemen)->get(route('schedules.index'))
+            ->assertOk()
+            ->assertSee('Daftar Jadwal Bekerja', false)
+            ->assertSee('api/schedules/lookup', false);
+
+        $this->actingAs($manajemen)->get(route('appointments.index'))
+            ->assertOk()
+            ->assertSee('api/appointments/lookup', false);
     }
 
     public function test_guest_is_redirected_to_login(): void
@@ -51,6 +68,27 @@ class ClinicSmokeTest extends TestCase
         $response = $this->actingAs($user)->getJson('/api/diagnosis-codes?q=gigi+berlubang');
 
         $response->assertOk()->assertJsonPath('data.0.code', 'K02.1');
+    }
+
+    /**
+     * D-06d/e: seeder tarif prostodonsia wajib masuk DB (dulu rollback
+     * diam-diam karena bug koma + kategori lab tak aktif).
+     */
+    public function test_prosthodontics_seed_data_integrity(): void
+    {
+        $pro = DB::table('categories')->where('name', 'Prostodonsia')->first();
+        $this->assertNotNull($pro);
+        $this->assertGreaterThan(0, DB::table('services')->where('category_id', $pro->id)->count());
+
+        $akrilik = DB::table('services')->where('name', 'Reparasi Akrilik')->first();
+        $this->assertNotNull($akrilik);
+        $this->assertEquals(1600000, (int) $akrilik->upper_price);
+
+        foreach (['Prostodonsia Lab BAS', 'Prostodonsia Klinik', 'Prostodonsia Lab Afif', 'Prostodonsia Lab Delta'] as $lab) {
+            $category = DB::table('categories')->where('name', $lab)->first();
+            $this->assertNotNull($category, "Kategori [$lab] harus ada");
+            $this->assertGreaterThan(0, DB::table('services')->where('category_id', $category->id)->count(), "Layanan [$lab] harus ada");
+        }
     }
 
     public function test_admin_cannot_cancel_directly_but_can_propose(): void

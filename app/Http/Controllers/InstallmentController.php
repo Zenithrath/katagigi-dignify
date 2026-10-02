@@ -55,6 +55,7 @@ class InstallmentController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('read transaction');
         $filter = (object) [
             'keyword' => $request->keyword,
             'due_date' => $request->due_date,
@@ -101,6 +102,7 @@ class InstallmentController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('read transaction');
         return view('pages.installments.detail', [
             'data' => $this->installmentService->readInstallmentByID($id),
             'getType' => function ($type, $step, $status = 'PENDING') {

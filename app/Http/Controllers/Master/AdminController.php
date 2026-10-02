@@ -86,7 +86,7 @@ class AdminController extends Controller
             Log::error($inserted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.admin.error.oncreate'))->withInput();
+                ->withErrors(['error' => __('messages.admin.error.oncreate')])->withInput();
         }
 
         return redirect()->route('admins.index')
@@ -101,6 +101,7 @@ class AdminController extends Controller
      */
     public function edit($id)
     {
+        $this->authorize('update admin');
         $data = $this->service->selectAdminByID($id);
 
         return view('pages.master.admin.form', [
@@ -118,6 +119,7 @@ class AdminController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('update admin');
         $updatedAdmin = Admin::findOrFail($id);
         if ($request->hasFile('cover_image')) {
             if ($updatedAdmin->cover_picture) {
@@ -144,7 +146,7 @@ class AdminController extends Controller
             Log::error($updated->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.admin.error.onupdate'))->withInput();
+                ->withErrors(['error' => __('messages.admin.error.onupdate')])->withInput();
         }
 
         return redirect()->route('admins.index')
@@ -159,6 +161,7 @@ class AdminController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('delete admin');
         $deletedAdmin = Admin::findOrFail($id);
         if ($deletedAdmin->cover_picture) {
             $this->service->deleteCoverImage($deletedAdmin->cover_picture);
@@ -172,7 +175,7 @@ class AdminController extends Controller
             Log::error($deleted->getMessage());
 
             return back()
-                ->withErrors('error', __('messages.admin.error.ondelete'))->withInput();
+                ->withErrors(['error' => __('messages.admin.error.ondelete')])->withInput();
         }
 
         return redirect()->route('admins.index')

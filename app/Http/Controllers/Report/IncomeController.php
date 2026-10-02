@@ -24,6 +24,7 @@ class IncomeController extends Controller
      */
     public function index()
     {
+        $this->authorize('read turnover');
         $doctorID = null;
 
         if (Auth::user()->hasRole('doctor')) {
@@ -38,6 +39,7 @@ class IncomeController extends Controller
 
     public function lookupTransactionReport(Request $request)
     {
+        $this->authorize('read turnover');
         try {
             $doctorID = null;
 

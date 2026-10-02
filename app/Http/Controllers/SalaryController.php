@@ -15,6 +15,8 @@ class SalaryController extends Controller
      */
     public function index(Request $request)
     {
+        // D-04: data gaji derived dari omzet → butuh read turnover.
+        $this->authorize('read turnover');
         $doctors = DB::table('doctors')
             ->join('users', 'doctors.user_id', '=', 'users.id')
             ->select('doctors.*', 'users.name')
@@ -74,6 +76,7 @@ class SalaryController extends Controller
                 foreach ((array) json_decode($row->services) as $svc) {
                     $svc = (array) $svc;
                     $entry = (object) [
+                        'id' => $row->id,
                         'trx_id' => $row->id,
                         'num' => $num,
                         'doctor_id' => $d->user_id,

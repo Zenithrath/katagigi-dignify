@@ -16,8 +16,20 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
+        <script>
+            // Anti-FOUC: terapkan tema + bahasa tersimpan sebelum render.
+            (function () {
+                var theme = localStorage.getItem('theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                }
+            })();
+        </script>
     </head>
     <body class="antialiased">
+        <div id="navigate-progress"
+            class="pointer-events-none fixed inset-x-0 top-0 z-[70] h-1 bg-emerald-500 opacity-0 transition-opacity"></div>
+
         <div class="app-shell" x-data="{ sidebarOpen: false, sidebarCollapsed: false }" x-on:open-sidebar.window="sidebarOpen = true">
 
             {{-- Sidebar: full-height, flush edges --}}
@@ -33,8 +45,8 @@
                 <div class="p-3 border-t border-slate-200/80">
                     <button type="button" @click="sidebarCollapsed = !sidebarCollapsed"
                         class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors text-xs font-medium">
-                        <x-lucide-panel-left-close class="w-4 h-4" x-show="!sidebarCollapsed" />
-                        <x-lucide-panel-left-open class="w-4 h-4" x-show="sidebarCollapsed" />
+                        <x-icon name="lucide-panel-left-close" class="w-4 h-4" x-show="!sidebarCollapsed" />
+                        <x-icon name="lucide-panel-left-open" class="w-4 h-4" x-show="sidebarCollapsed" />
                         <span x-show="!sidebarCollapsed" x-transition>Collapse</span>
                     </button>
                 </div>
@@ -49,7 +61,7 @@
                             <img src="{{ asset('assets/logo.svg') }}" alt="KataGigi" />
                         </a>
                         <button type="button" x-on:click="sidebarOpen = false" class="absolute right-3 grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-200/60" aria-label="Tutup menu">
-                            <x-lucide-x class="h-4 w-4" />
+                            <x-icon name="lucide-x" class="h-4 w-4" />
                         </button>
                     </div>
                     <div class="sidebar-scroll min-h-0 flex-1 overflow-y-auto" x-on:click="if ($event.target.closest('a')) sidebarOpen = false">
@@ -84,21 +96,59 @@
 
         @stack('scripts')
         <script type="text/javascript">
-            document.addEventListener('DOMContentLoaded', () => {
-                const elems = document.getElementsByClassName('selectable');
-                for (let index = 0; index < elems.length; index++) {
-                    try { initSelectable(elems[index]); } catch (_) {}
+            (function() {
+                var KEY = 'sidebar-scroll-top';
+                function restoreSidebarScroll() {
+                    var top = parseInt(sessionStorage.getItem(KEY) || '0', 10);
+                    document.querySelectorAll('.sidebar-scroll').forEach(function (el) {
+                        if (el.dataset.scrollBound !== '1') {
+                            el.addEventListener('click', function (e) {
+                                if (e.target.closest('a')) sessionStorage.setItem(KEY, String(el.scrollTop));
+                            });
+                            el.dataset.scrollBound = '1';
+                        }
+                        el.scrollTop = top;
+                    });
                 }
-            });
+
+                function initSelectables() {
+                    const elems = document.getElementsByClassName('selectable');
+                    for (let index = 0; index < elems.length; index++) {
+                        try { initSelectable(elems[index]); } catch (_) {}
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    restoreSidebarScroll();
+                    initSelectables();
+                });
+
+                document.addEventListener('livewire:navigated', function () {
+                    restoreSidebarScroll();
+                    initSelectables();
+                });
+
+                document.addEventListener('livewire:navigate', function () {
+                    document.getElementById('navigate-progress')?.classList.remove('opacity-0');
+                });
+
+                document.addEventListener('livewire:navigated', function () {
+                    document.getElementById('navigate-progress')?.classList.add('opacity-0');
+                });
+            })();
+
             function initSelectable(element) {
                 if (!window.$ || !window.$.fn || typeof window.$.fn.select2 !== 'function') return;
+                if (element.dataset.selectableBound === '1') return;
+
                 $(element).select2({
                     width: '100%',
                     id: element.getAttribute('id'),
                     dropdownParent: $(element).parent()
                 });
+                element.dataset.selectableBound = '1';
             }
         </script>
-        @livewireScripts
+        @livewireScriptConfig
     </body>
 </html>

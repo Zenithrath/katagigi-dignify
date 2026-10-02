@@ -10,6 +10,12 @@
         margin-right: auto;
     }
 
+    /* Halaman papan kanban (workspace): butuh lebar penuh agar
+       3 kolom kartu muat lega. */
+    .main-table-container--fluid {
+        max-width: 1680px;
+    }
+
     .main-table-container section.heading {
         @apply flex flex-col gap-1 mb-7 items-start justify-between;
         @apply md:flex-row md:items-center;

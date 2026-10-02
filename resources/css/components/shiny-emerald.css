@@ -1,12 +1,12 @@
 /* ============================================================
-   Style 3D Shiny Emerald — Hijau Tua Alami (Ijo Tua)
+   Style 3D Shiny Navy — Biru Tua selaras logo #264B6F
    Sesuai snippet original: radial gradient pekat, kilau kaca (glass sheen),
    dan kedalaman inset shadow taktil.
    ============================================================ */
 
-/* ---------- 1. Button Ijo 3D Emerald + Animasi ---------- */
+/* ---------- 1. Button 3D Navy + Animasi ---------- */
 .btn-shiny-emerald {
-  background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 40%, #051d11 80%);
+  background: radial-gradient(circle at 20% 20%, #264B6F 0%, #16324c 40%, #0a1e33 80%);
   box-shadow: inset 1px 1.5px 2px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(0, 0, 0, 0.5);
   border-radius: 16px;
@@ -31,12 +31,12 @@
   z-index: 1;
 }
 
-/* Overlay gradient ijo */
+/* Overlay gradient biru */
 .btn-shiny-emerald::after {
   content: '';
   position: absolute;
   inset: 0; border-radius: inherit;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(64, 166, 214, 0.15) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -45,9 +45,9 @@
 
 /* HOVER: lebih terang + kilau membesar */
 .btn-shiny-emerald:hover {
-  background: radial-gradient(circle at 20% 20%, #1c7347 0%, #0c3e26 40%, #062415 80%);
+  background: radial-gradient(circle at 20% 20%, #35648f 0%, #1b3a5c 40%, #0c2239 80%);
   box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.4);
-  border-color: rgba(34, 197, 94, 0.35);
+  border-color: rgba(64, 166, 214, 0.35);
   color: #ffffff;
 }
 .btn-shiny-emerald:hover::before {
@@ -69,11 +69,11 @@
   z-index: 2;
 }
 
-/* ---------- 2. Card Ijo 3D Emerald + Glass Shine (Ijo Tua) ---------- */
+/* ---------- 2. Card 3D Navy + Glass Shine ---------- */
 .card-shiny-emerald {
-  background: radial-gradient(circle at 18% 18%, #165b38 0%, #0a331f 40%, #051d11 85%);
-  box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.35), inset -3px -3px 6px rgba(0, 0, 0, 0.7), 0 10px 25px -4px rgba(5, 29, 17, 0.45);
-  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: radial-gradient(circle at 18% 18%, #264B6F 0%, #16324c 40%, #0a1e33 85%);
+  box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.35), inset -3px -3px 6px rgba(0, 0, 0, 0.7), 0 10px 25px -4px rgba(10, 30, 51, 0.45);
+  border: 1px solid rgba(64, 166, 214, 0.25);
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -98,7 +98,7 @@
   content: '';
   position: absolute;
   inset: 0; border-radius: inherit;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, transparent 60%);
+  background: linear-gradient(135deg, rgba(64, 166, 214, 0.12) 0%, transparent 60%);
   opacity: 0.6;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -108,9 +108,9 @@
 /* HOVER: ngangkat + lebih terang + kilau membesar */
 .card-shiny-emerald:hover {
   transform: translateY(-4px);
-  background: radial-gradient(circle at 18% 18%, #1c7347 0%, #0d4027 40%, #062315 85%);
-  box-shadow: inset 2px 2.5px 4px rgba(255, 255, 255, 0.5), inset -3px -3px 6px rgba(0, 0, 0, 0.8), 0 18px 32px -6px rgba(5, 29, 17, 0.55);
-  border-color: rgba(34, 197, 94, 0.4);
+  background: radial-gradient(circle at 18% 18%, #35648f 0%, #1e4266 40%, #0c2239 85%);
+  box-shadow: inset 2px 2.5px 4px rgba(255, 255, 255, 0.5), inset -3px -3px 6px rgba(0, 0, 0, 0.8), 0 18px 32px -6px rgba(10, 30, 51, 0.55);
+  border-color: rgba(64, 166, 214, 0.4);
 }
 .card-shiny-emerald:hover::before {
   width: 80%; height: 60%;

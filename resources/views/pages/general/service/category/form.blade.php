@@ -5,7 +5,7 @@
         <div class="flex gap-4 items-center">
             <a href="{{ isset($back->redirect) ? url($back->redirect) : route('categories.index') }}"
                 class="clickable-ghost w-9 h-9 rounded-xl">
-                <x-lucide-chevron-left class="w-full h-full" />
+                <x-icon name="lucide-chevron-left" class="w-full h-full" />
             </a>
             <h1 class="text-xl font-bold text-slate-900">
                 {{ $type == 'update' ? __('form.title.update.category') : __('form.title.create.category') }}

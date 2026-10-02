@@ -7,7 +7,7 @@
                     <span class="text-[11px] font-semibold uppercase tracking-wide bg-emerald-700 text-white rounded px-2 py-0.5">{{ $row['system'] }}</span>
                     <span class="font-semibold">[{{ $row['code'] }}]</span>
                     <span class="text-emerald-800">{{ $row['display_id'] }}</span>
-                    <button type="button" wire:click="remove({{ $index }})" class="rounded hover:bg-emerald-200 w-6 h-6 leading-none" aria-label="Hapus kode">&times;</button>
+                    <button type="button" wire:click="remove({{ $index }})" wire:loading.attr="disabled" class="rounded hover:bg-emerald-200 w-6 h-6 leading-none disabled:opacity-50" aria-label="Hapus kode">&times;</button>
                 </span>
                 <input type="hidden" name="{{ $fieldName }}[]" value="{{ $row['id'] }}">
             @endforeach
@@ -24,12 +24,14 @@
         >
 
         @if (strlen(trim($query)) >= 2)
-            <div class="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg">
+            <div wire:loading.class="opacity-50 pointer-events-none" class="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg">
+                <p wire:loading wire:target="query" class="px-3 py-2 text-xs text-slate-400">Mencari…</p>
                 @forelse ($results as $item)
                     <button
                         type="button"
                         wire:click="select('{{ $item->id }}')"
-                        class="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-emerald-50"
+                        wire:loading.attr="disabled"
+                        class="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-emerald-50 disabled:opacity-50"
                     >
                         <span class="mt-0.5 shrink-0 text-[11px] font-semibold uppercase tracking-wide rounded px-2 py-0.5
                             {{ $item->system === 'ICD10' ? 'bg-emerald-700 text-white' : ($item->system === 'ICD9' ? 'bg-teal-600 text-white' : 'bg-lime-600 text-white') }}">

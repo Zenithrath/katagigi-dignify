@@ -28,13 +28,13 @@
             text-slate-700 stroke-slate-700 disabled:text-slate-400;
     }
 
-    /* Primary buttons → shiny emerald 3D */
+    /* Primary buttons → shiny navy 3D (selaras logo #264B6F) */
     .clickable-primary {
         @apply clickable;
         @apply text-sm font-bold;
         @apply rounded-xl;
         @apply text-white;
-        background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 40%, #051d11 80%);
+        background: radial-gradient(circle at 20% 20%, #264B6F 0%, #16324c 40%, #0a1e33 80%);
         box-shadow: inset 1px 1.5px 2px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.35);
         border: 1px solid rgba(0, 0, 0, 0.5);
         position: relative;
@@ -54,9 +54,9 @@
     }
 
     .clickable-primary:hover {
-        background: radial-gradient(circle at 20% 20%, #1c7347 0%, #0c3e26 40%, #062415 80%);
+        background: radial-gradient(circle at 20% 20%, #35648f 0%, #1b3a5c 40%, #0c2239 80%);
         box-shadow: inset 1.5px 2px 3px rgba(255, 255, 255, 0.6), inset -2px -2px 4px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.4);
-        border-color: rgba(34, 197, 94, 0.35);
+        border-color: rgba(64, 166, 214, 0.35);
     }
 
     .clickable-primary:hover::before {
@@ -79,6 +79,24 @@
     .clickable-primary:disabled {
         @apply opacity-50 cursor-not-allowed;
         transform: none;
+    }
+
+    /* Pil kecil 3D navy (toggle bahasa aktif, dsb.) */
+    .pill-3d-navy {
+        background: radial-gradient(circle at 20% 20%, #264B6F 0%, #16324c 40%, #0a1e33 80%);
+        box-shadow: inset 1px 1.5px 2px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Avatar 3D navy */
+    .avatar-3d {
+        background: radial-gradient(circle at 20% 20%, #35648f 0%, #264B6F 45%, #16324c 85%);
+        box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.45), inset -2px -2px 3px rgba(0, 0, 0, 0.6), 0 2px 5px rgba(10, 30, 51, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #ffffff;
     }
 
     .clickable.icon-only {

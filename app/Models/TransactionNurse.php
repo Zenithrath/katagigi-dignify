@@ -36,7 +36,7 @@ class TransactionNurse extends Model
      */
     public function nurse(): BelongsTo
     {
-        return $this->belongsTo(Nurse::class, 'nurse_id', 'id');
+        return $this->belongsTo(Nurse::class, 'nurse_id', 'user_id');
     }
 
     /**

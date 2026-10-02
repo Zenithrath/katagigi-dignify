@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Audit;
 use App\Http\Requests\PasswordRequest;
 use App\Models\Admin;
 use App\Models\Doctor;
@@ -15,7 +16,6 @@ use App\Types\Entities\DoctorEntity;
 use App\Types\Entities\NurseEntity;
 use Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
@@ -95,7 +95,7 @@ class ProfileController extends Controller
             $data = $this->adminService->updateAdmin($admin, $user->id);
         }
 
-        if ($role[0] == 'doctor') {
+        if ($role == 'doctor') {
             $updatedDoctor = Doctor::findOrFail($id);
             if ($request->hasFile('cover_image')) {
                 if ($updatedDoctor->cover_picture) {
@@ -122,7 +122,7 @@ class ProfileController extends Controller
             $data = $this->doctorService->updateDoctor($doctor, $user->id);
         }
 
-        if ($role[0] == 'nurse') {
+        if ($role == 'nurse') {
             $updatedNurse = Nurse::findOrFail($id);
             if ($request->hasFile('cover_image')) {
                 if ($updatedNurse->cover_picture) {
@@ -164,17 +164,19 @@ class ProfileController extends Controller
         $user = User::findOrFail($id);
         $password = Hash::make($validated['password']);
         if ($user->update(['password' => $password])) {
+            Audit::log('change-password', 'user', $user->id);
+
             return redirect()->route('profile')->with('success', 'Password updated successfully');
         }
     }
 
     public function switchLanguage($lang)
     {
-        // App::setLocale($lang);
-        // session(["my_locale", $lang]);
-        Session::put('applocale', $lang);
+        // Hanya locale yang tersedia; nilai lain diabaikan (hindari locale smuggling).
+        if (in_array($lang, ['id', 'en'], true)) {
+            Session::put('applocale', $lang);
+        }
 
-        // dd(session());
         return redirect()->back();
     }
 }

@@ -9,6 +9,8 @@ class ExportController extends Controller
 {
     public function exportTransactions(Request $request)
     {
+        // D-04: export XLSX dibangkitkan dari halaman omzet → butuh read turnover.
+        $this->authorize('read turnover');
         $report = new MonthlyReports($request);
         $filename = $report->export();
 

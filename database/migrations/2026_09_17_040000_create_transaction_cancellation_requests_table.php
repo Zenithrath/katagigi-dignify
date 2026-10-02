@@ -15,10 +15,10 @@ return new class extends Migration
         Schema::create('transaction_cancellation_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('transaction_id')->constrained('transactions')->cascadeOnDelete();
-            $table->foreignId('proposed_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('proposed_by')->constrained('users')->cascadeOnDelete();
             $table->string('reason');
             $table->string('status', 16)->default('PROPOSED'); // PROPOSED | APPROVED | REJECTED
-            $table->foreignId('decided_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('decided_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('decided_at')->nullable();
             $table->string('decision_note')->nullable();
             $table->timestamps();
