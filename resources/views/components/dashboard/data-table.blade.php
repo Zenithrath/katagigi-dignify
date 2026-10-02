@@ -28,7 +28,7 @@
     @if ($empty)
         <div class="py-12 flex flex-col items-center justify-center text-center">
             <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3 border border-emerald-100">
-                <x-dynamic-component :component="'lucide-'.$emptyIcon" class="w-7 h-7" />
+                <x-icon :name="'lucide-'.$emptyIcon" class="w-7 h-7" />
             </div>
             <p class="text-base font-bold text-slate-800">{{ $emptyTitle }}</p>
             @if ($emptyHint)

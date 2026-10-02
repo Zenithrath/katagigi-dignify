@@ -14,7 +14,7 @@ new class extends Component
 
 <header class="flex items-center gap-3 bg-[#f8fafc] border-b border-slate-200/80 px-4 sm:px-6 py-2.5 sticky top-0 z-20">
     <button type="button" class="grid lg:hidden h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100" x-on:click="$dispatch('open-sidebar')" aria-label="Buka menu">
-        <x-lucide-menu class="h-5 w-5" />
+        <x-icon name="lucide-menu" class="h-5 w-5" />
     </button>
 
     <div class="flex-1"></div>
@@ -37,8 +37,8 @@ new class extends Component
             class="dark-toggle grid h-9 w-9 place-items-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
             title="Mode terang/gelap" aria-label="Ganti mode terang/gelap">
             {{-- Ikon mengikuti state .dark pada <html> via CSS --}}
-            <x-lucide-moon class="h-4 w-4 dark:hidden" />
-            <x-lucide-sun class="h-4 w-4 hidden dark:block" />
+            <x-icon name="lucide-moon" class="h-4 w-4 dark:hidden" />
+            <x-icon name="lucide-sun" class="h-4 w-4 hidden dark:block" />
         </button>
     </div>
 
@@ -64,7 +64,7 @@ new class extends Component
                 <span class="block text-[13px] font-bold text-slate-900">{{ auth()->user()->name }}</span>
                 <span class="block text-[11px] text-slate-500">{{ auth()->user()->email }}</span>
             </span>
-            <x-lucide-chevron-down class="w-3.5 h-3.5 text-slate-400 hidden md:block transition-transform duration-200" x-bind:class="open ? 'rotate-180' : ''" />
+            <x-icon name="lucide-chevron-down" class="w-3.5 h-3.5 text-slate-400 hidden md:block transition-transform duration-200" x-bind:class="open ? 'rotate-180' : ''" />
         </button>
 
         <div x-show="open" x-cloak
@@ -94,7 +94,7 @@ new class extends Component
             <div class="py-1.5">
                 <a href="{{ route('profile') }}" wire:navigate
                     class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors">
-                    <x-lucide-settings class="w-4 h-4 text-slate-400" />
+                    <x-icon name="lucide-settings" class="w-4 h-4 text-slate-400" />
                     Profile & Password
                 </a>
             </div>
@@ -104,7 +104,7 @@ new class extends Component
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                        <x-lucide-log-out class="w-4 h-4" />
+                        <x-icon name="lucide-log-out" class="w-4 h-4" />
                         Log Out
                     </button>
                 </form>

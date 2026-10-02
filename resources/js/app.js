@@ -1,5 +1,5 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import select2 from 'select2';
 import jQuery from 'jquery';
 
@@ -229,7 +229,7 @@ Alpine.data('yoyChart', (payload = {}) => ({
     },
 }));
 
-Alpine.start();
+Livewire.start();
 
 // jQuery + Select2 init — guarded so third-party init can NEVER break Alpine boot.
 // (select2 UMD exports a factory function; call it explicitly with our jQuery copy.)

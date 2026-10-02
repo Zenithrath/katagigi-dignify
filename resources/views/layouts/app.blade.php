@@ -42,8 +42,8 @@
                 <div class="p-3 border-t border-slate-200/80">
                     <button type="button" @click="sidebarCollapsed = !sidebarCollapsed"
                         class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors text-xs font-medium">
-                        <x-lucide-panel-left-close class="w-4 h-4" x-show="!sidebarCollapsed" />
-                        <x-lucide-panel-left-open class="w-4 h-4" x-show="sidebarCollapsed" />
+                        <x-icon name="lucide-panel-left-close" class="w-4 h-4" x-show="!sidebarCollapsed" />
+                        <x-icon name="lucide-panel-left-open" class="w-4 h-4" x-show="sidebarCollapsed" />
                         <span x-show="!sidebarCollapsed" x-transition>Collapse</span>
                     </button>
                 </div>
@@ -58,7 +58,7 @@
                             <img src="{{ asset('assets/logo.svg') }}" alt="KataGigi" />
                         </a>
                         <button type="button" x-on:click="sidebarOpen = false" class="absolute right-3 grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-200/60" aria-label="Tutup menu">
-                            <x-lucide-x class="h-4 w-4" />
+                            <x-icon name="lucide-x" class="h-4 w-4" />
                         </button>
                     </div>
                     <div class="sidebar-scroll min-h-0 flex-1 overflow-y-auto" x-on:click="if ($event.target.closest('a')) sidebarOpen = false">
@@ -121,6 +121,6 @@
                 });
             }
         </script>
-        @livewireScripts
+        @livewireScriptConfig
     </body>
 </html>

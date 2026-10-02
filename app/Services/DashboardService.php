@@ -68,7 +68,7 @@ class DashboardService extends Service
                             ->orWhereNull('patients.phone')
                             ->orWhere('patients.phone', '')
                             ->orWhereNull('patients.birthdate')
-                            ->orWhere('patients.birthdate', '')
+                            // ->orWhere('patients.birthdate', '')
                             ->orWhereNull('patient_addresses.patient_id')
                             ->orWhereNull('patient_addresses.street')
                             ->orWhere('patient_addresses.street', '');

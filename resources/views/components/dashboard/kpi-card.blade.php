@@ -14,7 +14,7 @@
 <div {{ $attributes->merge(['class' => 'card-shiny-emerald rounded-[22px] p-6']) }}>
     <div class="flex items-center justify-between">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-white/25 bg-white/15 text-white">
-            <x-dynamic-component :component="'lucide-'.$icon" class="w-5 h-5" />
+            <x-icon :name="'lucide-'.$icon" class="w-5 h-5" />
         </div>
         @if ($badge)
             <span class="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-white/25 bg-white/15 text-white">

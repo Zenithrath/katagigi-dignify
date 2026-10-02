@@ -25,7 +25,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5 mb-5">
         <div>
             <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
-                <x-dynamic-component :component="'lucide-'.$icon" class="w-5 h-5 text-emerald-600" />
+                <x-icon :name="'lucide-'.$icon" class="w-5 h-5 text-emerald-600" />
                 {{ $title }}
             </h3>
             @if ($subtitle)
