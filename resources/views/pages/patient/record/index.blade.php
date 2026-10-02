@@ -8,11 +8,13 @@
                 <p>{{ __('patient.record.index._subtitle') }}</p>
             </div>
 
+            {{-- PARKED: input awal lewat visit (satu pintu). Tabel + edit tetap jalan.
             @can('create medical record')
                 <a href="{{ route('medical-records.create') }}" class="clickable-primary py-2 px-4 rounded-xl">
                     {{ __('patient.record.index.actions.add') }}
                 </a>
             @endcan
+            --}}
         </section>
 
         <x-flash-alerts />

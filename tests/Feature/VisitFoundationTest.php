@@ -35,12 +35,12 @@ class VisitFoundationTest extends TestCase
     public function test_visit_service_creates_numbered_visit(): void
     {
         $service = new VisitService;
-        $patient = Patient::factory()->create();
-        $doctor = Doctor::factory()->create();
+        $appointment = Appointment::factory()->create();
 
         $first = $service->createVisit([
-            'patient_id' => $patient->id,
-            'doctor_id' => $doctor->user_id,
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'appointment_id' => $appointment->id,
         ]);
         $this->assertInstanceOf(Visit::class, $first);
         $this->assertMatchesRegularExpression('/^VST-\d{7}$/', $first->visit_number);
@@ -49,15 +49,66 @@ class VisitFoundationTest extends TestCase
         $this->assertNotNull($first->branch_id);
 
         $second = $service->createVisit([
-            'patient_id' => $patient->id,
-            'doctor_id' => $doctor->user_id,
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'appointment_id' => $appointment->id,
         ]);
         $this->assertNotEquals($first->visit_number, $second->visit_number);
 
         $fresh = Visit::find($first->id);
-        $this->assertEquals($patient->id, $fresh->patient->id);
-        $this->assertEquals($doctor->user_id, $fresh->doctor->user_id);
+        $this->assertEquals($appointment->patient_id, $fresh->patient->id);
+        $this->assertEquals($appointment->doctor_id, $fresh->doctor->user_id);
         $this->assertNotNull($fresh->branch);
+    }
+
+    public function test_visit_requires_appointment(): void
+    {
+        $service = new VisitService;
+        $patient = Patient::factory()->create();
+        $doctor = Doctor::factory()->create();
+
+        $result = $service->createVisit([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->user_id,
+        ]);
+
+        $this->assertInstanceOf(\Exception::class, $result);
+    }
+
+    public function test_queue_numbers_are_per_doctor_per_day(): void
+    {
+        $service = new VisitService;
+        $doctorA = Doctor::factory()->create();
+        $doctorB = Doctor::factory()->create();
+        $mkAppointment = fn ($doctor) => Appointment::factory()->create([
+            'doctor_id' => $doctor->user_id,
+        ]);
+
+        $a1 = $service->createVisit([
+            'patient_id' => $mkAppointment($doctorA)->patient_id,
+            'doctor_id' => $doctorA->user_id,
+            'appointment_id' => $mkAppointment($doctorA)->id,
+            'visit_date' => date('Y-m-d'),
+        ]);
+        // Samakan appointment agar FK konsisten (ID dibuat terpisah di atas).
+        $a2 = $service->createVisit([
+            'patient_id' => $a1->patient_id,
+            'doctor_id' => $doctorA->user_id,
+            'appointment_id' => $a1->appointment_id,
+            'visit_date' => date('Y-m-d'),
+        ]);
+        $b1 = $service->createVisit([
+            'patient_id' => $mkAppointment($doctorB)->patient_id,
+            'doctor_id' => $doctorB->user_id,
+            'appointment_id' => $mkAppointment($doctorB)->id,
+            'visit_date' => date('Y-m-d'),
+        ]);
+
+        $this->assertInstanceOf(Visit::class, $a1);
+        $this->assertEquals(1, $a1->queue_no);
+        $this->assertEquals(2, $a2->queue_no);
+        $this->assertEquals(1, $b1->queue_no);
+        $this->assertEquals('#1', $a1->queueLabel());
     }
 
     public function test_visit_linked_to_appointment(): void

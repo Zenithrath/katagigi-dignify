@@ -2,6 +2,7 @@
 
 namespace App\Services\Clinical;
 
+use App\Helpers\BranchContext;
 use App\Models\Visit;
 use App\Services\Service;
 use Exception;
@@ -30,16 +31,31 @@ class VisitService extends Service
 
     public function createVisit(array $data): Visit|Exception
     {
+        // Alur pelayanan: setiap visit wajib berasal dari appointment
+        // (tidak boleh langsung masuk antrean tanpa janji temu).
+        if (empty($data['appointment_id'])) {
+            return new Exception('Visit wajib memiliki appointment.', 422);
+        }
+
         try {
             return DB::transaction(function () use ($data) {
+                $visitDate = $data['visit_date'] ?? date('Y-m-d');
+                // whereDate: SQLite menyimpan kolom date sebagai 'Y-m-d H:i:s',
+                // where biasa tidak pernah cocok.
+                $nextQueueNo = ((int) DB::table('visits')
+                    ->where('doctor_id', $data['doctor_id'])
+                    ->whereDate('visit_date', $visitDate)
+                    ->max('queue_no')) + 1;
+
                 return Visit::create([
                     'id' => (string) Str::uuid(),
                     'visit_number' => $this->nextVisitNumber(),
+                    'queue_no' => $nextQueueNo,
                     'branch_id' => $data['branch_id'] ?? $this->defaultBranchId(),
                     'patient_id' => $data['patient_id'],
-                    'appointment_id' => $data['appointment_id'] ?? null,
+                    'appointment_id' => $data['appointment_id'],
                     'doctor_id' => $data['doctor_id'],
-                    'visit_date' => $data['visit_date'] ?? date('Y-m-d'),
+                    'visit_date' => $visitDate,
                     'clinical_status' => $data['clinical_status'] ?? Visit::STATUS_REGISTERED,
                     'billing_status' => Visit::BILLING_UNBILLED,
                     'notes' => $data['notes'] ?? null,
@@ -54,6 +70,6 @@ class VisitService extends Service
 
     public function defaultBranchId(): ?string
     {
-        return \App\Helpers\BranchContext::currentId() ?? \App\Helpers\BranchContext::defaultId();
+        return BranchContext::currentId() ?? BranchContext::defaultId();
     }
 }

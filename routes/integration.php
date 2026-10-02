@@ -14,6 +14,11 @@ Route::middleware('auth')->group(function () {
     // Fase 4.2: kamus KFA untuk autocomplete resep.
     Route::get('api/kfa/lookup', [KfaController::class, 'lookup'])->name('api.kfa.lookup');
 
+    /*
+     * PARKED 2026-09-24 (fokus alur pasien dulu).
+     * View dipindah ke backup/views/pages/integration.
+     * API lookup di atas tetap aktif (dipakai form pasien & resep).
+     *
     Route::get('satusehat/onboarding', [PractitionerOnboardingController::class, 'index'])
         ->name('satusehat.onboarding.index');
     Route::post('satusehat/onboarding/organization', [PractitionerOnboardingController::class, 'registerOrganization'])
@@ -37,4 +42,5 @@ Route::middleware('auth')->group(function () {
         ->name('satusehat.credentials.update');
     Route::post('satusehat/credentials/{branch}/verify', [SatuSehatCredentialController::class, 'verify'])
         ->name('satusehat.credentials.verify');
+     */
 });

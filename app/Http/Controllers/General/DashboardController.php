@@ -6,6 +6,7 @@ use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Services\DashboardService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
 {
@@ -45,9 +46,9 @@ class DashboardController extends Controller
      * untuk role terkait. Payload tanpa data tidak dirender (kecuali
      * kosong-nya bermakna operasional, mis. antrian hari ini).
      *
-     * @return \Illuminate\Support\Collection<int, object{view: string, payload: object}>
+     * @return Collection<int, object{view: string, payload: object}>
      */
-    private function buildWidgets(string $role, ?array $overview): \Illuminate\Support\Collection
+    private function buildWidgets(string $role, ?array $overview): Collection
     {
         if ($overview === null) {
             return collect(); // guest: hanya header
@@ -72,7 +73,8 @@ class DashboardController extends Controller
 
     /**
      * Registry widget: nama partial => [role yang boleh lihat, provider payload].
-     * Menambah widget/role baru cukup di sini + partial-nya.
+     * Fokus alur pasien (2026-09-24): widget finansial (chart-trend,
+     * billing-methods) diparkir ke backup/views/dashboard/widgets.
      */
     private function widgetMap(): array
     {
@@ -80,9 +82,7 @@ class DashboardController extends Controller
             // Pendapatan (kpi + grafik) HANYA manajemen/admin — dokter &
             // perawat melihat kinerja operasional tanpa angka finansial.
             'kpi-row' => [['admin', 'doctor', 'nurse'], 'kpiRow'],
-            'chart-trend' => [['admin'], 'chartTrend'],
             'queue-today' => [['admin', 'doctor', 'nurse'], 'queueToday'],
-            'billing-methods' => [['admin'], 'billingMethods'],
             'patients-incomplete' => [['admin'], 'patientsIncomplete'],
             'recent-activities' => [['admin', 'doctor'], 'recentActivities'],
         ];
@@ -97,7 +97,8 @@ class DashboardController extends Controller
             'transactions' => (int) ($o['transactions'] ?? 0),
             'patients' => isset($o['patients']) ? (int) $o['patients'] : null,
             'new_patients' => isset($o['new_patients']) ? (int) $o['new_patients'] : null,
-            'medical_records' => isset($o['medical_records']) ? (int) $o['medical_records'] : null,
+            'medical_records' => isset($o['visits_month']) ? (int) $o['visits_month']
+                : (isset($o['medical_records']) ? (int) $o['medical_records'] : null),
             // true = angka milik dokter sendiri, bukan seluruh klinik.
             'scoped' => $role !== 'admin',
         ];
@@ -153,7 +154,7 @@ class DashboardController extends Controller
      * agar akses properti (->name, ->code, dst.) di view tetap bekerja.
      * stdClass aman dipakai runtime; yang dilarang hanyalah masuk cache.
      */
-    private function toObjects(array $rows): \Illuminate\Support\Collection
+    private function toObjects(array $rows): Collection
     {
         return collect($rows)->map(fn ($row) => is_object($row) ? $row : (object) $row);
     }

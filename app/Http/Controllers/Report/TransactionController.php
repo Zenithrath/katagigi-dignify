@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Report;
 use App\Helpers\GeneralHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TransactionRequest;
+use App\Models\Invoice;
 use App\Models\TransactionCancellationRequest;
+use App\Models\Visit;
 use App\Services\OptionService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -36,9 +38,30 @@ class TransactionController extends Controller
             return GeneralHelper::floatToRupiah($value);
         };
 
+        // Tab kasir: menunggu pembayaran = tagihan terbit yang belum lunas
+        // + visit SIGNED yang belum ada tagihan aktif.
+        $pendingInvoices = null;
+        $unbilledVisits = null;
+        if ($request->input('tab') === 'pending') {
+            $pendingInvoices = Invoice::with(['patient:id,code,name', 'visit:id,visit_number', 'doctor.user:id,name'])
+                ->whereIn('status', [Invoice::STATUS_ISSUED, Invoice::STATUS_PARTIALLY_PAID])
+                ->orderBy('created_at')
+                ->paginate(20, ['*'], 'invoices_page')->withQueryString();
+            $unbilledVisits = Visit::with(['patient:id,code,name', 'doctor.user:id,name'])
+                ->where('clinical_status', Visit::STATUS_SIGNED)
+                ->where('billing_status', Visit::BILLING_UNBILLED)
+                ->whereDoesntHave('invoices', fn ($q) => $q->where('status', '!=', Invoice::STATUS_VOID))
+                ->orderBy('created_at')
+                ->limit(20)
+                ->get();
+        }
+
         return view('pages.report.transaction.index', [
             'transactionList' => $this->service->readAllTransactions($request),
             'toRupiah' => $rupiahConverter,
+            'tab' => $request->input('tab', 'all'),
+            'pendingInvoices' => $pendingInvoices,
+            'unbilledVisits' => $unbilledVisits,
         ]);
     }
 
@@ -64,6 +87,7 @@ class TransactionController extends Controller
     public function getTransactionsByID(Request $request, $id)
     {
         $this->authorize('read transaction');
+
         return response()->json([
             'data' => $this->service->readTransactionByID($id),
         ], 200);
@@ -85,7 +109,7 @@ class TransactionController extends Controller
         $prefillVisit = null;
         $prefillAppointmentID = null;
         if (request()->filled('visit')) {
-            $prefillVisit = \App\Models\Visit::with(['patient:id,code,name', 'treatments'])->find(request()->input('visit'));
+            $prefillVisit = Visit::with(['patient:id,code,name', 'treatments'])->find(request()->input('visit'));
             if ($prefillVisit && $prefillVisit->appointment_id) {
                 $prefillAppointmentID = $prefillVisit->appointment_id;
             }

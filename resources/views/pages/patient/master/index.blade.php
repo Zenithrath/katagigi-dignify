@@ -27,11 +27,11 @@
         @endphp
         <div class="flex flex-wrap items-center gap-2 mb-1">
             <a href="{{ $tabUrl('all') }}"
-                class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'all' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+                class="px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'all' ? 'clickable-primary' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
                 {{ __('patient.master.index.table.all') }}
             </a>
             <a href="{{ $tabUrl('complete') }}"
-                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'complete' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
+                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-colors {{ $tab === 'complete' ? 'clickable-primary' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
                 <span class="w-2 h-2 rounded-full {{ $tab === 'complete' ? 'bg-white' : 'bg-emerald-500' }}"></span>
                 {{ __('patient.master.index.table.complete') }}
                 <span class="text-xs font-bold px-1.5 py-0.5 rounded-md {{ $tab === 'complete' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-700' }}">{{ $completeness['complete'] }}</span>

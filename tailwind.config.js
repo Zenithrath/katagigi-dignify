@@ -20,10 +20,12 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
-            // Palet warisan app lama (dipakai halaman-halaman port)
-            // brand = hijau emerald Donezo
+            // Palet selaras logo (#264B6F biru tua): primer = sky,
+            // emerald/teal lawas dipetakan ke sky agar seluruh aksen seragam.
             colors: {
-                brand: colors.emerald,
+                brand: colors.sky,
+                emerald: colors.sky,
+                teal: colors.sky,
                 danger: colors.red,
                 warning: colors.yellow,
                 success: colors.green,

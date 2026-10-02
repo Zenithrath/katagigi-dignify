@@ -30,7 +30,7 @@
                     <a href="{{ route('workspace.index') }}" class="btn-shiny-emerald inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white">
                         <x-lucide-stethoscope class="w-4 h-4" /> <span>{{ __('dashboard.action.workspace') }}</span>
                     </a>
-                    <a href="{{ route('visits.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">
+                    <a href="{{ route('workspace.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all">
                         <x-lucide-list-ordered class="w-4 h-4" /> {{ __('dashboard.action.queue') }}
                     </a>
                 @endif

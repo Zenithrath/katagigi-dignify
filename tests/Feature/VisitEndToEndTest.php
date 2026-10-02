@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Doctor;
+use App\Models\Invoice;
+use App\Models\MedicalConsentRecord;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,6 +48,8 @@ class VisitEndToEndTest extends TestCase
             'nik' => '6371011705900009',
             'birth_place' => 'Banjarmasin',
             'birthdate' => '1995-01-01',
+            'street' => 'Jl. Test No. 1',
+            'village' => 'Test',
             'satusehat_consent' => '1',
         ])->assertRedirect();
         $patient = DB::table('patients')->where('name', 'Pasien Visit')->first();
@@ -67,12 +71,12 @@ class VisitEndToEndTest extends TestCase
         $appointment = DB::table('appointments')->where('patient_id', $patient->id)->first();
         $this->actingAs($admin)->post(route('appointments.confirm', $appointment->id))->assertRedirect();
 
-        // 2. Check-in → WAITING → CALLED → IN_TREATMENT.
+        // 2. Check-in → WAITING (suster) → CALLED → IN_TREATMENT (dokter).
         $this->actingAs($admin)->post(route('appointments.checkin', $appointment->id))->assertRedirect();
         $visit = Visit::where('appointment_id', $appointment->id)->first();
         $this->assertEquals(Visit::STATUS_WAITING, $visit->clinical_status);
         $this->actingAs($nurse)->post(route('visits.status', $visit->id), ['status' => Visit::STATUS_CALLED])->assertRedirect();
-        $this->actingAs($nurse)->post(route('visits.status', $visit->id), ['status' => Visit::STATUS_IN_TREATMENT])->assertRedirect();
+        $this->actingAs($doctorUser)->post(route('visits.status', $visit->id), ['status' => Visit::STATUS_IN_TREATMENT])->assertRedirect();
 
         // 3. Isi klinis oleh dokter.
         $icd10 = DB::table('diagnosis_codes')->where('code', 'K02.1')->first();
@@ -120,7 +124,7 @@ class VisitEndToEndTest extends TestCase
         // tanpa consent disetujui, sign ditolak 422.
         $this->actingAs($doctorUser)->post(route('visits.sign', $visit->id))->assertStatus(422);
         $this->actingAs($doctorUser)->post(route('visits.consents.store', $visit->id), [
-            'consent_text' => \App\Models\MedicalConsentRecord::DEFAULT_TEXT,
+            'consent_text' => MedicalConsentRecord::DEFAULT_TEXT,
             'granted' => '1',
             'granted_by_name' => 'Pasien Visit',
         ])->assertRedirect();
@@ -137,7 +141,25 @@ class VisitEndToEndTest extends TestCase
         ])->assertStatus(422);
         $this->actingAs($nurse)->post(route('visits.sign', $visit->id))->assertForbidden();
 
-        // 6. Kasir membuat nota dari appointment visit.
+        // 6. Kasir: buat tagihan dari visit SIGNED → terbit → bayar lunas.
+        // Alur: pembayaran Belum Bayar → Sudah Bayar → kunjungan selesai.
+        $this->actingAs($admin)->post(route('visits.invoice.store', $visit->id))->assertRedirect();
+        $invoice = Invoice::where('visit_id', $visit->id)->first();
+        $this->assertNotNull($invoice);
+        $this->actingAs($admin)->post(route('invoices.issue', $invoice->id))->assertRedirect();
+        $this->assertEquals(Visit::BILLING_BILLED, $visit->fresh()->billing_status);
+
+        $invoice->refresh();
+        $this->actingAs($admin)->post(route('invoices.payments.store', $invoice->id), [
+            'amount' => $invoice->total,
+            'method' => 'CASH',
+        ])->assertRedirect();
+        $visit = $visit->fresh();
+        $this->assertEquals(Visit::BILLING_PAID, $visit->billing_status);
+        $this->assertTrue($visit->isVisitComplete());
+        $this->assertNotNull(DB::table('appointments')->where('id', $appointment->id)->first()->paid_at);
+
+        // 7. Nota lama tetap bisa dibuat (kompatibilitas).
         $this->actingAs($admin)->post(route('transactions.store'), [
             'appointment_id' => $appointment->id,
             'service_id' => [$service->id],
@@ -149,6 +171,40 @@ class VisitEndToEndTest extends TestCase
             'payment_method' => 'CASH',
         ])->assertRedirect();
         $this->assertNotNull(DB::table('transactions')->where('appointment_id', $appointment->id)->first());
+    }
+
+    public function test_appointment_with_new_patient_creates_both(): void
+    {
+        $admin = User::where('email', 'admin@gmail.com')->first();
+        $doctor = Doctor::factory()->create();
+        $service = DB::table('services')->where('is_active', true)->first();
+        $date = date('Y-m-d', strtotime('next monday'));
+
+        $this->actingAs($admin)->post(route('schedules.store'), [
+            'doctor_id' => $doctor->user_id,
+            'day' => 'MONDAY',
+            'start_time' => '08:00',
+            'end_time' => '15:00',
+        ])->assertRedirect();
+
+        // Tanpa patient_id: pasien baru dibuat inline dari form yang sama.
+        // Nomor 62… sengaja untuk membuktikan normalisasi ke 08… .
+        $this->actingAs($admin)->post(route('appointments.store'), [
+            'new_patient_name' => 'Pasien Dadakan',
+            'new_patient_phone' => '6281234569999',
+            'new_patient_birthdate' => '1990-05-05',
+            'new_patient_gender' => 'MALE',
+            'doctor_id' => $doctor->user_id,
+            'service_id' => [$service->id],
+            'date' => $date,
+            'start_time' => '11:00',
+            'end_time' => '12:00',
+        ])->assertRedirect(route('appointments.index'));
+
+        $patient = DB::table('patients')->where('name', 'Pasien Dadakan')->first();
+        $this->assertNotNull($patient);
+        $appointment = DB::table('appointments')->where('patient_id', $patient->id)->first();
+        $this->assertNotNull($appointment);
     }
 
     public function test_sign_requires_done_and_icd10(): void
@@ -178,7 +234,7 @@ class VisitEndToEndTest extends TestCase
         $this->actingAs($doctorUser)->post(route('visits.sign', $visit->id))->assertStatus(422);
 
         $this->actingAs($doctorUser)->post(route('visits.consents.store', $visit->id), [
-            'consent_text' => \App\Models\MedicalConsentRecord::DEFAULT_TEXT,
+            'consent_text' => MedicalConsentRecord::DEFAULT_TEXT,
             'granted' => '1',
             'granted_by_name' => 'Pasien Visit',
         ])->assertRedirect();

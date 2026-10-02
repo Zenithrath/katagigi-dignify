@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -27,11 +28,11 @@ class InvoiceTest extends TestCase
         $doctor = Doctor::factory()->create();
         $visit = Visit::factory()->create([
             'doctor_id' => $doctor->user_id,
-            'clinical_status' => \App\Models\Visit::STATUS_SIGNED,
+            'clinical_status' => Visit::STATUS_SIGNED,
         ]);
         $icd9 = DB::table('diagnosis_codes')->where('code', '23.2')->first();
         $visit->treatments()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'tooth_fdi' => '36',
             'procedure_code_id' => $icd9->id,
             'system' => 'ICD9',
@@ -64,11 +65,11 @@ class InvoiceTest extends TestCase
         $doctor = Doctor::factory()->create();
         $visit = Visit::factory()->create([
             'doctor_id' => $doctor->user_id,
-            'clinical_status' => \App\Models\Visit::STATUS_DONE,
+            'clinical_status' => Visit::STATUS_DONE,
         ]);
         $icd9 = DB::table('diagnosis_codes')->where('code', '23.2')->first();
         $visit->treatments()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'procedure_code_id' => $icd9->id,
             'system' => 'ICD9',
             'code' => '23.2',
@@ -86,7 +87,7 @@ class InvoiceTest extends TestCase
         ])->assertRedirect();
         $this->assertEquals('DRAFT', $invoice->fresh()->status);
 
-        $visit->update(['clinical_status' => \App\Models\Visit::STATUS_SIGNED]);
+        $visit->update(['clinical_status' => Visit::STATUS_SIGNED]);
         $this->actingAs($admin)->post(route('invoices.issue', $invoice->id), [
             'discount' => 10000,
         ])->assertRedirect();
@@ -123,6 +124,35 @@ class InvoiceTest extends TestCase
             ->assertDontSee($theirsInvoice->number, false);
 
         $this->actingAs($doctorUser)->get(route('invoices.show', $theirsInvoice->id))->assertForbidden();
+    }
+
+    public function test_pending_tab_lists_unpaid_and_pay_in_full(): void
+    {
+        $admin = User::where('email', 'admin@gmail.com')->first();
+        $visit = $this->signedVisitWithTreatment();
+        $this->actingAs($admin)->post(route('visits.invoice.store', $visit->id));
+        $invoice = $visit->invoices()->first();
+        $this->actingAs($admin)->post(route('invoices.issue', $invoice->id))->assertRedirect();
+
+        // Tab kasir menampilkan tagihan belum bayar.
+        $this->actingAs($admin)->get(route('transactions.index', ['tab' => 'pending']))
+            ->assertOk()
+            ->assertSee($invoice->number, false)
+            ->assertSee('Belum Bayar', false);
+
+        // Tandai lunas = bayar sisa penuh.
+        $this->actingAs($admin)->post(route('invoices.payments.store', $invoice->id), [
+            'amount' => $invoice->fresh()->amountDue(),
+            'method' => 'CASH',
+        ])->assertRedirect();
+        $this->assertEquals('PAID', $invoice->fresh()->status);
+        $this->assertEquals('PAID', $visit->fresh()->billing_status);
+        $this->assertTrue($visit->fresh()->isVisitComplete());
+
+        // Lunas → hilang dari tab tunggu bayar.
+        $this->actingAs($admin)->get(route('transactions.index', ['tab' => 'pending']))
+            ->assertOk()
+            ->assertDontSee($invoice->number, false);
     }
 
     public function test_void_and_item_rules(): void

@@ -21,6 +21,8 @@ class VisitAttachment extends Model
     public const TYPES = [
         'INTRAORAL' => 'Intraoral',
         'EXTRAORAL' => 'Ekstraoral',
+        'BEFORE' => 'Foto Before',
+        'AFTER' => 'Foto After',
         'XRAY' => 'Rontgen',
         'DOCUMENT' => 'Dokumen',
         'OTHER' => 'Lainnya',

@@ -38,13 +38,33 @@ class Visit extends Model
         self::STATUS_IN_TREATMENT,
     ];
 
+    /**
+     * Alur pelayanan pasien (satu rangkaian):
+     * appointment → check-in → WAITING (antrean perawat: registrasi +
+     * pemeriksaan awal) → CALLED (antrean dokter) → IN_TREATMENT
+     * (diperiksa) → DONE (selesai diperiksa) → SIGNED (RME dikunci).
+     */
+    public const QUEUE_NURSE = [
+        self::STATUS_WAITING,
+    ];
+
+    public const QUEUE_DOCTOR = [
+        self::STATUS_CALLED,
+        self::STATUS_IN_TREATMENT,
+    ];
+
     public const BILLING_UNBILLED = 'UNBILLED';
 
     public const BILLING_BILLED = 'BILLED';
 
+    public const BILLING_PARTIALLY_PAID = 'PARTIALLY_PAID';
+
+    public const BILLING_PAID = 'PAID';
+
     protected $fillable = [
         'id',
         'visit_number',
+        'queue_no',
         'branch_id',
         'patient_id',
         'appointment_id',
@@ -168,5 +188,36 @@ class Visit extends Model
     public function isQueued(): bool
     {
         return in_array($this->clinical_status, self::QUEUE_STATUSES, true);
+    }
+
+    public function isNurseQueue(): bool
+    {
+        return in_array($this->clinical_status, self::QUEUE_NURSE, true);
+    }
+
+    public function isDoctorQueue(): bool
+    {
+        return in_array($this->clinical_status, self::QUEUE_DOCTOR, true);
+    }
+
+    /**
+     * Nomor antrean harian per dokter (#1, #2, …).
+     */
+    public function queueLabel(): string
+    {
+        return '#'.($this->queue_no ?? '–');
+    }
+
+    public function isPaymentComplete(): bool
+    {
+        return $this->billing_status === self::BILLING_PAID;
+    }
+
+    /**
+     * Kunjungan selesai = RME dikunci (SIGNED) + pembayaran lunas (PAID).
+     */
+    public function isVisitComplete(): bool
+    {
+        return $this->isSigned() && $this->isPaymentComplete();
     }
 }

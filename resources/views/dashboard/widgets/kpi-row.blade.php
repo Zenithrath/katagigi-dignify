@@ -28,7 +28,7 @@
         <x-dashboard.kpi-card
             icon="user-check" tone="emerald" :badge="__('dashboard.kpi.this_month')"
             :label="__('dashboard.kpi.visits')"
-            :value="number_format($widget->transactions, 0, ',', '.')"
+            :value="number_format($widget->medical_records, 0, ',', '.')"
             unit="{{ __('dashboard.kpi.visits_unit') }}" :hint="__('dashboard.kpi.visits_hint')" />
     @elseif ($widget->patients === null)
         <x-dashboard.kpi-card

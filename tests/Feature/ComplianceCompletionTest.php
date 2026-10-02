@@ -321,7 +321,9 @@ class ComplianceCompletionTest extends TestCase
     public function test_prescription_item_rejects_unknown_kfa_code(): void
     {
         $doctor = User::where('email', 'doctor@gmail.com')->first();
-        Doctor::factory()->create(['user_id' => $doctor->id]);
+        // Seeder sudah buatkan profil dokter akun demo — pakai ulang bila ada.
+        Doctor::where('user_id', $doctor->id)->first()
+            ?? Doctor::factory()->create(['user_id' => $doctor->id]);
         $visit = Visit::factory()->create(['doctor_id' => $doctor->id]);
         $visit->patient->update(['satusehat_consent' => true]);
 

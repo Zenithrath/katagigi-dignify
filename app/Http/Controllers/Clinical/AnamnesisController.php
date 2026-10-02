@@ -36,6 +36,13 @@ class AnamnesisController extends Controller
             ...$validated,
         ]);
 
+        // Triase dari workspace: otomatis masuk antrean dokter.
+        if ($request->boolean('advance_to_called') && $visit->clinical_status === Visit::STATUS_WAITING) {
+            $visit->update(['clinical_status' => Visit::STATUS_CALLED]);
+
+            return back()->with('success', 'Triase tersimpan — pasien masuk antrean dokter.');
+        }
+
         return back()->with('success', 'Anamnesis tersimpan.');
     }
 
@@ -55,6 +62,13 @@ class AnamnesisController extends Controller
         ]);
 
         $visit->anamnesis()->updateOrCreate(['visit_id' => $visit->id], $validated + ['id' => (string) Str::uuid()]);
+
+        // Triase dari workspace: otomatis masuk antrean dokter.
+        if ($request->boolean('advance_to_called') && $visit->fresh()->clinical_status === Visit::STATUS_WAITING) {
+            $visit->update(['clinical_status' => Visit::STATUS_CALLED]);
+
+            return back()->with('success', 'Triase tersimpan — pasien masuk antrean dokter.');
+        }
 
         return back()->with('success', 'Anamnesis diperbarui.');
     }

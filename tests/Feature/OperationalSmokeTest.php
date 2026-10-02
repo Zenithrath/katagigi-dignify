@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -26,7 +27,9 @@ class OperationalSmokeTest extends TestCase
     {
         $user = User::where('email', 'manajemen@gmail.com')->first();
 
-        foreach (['invoices.index', 'doctor-fees.index', 'inventory.index', 'expenses.index', 'finance-report.index', 'workspace.index', 'calendar.index'] as $route) {
+        // Fokus alur pasien: halaman kasir + klinis aktif.
+        // Halaman non-inti (fee/inventory/beban/laporan) diparkir ke backup/.
+        foreach (['invoices.index', 'workspace.index', 'calendar.index'] as $route) {
             $this->actingAs($user)->get(route($route))->assertOk();
         }
     }
@@ -36,20 +39,9 @@ class OperationalSmokeTest extends TestCase
         $doctor = Doctor::factory()->create();
         $doctorUser = $doctor->user;
         $doctorUser->assignRole('doctor');
-        $nurse = User::where('email', 'nurse@gmail.com')->first();
 
-        // Dokter: fee + laporan + inventory + beban (baca).
-        foreach (['doctor-fees.index', 'finance-report.index', 'inventory.index', 'expenses.index'] as $route) {
-            $this->actingAs($doctorUser)->get(route($route))->assertOk();
-        }
-
-        // Nurse: inventory + beban baca; fee + laporan ikut read turnover (boleh).
-        $this->actingAs($nurse)->get(route('inventory.index'))->assertOk();
-        $this->actingAs($nurse)->get(route('expenses.index'))->assertOk();
-
-        // Nurse tak boleh kelola inventory/expense/fee.
-        $this->actingAs($nurse)->get(route('inventory.create'))->assertForbidden();
-        $this->actingAs($nurse)->post(route('doctor-fees.pay', (string) \Illuminate\Support\Str::uuid()))->assertForbidden();
+        // Dokter: workspace + antreannya.
+        $this->actingAs($doctorUser)->get(route('workspace.index'))->assertOk();
     }
 
     public function test_invoice_creation_is_idempotent_per_visit(): void
@@ -70,7 +62,7 @@ class OperationalSmokeTest extends TestCase
         $visit = Visit::factory()->create(['clinical_status' => Visit::STATUS_SIGNED]);
         $icd9 = DB::table('diagnosis_codes')->where('code', '23.2')->first();
         $visit->treatments()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'procedure_code_id' => $icd9->id,
             'system' => 'ICD9',
             'code' => '23.2',

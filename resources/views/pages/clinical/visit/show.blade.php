@@ -4,30 +4,26 @@
     <main class="main-table-container">
         <section class="heading">
             <div>
-                <x-back-button href="{{ route('visits.index') }}" />
+                <x-back-button href="{{ route('workspace.index') }}" />
                 <h1>Visit {{ $visit->visit_number }}</h1>
                 <p>{{ $visit->patient->name ?? '-' }} — {{ $visit->doctor->user->name ?? '-' }} — {{ $visit->visit_date?->format('d M Y') }}</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 <span class="badge {{ $visit->isSigned() ? 'badge-success' : 'badge-info' }}">{{ $visit->clinical_status }}</span>
                 <span class="badge badge-neutral">{{ $visit->billing_status }}</span>
+                @if ($visit->isVisitComplete())
+                    <span class="badge badge-success">KUNJUNGAN SELESAI</span>
+                @elseif ($visit->isSigned())
+                    <span class="badge badge-warning">Menunggu pelunasan</span>
+                @endif
             </div>
         </section>
 
         <x-flash-alerts />
 
-        <div class="content-card overflow-hidden" x-data="{ tab: 'ringkasan' }">
-            <div class="flex gap-2 p-6 pb-0 flex-wrap">
-                @foreach (['ringkasan' => 'Ringkasan', 'anamnesis' => 'Anamnesis', 'pemeriksaan' => 'Pemeriksaan', 'odontogram' => 'Odontogram', 'tindakan' => 'Diagnosis & Tindakan', 'resep' => 'Resep', 'rencana' => 'Rencana', 'radiologi' => 'Radiologi', 'lampiran' => 'Lampiran', 'consent' => 'Consent', 'surat' => 'Surat'] as $key => $label)
-                    <button type="button" x-on:click="tab = '{{ $key }}'"
-                        class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
-                        :class="tab === '{{ $key }}' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
-                        {{ $label }}
-                    </button>
-                @endforeach
-            </div>
-
-            <div x-show="tab === 'ringkasan'" class="p-8">
+        <div class="content-card overflow-hidden">
+            <div class="p-8">
+                <h3 class="font-bold text-lg text-slate-900 mb-4">Data Kunjungan</h3>
                 <dl class="detail-list">
                     <div class="data-container">
                         <dt>Pasien</dt>
@@ -92,20 +88,7 @@
                 @endcan
                 @if ($visit->isSigned())
                     <p class="mt-3 text-xs text-slate-500">Ditandatangani oleh {{ $visit->signer->name ?? '-' }} pada {{ $visit->signed_at?->format('d M Y H:i') }}. Visit terkunci.</p>
-                    @can('manage satusehat')
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            <form action="{{ route('visits.satusehat.sync', $visit->id) }}" method="post">
-                                @csrf
-                                <button type="submit" class="clickable-ghost px-5 py-2 rounded-xl text-sm">Sinkron SATUSEHAT</button>
-                            </form>
-                            @if ($visit->satusehatLogs->contains('status', \App\Models\SatuSehatSyncLog::STATUS_FAILED))
-                                <form action="{{ route('visits.satusehat.retry', $visit->id) }}" method="post">
-                                    @csrf
-                                    <button type="submit" class="clickable-primary px-5 py-2 rounded-xl text-sm">Ulang yang gagal</button>
-                                </form>
-                            @endif
-                        </div>
-                    @endcan
+                    {{-- PARKED 2026-09-24: tombol Sinkron SATUSEHAT (route diparkir). --}}
                 @elseif ($visit->clinical_status === 'DONE')
                     @can('sign visit')
                         <form action="{{ route('visits.sign', $visit->id) }}" method="post" class="mt-3">
@@ -126,7 +109,7 @@
                 @endif
             </div>
 
-            <div x-show="tab === 'anamnesis'" class="p-8">
+            <div class="p-8 border-t border-slate-200">
                 <h3 class="font-bold text-lg text-slate-900 mb-4">Anamnesis</h3>
                 <form method="post" action="{{ $visit->anamnesis ? route('visits.anamnesis.update', $visit->id) : route('visits.anamnesis.store', $visit->id) }}">
                     @csrf
@@ -170,7 +153,7 @@
                 </form>
             </div>
 
-            <div x-show="tab === 'pemeriksaan'" class="p-8">
+            <div class="p-8 border-t border-slate-200">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Pemeriksaan (SOAP)</h3>
                 <p class="text-xs text-slate-500 mb-4">Ditulis dokter. Asisten hanya membaca.</p>
                 <form method="post" action="{{ $visit->examination ? route('visits.examination.update', $visit->id) : route('visits.examination.store', $visit->id) }}">
@@ -270,7 +253,7 @@
                 @include('pages.clinical.visit.partials.oral-health-index')
             </div>
 
-            <div x-show="tab === 'odontogram'" class="p-8" x-data="{
+            <div class="p-8 border-t border-slate-200" x-data="{
                 tooth: '{{ request('tooth', '') }}',
                 surface: 'whole',
                 arch: 'both',
@@ -349,7 +332,7 @@
                 @endif
             </div>
 
-            <div x-show="tab === 'tindakan'" class="p-8 space-y-8">
+            <div class="p-8 border-t border-slate-200 space-y-8">
                 <section>
                     <h3 class="font-bold text-lg text-slate-900 mb-1">Diagnosis Penyakit (ICD-10)</h3>
                     <p class="text-xs text-slate-500 mb-3">Minimal 1 per visit — syarat SATUSEHAT. Tandai primer/sekunder.</p>
@@ -377,7 +360,20 @@
                     @if (auth()->user()->can('write diagnosis') && ! $visit->isSigned())
                         <form method="post" action="{{ route('visits.diagnoses.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
                             @csrf
-                            <livewire:diagnosis-search system="ICD10" fieldName="diagnosis_code_ids" :selected="[]" />
+                            <div class="input-group">
+                                <label for="dx_code">Pilih kode diagnosis (ICD-10) <span class="text-red-500">*</span></label>
+                                <select name="diagnosis_code_ids[]" id="dx_code" class="custom-select" required>
+                                    <option value="">— Pilih kode resmi —</option>
+                                    @foreach ($icd10Groups as $category => $codes)
+                                        <optgroup label="{{ $category }}">
+                                            @foreach ($codes as $code)
+                                                <option value="{{ $code->id }}">[{{ $code->code }}] {{ $code->display_id }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                                <small class="helper">Kode resmi kamus (tersimpan untuk SATUSEHAT).</small>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 mt-3">
                                 <div class="input-group">
                                     <label>Gigi (opsional)</label>
@@ -431,7 +427,20 @@
                     @if (auth()->user()->can('write treatment') && ! $visit->isSigned())
                         <form method="post" action="{{ route('visits.treatments.store', $visit->id) }}" class="rounded-xl border border-slate-200 p-4">
                             @csrf
-                            <livewire:diagnosis-search system="ICD9" fieldName="procedure_code_ids" :selected="[]" />
+                            <div class="input-group">
+                                <label for="tx_code">Pilih kode tindakan (ICD-9) <span class="text-red-500">*</span></label>
+                                <select name="procedure_code_ids[]" id="tx_code" class="custom-select" required>
+                                    <option value="">— Pilih kode resmi —</option>
+                                    @foreach ($icd9Groups as $category => $codes)
+                                        <optgroup label="{{ $category }}">
+                                            @foreach ($codes as $code)
+                                                <option value="{{ $code->id }}">[{{ $code->code }}] {{ $code->display_id }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                                <small class="helper">Kode resmi kamus, ditagih pada nota.</small>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 mt-3">
                                 <div class="input-group">
                                     <label>Gigi (opsional)</label>
@@ -460,7 +469,7 @@
                 </section>
             </div>
 
-            <div x-show="tab === 'rencana'" class="p-8 space-y-6">
+            <div class="p-8 border-t border-slate-200 space-y-6">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Rencana Perawatan</h3>
                 @forelse ($visit->treatmentPlans as $plan)
                     <section class="rounded-xl border border-slate-200 p-4">
@@ -548,7 +557,7 @@
                 @endif
             </div>
 
-            <div x-show="tab === 'resep'" class="p-8 space-y-6">
+            <div class="p-8 border-t border-slate-200 space-y-6">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Resep</h3>
                 @forelse ($visit->prescriptions as $rx)
                     <section class="rounded-xl border border-slate-200 p-4">
@@ -621,7 +630,7 @@
                 @endif
             </div>
 
-            <div x-show="tab === 'lampiran'" class="p-8 space-y-6">
+            <div class="p-8 border-t border-slate-200 space-y-6">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Lampiran</h3>
                 <p class="text-xs text-slate-500">Disimpan privat — hanya bisa dibuka lewat tautan bertanda tangan.</p>
                 @forelse ($visit->attachments as $file)
@@ -687,7 +696,7 @@
             @include('pages.clinical.visit.partials.consents')
 
             {{-- Fase 4.3: generator surat sakit/berobat/rujukan --}}
-            <div x-show="tab === 'surat'" class="p-8 space-y-6">
+            <div class="p-8 border-t border-slate-200 space-y-6">
                 <div>
                     <h3 class="font-bold text-lg text-slate-900 mb-1">Surat Keterangan</h3>
                     <p class="text-xs text-slate-500">Surat sakit / berobat / rujukan dicetak dari data visit. Data terkunci bila visit sudah SIGNED dan mengikuti isi rekam medis terkini.</p>

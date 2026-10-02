@@ -88,6 +88,8 @@ class DashboardTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('data-widget="kpi-row"', $response->getContent());
         $this->assertStringContainsString('data-widget="patients-incomplete"', $response->getContent());
+        // Kartu ke-4 (Kunjungan bulan berjalan, dari tabel visits) wajib render.
+        $this->assertStringContainsString('Kunjungan', $response->getContent());
     }
 
     public function test_doctor_overview_scopes_revenue_to_own_transactions(): void

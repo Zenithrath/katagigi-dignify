@@ -132,6 +132,10 @@ class DashboardService extends Service
                     'revenue' => $monthlyRevenue,
                     'patients' => $totalPatients,
                     'new_patients' => $newPatientsThisMonth,
+                    'visits_month' => (int) DB::table('visits')
+                        ->whereMonth('visit_date', date('m'))
+                        ->whereYear('visit_date', date('Y'))
+                        ->count(),
                     'avg_ticket' => $avgTicket,
                     'revenue_analytics' => $revenueAnalytics,
                     'monthly_trend' => $revenueAnalytics['monthly'],

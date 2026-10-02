@@ -21,7 +21,7 @@
             <span class="text-sm text-slate-500" x-text="`Menampilkan ${pagination.total} janji`"></span>
         </section>
 
-        @role('admin|nurse')
+        @role('manajemen|admin|nurse')
             <section class="table-content">
                 <table>
                     <thead>
@@ -93,6 +93,18 @@
                                     </td>
                                     <td class="action-column">
                                         <div class="flex items-center gap-2">
+                                            @can('create visit')
+                                                <template x-if="appointment.confirmed_at && !appointment.canceled_at">
+                                                    <form
+                                                        :action="`{{ route('appointments.checkin', ['appointment' => '__ID__']) }}`.replace('__ID__', appointment.id)"
+                                                        method="post">
+                                                        @csrf
+                                                        <button class="text-sm font-semibold text-emerald-600 hover:text-emerald-700" type="submit">
+                                                            Check-in
+                                                        </button>
+                                                    </form>
+                                                </template>
+                                            @endcan
                                             @can('update appointment')
                                                 <template x-if="!appointment.confirmed_at">
                                                     <form
@@ -317,7 +329,7 @@
                     page: this.pagination.page,
                     limit: this.pagination.limit,
                 });
-                @role('admin|nurse')
+                @role('manajemen|admin|nurse')
                     fetch(`{{ route('api.appointments.lookup') }}?${params}`)
                         .then(response => response.json())
                         .then(data => {

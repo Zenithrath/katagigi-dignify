@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Appointment;
 use App\Models\User;
 use App\Models\Visit;
+use App\Services\Clinical\VisitService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -41,7 +44,7 @@ class BranchContextTest extends TestCase
         $admin = User::where('email', 'admin@gmail.com')->first();
         $branch2 = DB::table('branches')->where('code', 'CBG-01')->first();
         DB::table('branches')->insert([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'code' => 'CBG-02',
             'org' => 'Klinik Kata Gigi',
             'name' => 'Cabang Dua',
@@ -59,23 +62,28 @@ class BranchContextTest extends TestCase
         ]);
 
         // Tanpa switch: semua terlihat.
-        $this->actingAs($admin)->get(route('visits.index'))
+        $this->actingAs($admin)->get(route('workspace.index'))
             ->assertOk()
             ->assertSee($visitA->visit_number, false)
             ->assertSee($visitB->visit_number, false);
 
         // Switch ke CBG-02: hanya visit cabang itu.
         $this->actingAs($admin)->post(route('branch.switch', ['branch_id' => $branch2Id]))->assertRedirect();
-        $this->actingAs($admin)->get(route('visits.index'))
+        $this->actingAs($admin)->get(route('workspace.index'))
             ->assertOk()
             ->assertDontSee($visitA->visit_number, false)
             ->assertSee($visitB->visit_number, false);
 
         // Visit baru ditandai cabang aktif.
-        $service = new \App\Services\Clinical\VisitService;
+        $service = new VisitService;
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $visitA->patient_id,
+            'doctor_id' => $visitA->doctor_id,
+        ]);
         $new = $service->createVisit([
             'patient_id' => $visitA->patient_id,
             'doctor_id' => $visitA->doctor_id,
+            'appointment_id' => $appointment->id,
         ]);
         $this->assertEquals($branch2Id, $new->branch_id);
     }

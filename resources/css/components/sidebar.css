@@ -9,8 +9,8 @@
 }
 
 .app-sidebar {
-    --dz-green-dark: #0d5c3e;
-    --dz-green-light-bg: #eaf6f0;
+    --dz-green-dark: #264B6F;
+    --dz-green-light-bg: #e8f1f8;
     --dz-text-main: #111827;
     --dz-text-muted: #6b7280;
     --dz-text-sub: #9ca3af;
@@ -118,7 +118,7 @@
     transform: translateY(-50%) scale(0);
     width: 10px;
     height: 36px;
-    background: radial-gradient(circle at 20% 20%, #165b38 0%, #0a331f 50%, #051d11 100%);
+    background: radial-gradient(circle at 20% 20%, #264B6F 0%, #16324c 50%, #0a1e33 100%);
     box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.55), inset -2px -2px 3px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(5, 29, 17, 0.55);
     border: 1px solid rgba(0, 0, 0, 0.55);
     border-radius: 999px;
@@ -169,10 +169,11 @@
 
 .app-sidebar .nav-item.active a,
 .app-sidebar .nav-item.active button {
-    background-color: var(--dz-green-light-bg);
-    color: var(--dz-green-dark);
+    background: radial-gradient(circle at 20% 20%, #35648f 0%, #264B6F 45%, #16324c 85%);
+    box-shadow: inset 1px 1.5px 2px rgba(255, 255, 255, 0.4), inset -2px -2px 4px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(10, 30, 51, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    color: #ffffff;
     font-weight: 700;
-    box-shadow: 0 0 0 1px rgb(13 92 62 / 0.18);
 }
 
 .app-sidebar .nav-item svg {

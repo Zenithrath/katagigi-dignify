@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Clinical\VisitController as ClinicalVisitController;
 use App\Http\Requests\General\AppointmentRequest;
 use App\Http\Requests\General\UpdateAppointmentRequest;
+use App\Models\Visit;
 use App\Services\General\AppointmentService;
 use App\Services\General\ServiceService;
 use App\Services\Master\DoctorService;
@@ -11,7 +13,9 @@ use App\Services\OptionService;
 use App\Services\Patient\MasterService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AppointmentController extends Controller
 {
@@ -37,7 +41,7 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
@@ -52,7 +56,7 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -146,12 +150,32 @@ class AppointmentController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(AppointmentRequest $request)
     {
         $this->authorize('create appointment');
         $validated = $request->validated();
+
+        // Quick-add: pasien belum daftar dibuat dulu di sini
+        // (nama + HP + tgl lahir + gender; sisanya dilengkapi saat check-in).
+        if ($request->filled('new_patient_name')) {
+            try {
+                $patientId = $this->patientService->insertPatient(new Request([
+                    'name' => $validated['new_patient_name'],
+                    'phone' => '62'.$validated['new_patient_phone'],
+                    'birthdate' => $validated['new_patient_birthdate'],
+                    'gender' => $validated['new_patient_gender'],
+                ]));
+            } catch (Throwable $e) {
+                Log::error($e->getMessage());
+
+                return redirect()->back()
+                    ->with('error', __('messages.patient.error.oncreate'))->withInput();
+            }
+            $validated['patient_id'] = $patientId;
+        }
+
         $patient = $this->patientService->selectPatientByID($validated['patient_id']);
         abort_if(! $patient, 404, 'Pasien tidak ditemukan.');
         $validated['patient_id'] = $patient->id;
@@ -162,7 +186,6 @@ class AppointmentController extends Controller
         $validated['doctor_name'] = $doctor->name;
         $validated['doctor_nipp'] = $doctor->nipp;
         $validated['doctor_niptk'] = $doctor->niptk;
-        $validated['status'] = 'PENDING';
         $services = $this->serviceService->readServicesByIDList($validated['service_id']);
         $validated['services'] = json_encode($services);
 
@@ -183,7 +206,7 @@ class AppointmentController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show($id)
     {
@@ -191,9 +214,14 @@ class AppointmentController extends Controller
         $appointment = $this->appointmentService->readDetailAppointmentByID($id);
         $appointment->services = json_decode($appointment->services);
 
+        // Data pasien mentah untuk drawer pelengkap check-in.
+        $patient = DB::table('patients')->where('id', $appointment->patient_id)->first();
+
         return view('pages.general.appointment.detail', [
             'data' => $appointment,
-            'visit' => \App\Models\Visit::where('appointment_id', $id)->first(),
+            'visit' => Visit::where('appointment_id', $id)->first(),
+            'patient' => $patient,
+            'checkinMissing' => ClinicalVisitController::missingCheckinFields($appointment->patient_id),
         ]);
     }
 
@@ -201,7 +229,7 @@ class AppointmentController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function edit($id)
     {
@@ -224,7 +252,7 @@ class AppointmentController extends Controller
      *
      * @param  Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function update(UpdateAppointmentRequest $request, $id)
     {
@@ -252,7 +280,7 @@ class AppointmentController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {

@@ -14,7 +14,7 @@
             <div class="flex gap-2 p-6 pb-0">
                 <button x-on:click="tab = 1"
                     class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
-                    :class="tab === 1 ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                    :class="tab === 1 ? 'clickable-primary' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
                     <span class="flex items-center gap-1.5">
                         <x-lucide-user class="w-4 h-4" />
                         {{ __('patient.master.detail.labels.information') }}
@@ -22,7 +22,7 @@
                 </button>
                 <button x-on:click="tab = 2"
                     class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
-                    :class="tab === 2 ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                    :class="tab === 2 ? 'clickable-primary' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
                     <span class="flex items-center gap-1.5">
                         <x-lucide-clock class="w-4 h-4" />
                         {{ __('patient.master.detail.labels.history') }}

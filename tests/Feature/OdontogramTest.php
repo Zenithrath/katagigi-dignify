@@ -71,7 +71,7 @@ class OdontogramTest extends TestCase
         $this->assertEquals(0, $visit->odontogramFindings()->count());
     }
 
-    public function test_nurse_cannot_write_odontogram_but_can_read_chart(): void
+    public function test_nurse_cannot_write_odontogram_nor_open_visit(): void
     {
         $nurse = User::where('email', 'nurse@gmail.com')->first();
         $visit = Visit::factory()->create();
@@ -81,9 +81,8 @@ class OdontogramTest extends TestCase
             'condition' => 'sound',
         ])->assertForbidden();
 
-        $this->actingAs($nurse)->get(route('visits.show', $visit->id))
-            ->assertOk()
-            ->assertSee('Odontogram (FDI)', false);
+        // Suster terkunci dari halaman visit — triase via drawer workspace.
+        $this->actingAs($nurse)->get(route('visits.show', $visit->id))->assertForbidden();
     }
 
     public function test_doctor_can_archive_finding_without_hard_delete(): void

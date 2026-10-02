@@ -55,6 +55,20 @@ class VisitDxTxTest extends TestCase
         $this->assertEquals(300000.0, $treatment->subtotal());
     }
 
+    public function test_visit_page_shows_code_dropdowns(): void
+    {
+        $doctor = User::where('email', 'doctor@gmail.com')->first();
+        $visit = Visit::factory()->create();
+
+        // Satu halaman tanpa tab: dropdown kode resmi render dengan opsi kamus.
+        $this->actingAs($doctor)->get(route('visits.show', $visit->id))
+            ->assertOk()
+            ->assertSee('Pilih kode diagnosis (ICD-10)', false)
+            ->assertSee('Pilih kode tindakan (ICD-9)', false)
+            ->assertSee('[K02.1]', false)
+            ->assertSee('Data Kunjungan', false);
+    }
+
     public function test_diagnosis_rejects_non_icd10_and_treatment_rejects_non_icd9(): void
     {
         $doctor = User::where('email', 'doctor@gmail.com')->first();

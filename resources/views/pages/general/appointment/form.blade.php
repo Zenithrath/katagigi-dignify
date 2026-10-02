@@ -26,13 +26,23 @@
 
                 <div class="input-container" x-data="patientDataState">
                     @if ($type != 'update')
+                        <div class="flex gap-2 mb-4">
+                            <button type="button" @click="switchPatientMode('lama')"
+                                class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+                                :class="patientMode === 'lama' ? 'clickable-primary' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">Pasien Lama</button>
+                            <button type="button" @click="switchPatientMode('baru')"
+                                class="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+                                :class="patientMode === 'baru' ? 'clickable-primary' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">Pasien Baru</button>
+                        </div>
+
+                        <div x-show="patientMode === 'lama'">
                         <div class="input-group">
                             <label for="patient_code">{{ __('form.labels.patient_keyword') }}</label>
                             <div class="flex  flex-col md:flex-row gap-2 items-start">
                                 <input type="text" name="patient_code" id="patient_code" class="w-full"
                                     placeholder="{{ __('form.placeholders.keyword') }}"
                                     value="{{ $data->patient_code ?? (old('patient_code') ?? '') }}"
-                                    x-model="patientKeyword" @keydown="handleKeyDown()" required />
+                                    x-model="patientKeyword" @keydown="handleKeyDown()" :required="patientMode === 'lama'" />
                                 <button class="clickable-primary px-4 py-2 rounded-md" @click.prevent="getPatientData()"
                                     id="check_patient">{{ __('form.actions.check') }}</button>
                             </div>
@@ -41,9 +51,48 @@
                                 <small class="error">{{ $message }}</small>
                             @enderror
                         </div>
+                        </div>
                     @endif
 
                     <input type="hidden" name="patient_id" id="patient_id" x-model="patientID" />
+
+                    @if ($type != 'update')
+                        <div x-show="patientMode === 'baru'">
+                        <div class="rounded-xl border border-dashed border-slate-300 p-4 mt-1">
+                            <p class="text-sm font-bold text-slate-700">Data pasien baru</p>
+                            <p class="text-xs text-slate-500 mb-3">Sisanya dilengkapi saat check-in.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                                <div class="input-group">
+                                    <label for="new_patient_name">Nama pasien baru</label>
+                                    <input type="text" name="new_patient_name" id="new_patient_name" class="custom-input"
+                                        value="{{ old('new_patient_name') }}" :required="patientMode === 'baru'" />
+                                    @error('new_patient_name')<small class="danger">{{ $message }}</small>@enderror
+                                </div>
+                                <div class="input-group">
+                                    <label for="new_patient_phone">No. HP (08…)</label>
+                                    <input type="text" name="new_patient_phone" id="new_patient_phone" class="custom-input"
+                                        value="{{ old('new_patient_phone') }}" placeholder="08xxxxxxxxxx" />
+                                    @error('new_patient_phone')<small class="danger">{{ $message }}</small>@enderror
+                                </div>
+                                <div class="input-group">
+                                    <label for="new_patient_birthdate">Tanggal lahir</label>
+                                    <input type="date" name="new_patient_birthdate" id="new_patient_birthdate" class="custom-input"
+                                        value="{{ old('new_patient_birthdate') }}" />
+                                    @error('new_patient_birthdate')<small class="danger">{{ $message }}</small>@enderror
+                                </div>
+                                <div class="input-group">
+                                    <label for="new_patient_gender">Jenis kelamin</label>
+                                    <select name="new_patient_gender" id="new_patient_gender" class="custom-select">
+                                        <option value="">— Pilih —</option>
+                                        <option value="MALE" @selected(old('new_patient_gender') === 'MALE')>Laki-laki</option>
+                                        <option value="FEMALE" @selected(old('new_patient_gender') === 'FEMALE')>Perempuan</option>
+                                    </select>
+                                    @error('new_patient_gender')<small class="danger">{{ $message }}</small>@enderror
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    @endif
 
                     <template x-if="isShown">
                         <table class="text-sm">
@@ -178,6 +227,7 @@
 @pushOnce('scripts')
     <script type="text/javascript">
         const patientDataState = {
+            patientMode: "{{ old('new_patient_name') ? 'baru' : 'lama' }}",
             patientKeyword: "",
             patientID: "",
             patientList: [],
@@ -204,11 +254,28 @@
             handleSelectPatient(patientID) {
                 this.patientID = patientID;
                 this.patientList = this.patientList.filter((p) => p.id === this.patientID);
+                const npn = document.getElementById('new_patient_name');
+                if (npn) npn.value = '';
             },
             handleKeyDown() {
                 this.isShown = false;
                 this.patientList = [];
                 this.patientID = "";
+            },
+            handleNewPatientInput() {
+                // Pasien baru diketik → batalkan pilihan pasien terdaftar.
+                this.isShown = false;
+                this.patientList = [];
+                this.patientID = "";
+                this.patientKeyword = "";
+            },
+            switchPatientMode(mode) {
+                this.patientMode = mode;
+                if (mode === 'baru') {
+                    this.handleNewPatientInput();
+                } else {
+                    document.getElementById('new_patient_name').value = '';
+                }
             },
             getPatientData() {
                 const paramsString = new URLSearchParams({

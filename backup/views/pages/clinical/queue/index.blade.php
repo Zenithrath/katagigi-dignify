@@ -5,7 +5,11 @@
         <section class="heading">
             <div>
                 <h1>Antrian Hari Ini</h1>
-                <p>Check-in appointment → panggil → layani → selesai</p>
+                <p>Appointment → check-in → antrean perawat → antrean dokter → diperiksa → bayar → selesai</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+                <span class="badge badge-warning">Perawat: {{ isset($nurseQueue) ? $nurseQueue->count() : '-' }}</span>
+                <span class="badge badge-info">Dokter: {{ isset($doctorQueue) ? $doctorQueue->count() : '-' }}</span>
             </div>
         </section>
 
@@ -30,6 +34,15 @@
             </form>
 
             <div class="p-6 overflow-x-auto">
+                @if (! request()->filled('status'))
+                    <h3 class="font-bold text-slate-900 mb-2">Antrean Perawat <span class="text-xs font-normal text-slate-500">registrasi + pemeriksaan awal (WAITING)</span></h3>
+                    @include('pages.clinical.queue.partials.table', ['rows' => $nurseQueue ?? collect(), 'transitions' => $transitions])
+
+                    <h3 class="font-bold text-slate-900 mt-8 mb-2">Antrean Dokter <span class="text-xs font-normal text-slate-500">menunggu + sedang diperiksa (CALLED → IN_TREATMENT)</span></h3>
+                    @include('pages.clinical.queue.partials.table', ['rows' => $doctorQueue ?? collect(), 'transitions' => $transitions])
+
+                    <h3 class="font-bold text-slate-900 mt-8 mb-2">Semua Antrian Aktif</h3>
+                @endif
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="text-left text-slate-500 border-b border-slate-200">

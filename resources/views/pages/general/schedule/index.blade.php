@@ -12,7 +12,7 @@
         <x-flash-alerts />
 
         {{-- FORM INPUT --}}
-        @role('admin|nurse')
+        @role('manajemen|admin|nurse')
             <div class="content-card">
                 <div class="card-header-clean">
                     <div class="icon-box">
@@ -126,7 +126,7 @@
         @endrole
 
         {{-- TABEL --}}
-        @role('admin|nurse')
+        @role('manajemen|admin|nurse')
             <div class="content-card !p-0">
                 {{-- Top Bar --}}
                 <div class="flex items-center justify-between px-7 py-5 border-b border-slate-200">
@@ -406,7 +406,7 @@
                 if (this.filterDoctorId) {
                     params.append('doctor_id', this.filterDoctorId);
                 }
-                @role('admin|nurse')
+                @role('manajemen|admin|nurse')
                     fetch(`{{ route('api.schedules.lookup') }}?${params}`)
                         .then(response => response.json())
                         .then(data => {

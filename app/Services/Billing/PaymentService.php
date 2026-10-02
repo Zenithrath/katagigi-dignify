@@ -5,6 +5,7 @@ namespace App\Services\Billing;
 use App\Models\Invoice;
 use App\Models\InvoicePayment;
 use App\Models\PaymentReceipt;
+use App\Models\Visit;
 use App\Services\Service;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,33 @@ class PaymentService extends Service
                 $invoice->update([
                     'status' => $invoice->amountDue() <= 0.009 ? Invoice::STATUS_PAID : Invoice::STATUS_PARTIALLY_PAID,
                 ]);
+
+                // Sinkron status pembayaran visit: BILLED → PARTIALLY_PAID → PAID.
+                // Kunjungan selesai = visit SIGNED + billing PAID.
+                if ($invoice->visit_id) {
+                    $activeStatuses = Invoice::where('visit_id', $invoice->visit_id)
+                        ->where('status', '!=', Invoice::STATUS_VOID)
+                        ->pluck('status')
+                        ->all();
+
+                    if ($activeStatuses !== [] && count(array_unique($activeStatuses)) === 1 && $activeStatuses[0] === Invoice::STATUS_PAID) {
+                        $visitBilling = Visit::BILLING_PAID;
+                    } elseif (in_array(Invoice::STATUS_PARTIALLY_PAID, $activeStatuses, true) || in_array(Invoice::STATUS_PAID, $activeStatuses, true)) {
+                        $visitBilling = Visit::BILLING_PARTIALLY_PAID;
+                    } else {
+                        $visitBilling = Visit::BILLING_BILLED;
+                    }
+                    Visit::where('id', $invoice->visit_id)->update(['billing_status' => $visitBilling]);
+
+                    if ($visitBilling === Visit::BILLING_PAID) {
+                        $visit = Visit::find($invoice->visit_id);
+                        if ($visit?->appointment_id) {
+                            DB::table('appointments')->where('id', $visit->appointment_id)->update([
+                                'paid_at' => date('Y-m-d H:i:s'),
+                            ]);
+                        }
+                    }
+                }
 
                 // Fase 3 T3: tagihan lunas → posting jasa medis dokter.
                 if ($invoice->status === Invoice::STATUS_PAID) {

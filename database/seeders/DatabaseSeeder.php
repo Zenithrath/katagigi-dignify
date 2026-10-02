@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             BranchSeeder::class,
+            DoctorSeeder::class,
+            ScheduleSeeder::class,
             WhatsappTemplateSeeder::class,
             DiagnosisCodeSeeder::class,
             // Master wilayah Kemendagri + kamus KFA + penjamin (Fase 4).

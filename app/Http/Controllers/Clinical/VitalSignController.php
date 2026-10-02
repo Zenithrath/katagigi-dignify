@@ -29,6 +29,13 @@ class VitalSignController extends Controller
             $validated + ['id' => (string) Str::uuid()]
         );
 
+        // Triase dari workspace: otomatis masuk antrean dokter.
+        if ($request->boolean('advance_to_called') && $visit->clinical_status === Visit::STATUS_WAITING) {
+            $visit->update(['clinical_status' => Visit::STATUS_CALLED]);
+
+            return back()->with('success', 'Triase tersimpan — pasien masuk antrean dokter.');
+        }
+
         return back()->with('success', 'Tanda vital tersimpan.');
     }
 }

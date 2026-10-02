@@ -38,9 +38,22 @@ class ClinicSmokeTest extends TestCase
                 "Route [$route] returned ".$response->status()
             );
         }
+    }
 
-        // D-06g: salaries kini route bernama.
-        $this->actingAs($user)->get(route('salaries.index'))->assertOk();
+    public function test_manajemen_sees_schedule_and_appointment_tables(): void
+    {
+        // Regresi: gate @role di view sempat mengeluarkan manajemen
+        // sehingga form + tabel jadwal/janji temu tidak tampil.
+        $manajemen = User::where('email', 'manajemen@gmail.com')->first();
+
+        $this->actingAs($manajemen)->get(route('schedules.index'))
+            ->assertOk()
+            ->assertSee('Daftar Jadwal Bekerja', false)
+            ->assertSee('api/schedules/lookup', false);
+
+        $this->actingAs($manajemen)->get(route('appointments.index'))
+            ->assertOk()
+            ->assertSee('api/appointments/lookup', false);
     }
 
     public function test_guest_is_redirected_to_login(): void
@@ -79,7 +92,8 @@ class ClinicSmokeTest extends TestCase
     }
 
     public function test_admin_cannot_cancel_directly_but_can_propose(): void
-    {        $admin = User::where('email', 'admin@gmail.com')->first();
+    {
+        $admin = User::where('email', 'admin@gmail.com')->first();
         $manajemen = User::where('email', 'manajemen@gmail.com')->first();
 
         $this->assertTrue($admin->can('request cancellation'));

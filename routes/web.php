@@ -9,13 +9,13 @@ use App\Http\Controllers\CancellationController;
 use App\Http\Controllers\Clinical\AnamnesisController;
 use App\Http\Controllers\Clinical\CalendarController;
 use App\Http\Controllers\Clinical\ExaminationController;
+use App\Http\Controllers\Clinical\LetterController;
 use App\Http\Controllers\Clinical\MedicalConsentController;
 use App\Http\Controllers\Clinical\OdontogramController;
 use App\Http\Controllers\Clinical\OralHealthIndexController;
 use App\Http\Controllers\Clinical\PrescriptionController;
 use App\Http\Controllers\Clinical\RadiologyOrderController;
 use App\Http\Controllers\Clinical\TreatmentPlanController;
-use App\Http\Controllers\Clinical\LetterController;
 use App\Http\Controllers\Clinical\VisitAttachmentController;
 use App\Http\Controllers\Clinical\VisitController;
 use App\Http\Controllers\Clinical\VisitDiagnosisController;
@@ -111,11 +111,28 @@ Route::middleware('auth')->group(function () {
     // Fase 2: kunjungan klinis (check-in → antrian → visit).
     Route::post('appointments/{appointment}/checkin', [VisitController::class, 'checkin'])
         ->name('appointments.checkin');
+    Route::post('appointments/{appointment}/checkin-complete', [VisitController::class, 'checkinComplete'])
+        ->name('appointments.checkin.complete');
     Route::post('visits/{visit}/status', [VisitController::class, 'updateStatus'])
         ->name('visits.status');
     Route::post('visits/{visit}/sign', [VisitController::class, 'sign'])
         ->name('visits.sign');
     Route::resource('visits', VisitController::class)->only(['index', 'show']);
+
+    /*
+     * PARKED 2026-09-24 (fokus alur pasien dulu).
+     * View dipindah ke backup/views, test ke backup/tests.
+     * Kembalikan: uncomment blok ini + git mv backup/... ke resources/... .
+     *
+    // Fase 4 T2: SATUSEHAT (sandbox dulu; tanpa klaim produksi).
+    Route::get('satusehat', [SatuSehatController::class, 'index'])->name('satusehat.index');
+    Route::post('visits/{visit}/satusehat', [SatuSehatController::class, 'sync'])->name('visits.satusehat.sync');
+    Route::post('visits/{visit}/satusehat/retry', [SatuSehatController::class, 'retry'])->name('visits.satusehat.retry');
+
+    // Fase 4 T3: WhatsApp Official (driver log default).
+    Route::get('whatsapp', [WhatsappController::class, 'index'])->name('whatsapp.index');
+    Route::post('whatsapp/send', [WhatsappController::class, 'send'])->name('whatsapp.send');
+     */
 
     // Fase 2 Task 9: workspace dokter + kalender appointment.
     Route::get('workspace', [WorkspaceController::class, 'index'])->name('workspace.index');
@@ -219,6 +236,11 @@ Route::middleware('auth')->group(function () {
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
     Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
 
+    /*
+     * PARKED 2026-09-24 (fokus alur pasien dulu).
+     * View dipindah ke backup/views, test ke backup/tests.
+     * Kembalikan: uncomment blok ini + git mv backup/... ke resources/... .
+     *
     // Fase 3 T4: inventory ringan.
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
@@ -233,6 +255,7 @@ Route::middleware('auth')->group(function () {
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('finance-report', [FinanceReportController::class, 'index'])->name('finance-report.index');
+     */
 
     // Fase 4 T1: cabang (CRUD manajemen + switch konteks semua user).
     Route::get('branches', [BranchController::class, 'index'])->name('branches.index');
@@ -240,19 +263,17 @@ Route::middleware('auth')->group(function () {
     Route::post('branches/{branch}/toggle', [BranchController::class, 'toggle'])->name('branches.toggle');
     Route::post('branch/switch', [BranchController::class, 'switch'])->name('branch.switch');
 
-    // Fase 4 T2: SATUSEHAT (sandbox dulu; tanpa klaim produksi).
-    Route::get('satusehat', [SatuSehatController::class, 'index'])->name('satusehat.index');
-    Route::post('visits/{visit}/satusehat', [SatuSehatController::class, 'sync'])->name('visits.satusehat.sync');
-    Route::post('visits/{visit}/satusehat/retry', [SatuSehatController::class, 'retry'])->name('visits.satusehat.retry');
+    // PARKED 2026-09-24: rute SATUSEHAT/WhatsApp duplikat sudah dipindah ke blok
+    // PARKED di atas (fase kunjungan klinis). Lihat blok PARKED tersebut.
 
-    // Fase 4 T3: WhatsApp Official (driver log default).
-    Route::get('whatsapp', [WhatsappController::class, 'index'])->name('whatsapp.index');
-    Route::post('whatsapp/send', [WhatsappController::class, 'send'])->name('whatsapp.send');
-
+    /*
+     * PARKED 2026-09-24 (fokus alur pasien dulu).
+     *
     // Fase 3 T3: jasa medis dokter.
     Route::get('doctor-fees', [DoctorFeeController::class, 'index'])->name('doctor-fees.index');
     Route::post('doctor-fees/{fee}/pay', [DoctorFeeController::class, 'pay'])->name('doctor-fees.pay');
     Route::post('doctors/{doctor}/fee-rule', [DoctorFeeController::class, 'rule'])->name('doctors.fee-rule');
+     */
 
     Route::get('export-transactions', [ExportController::class, 'exportTransactions'])
         ->name('export-transactions');
@@ -267,6 +288,13 @@ Route::middleware('auth')->group(function () {
     Route::put('profile/change-password/{id}', [ProfileController::class, 'updatePassword'])
         ->name('profile.change-password.update');
 
+    // Cicilan (installments) — dikembalikan 2026-09-25.
+    Route::resource('installments', InstallmentController::class);
+
+    /*
+     * PARKED 2026-09-24 (fokus alur pasien dulu).
+     * View dipindah ke backup/views, test ke backup/tests.
+     *
     // D-06g: route gaji dokter kini bernama agar bisa dipakai redirect/link.
     Route::get('salaries', [SalaryController::class, 'index'])->name('salaries.index');
 
@@ -284,6 +312,7 @@ Route::middleware('auth')->group(function () {
     // Fase 4: jejak audit (Permenkes 24/2022) — baca saja, khusus manajemen.
     Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::resource('installments', InstallmentController::class);
+     */
 });
 
 require __DIR__.'/auth.php';

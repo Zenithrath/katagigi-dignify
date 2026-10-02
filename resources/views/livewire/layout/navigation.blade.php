@@ -24,7 +24,7 @@ new class extends Component
         <div class="flex items-center rounded-xl bg-white border border-slate-200 overflow-hidden" role="group" aria-label="Bahasa">
             @foreach (['id' => 'ID', 'en' => 'EN'] as $code => $label)
                 <a href="{{ route('switch-language', $code) }}"
-                    class="px-2.5 py-2 text-xs font-bold transition-colors {{ app()->getLocale() === $code ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:bg-slate-50' }}"
+                    class="px-2.5 py-2 text-xs font-bold transition-colors {{ app()->getLocale() === $code ? 'pill-3d-navy' : 'text-slate-500 hover:bg-slate-50' }}"
                     @if(app()->getLocale() === $code) aria-current="true" @endif>{{ $label }}</a>
             @endforeach
         </div>
@@ -57,7 +57,7 @@ new class extends Component
     {{-- Profile dropdown --}}
     <div x-data="{ open: false }" @click.outside="open = false" @keydown.escape.window="open = false" class="relative">
         <button @click="open = ! open" type="button" class="flex items-center gap-2.5 rounded-xl bg-white border border-slate-200 py-1.5 pl-1.5 pr-3 hover:bg-slate-50 transition-colors shadow-sm">
-            <span class="grid h-8 w-8 place-items-center rounded-lg bg-emerald-600 text-xs font-bold text-white">
+            <span class="grid h-8 w-8 place-items-center rounded-lg avatar-3d text-xs font-bold">
                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
             </span>
             <span class="hidden md:block text-left leading-tight">
@@ -80,7 +80,7 @@ new class extends Component
             {{-- User info --}}
             <div class="px-4 py-3 border-b border-slate-100">
                 <div class="flex items-center gap-3">
-                    <span class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-600 text-sm font-bold text-white">
+                    <span class="grid h-10 w-10 place-items-center rounded-xl avatar-3d text-sm font-bold">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </span>
                     <div class="min-w-0">
